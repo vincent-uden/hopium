@@ -27,10 +27,27 @@ int main(int argc, char** argv) {
 
   Vector2 mousePos;
 
+  std::vector<std::string> fileOptions;
+  fileOptions.push_back("New");
+  fileOptions.push_back("Open");
+  fileOptions.push_back("Exit");
+  std::shared_ptr<Ui> fileDropDown(new UiDropDown("File", fileOptions));
+  fileDropDown->setPos({10, 10});
+
+  std::vector<std::string> editOptions;
+  editOptions.push_back("Undo");
+  editOptions.push_back("Redo");
+  editOptions.push_back("Preferences");
+  std::shared_ptr<Ui> editDropDown(new UiDropDown("Edit", editOptions));
+  editDropDown->setPos({10, 10});
+
   {
     // We need to dealloc the renderer and all it's textures before closing the
     // window
     Renderer renderer(screenWidth, screenHeight);
+    renderer.splitPaneVertical({1, 1});
+    renderer.areas[0]->addUi(fileDropDown);
+    renderer.areas[1]->addUi(editDropDown);
 
     while ( !WindowShouldClose() ) {
       if (IsKeyPressed(KEY_H)) {

@@ -2,6 +2,7 @@
 #define UDEN_UI
 
 
+#include <memory>
 #include <raylib.h>
 #include <string>
 #include <vector>
@@ -48,6 +49,25 @@ private:
   Color color;
 };
 
+class UiRect: public Ui {
+public:
+  UiRect();
+  ~UiRect();
+
+  void move(Vector2 distance);
+  void setPos(Vector2 pos);
+  void draw();
+  void receiveMousePos(Vector2 mousePos);
+
+  void setColor(Color c);
+  void setSize(Vector2 size);
+private:
+  bool hovered = false;
+
+  Rectangle bounds = { 0, 0, 0, 0 };
+  Color bgColor = { 0, 0, 0, 0 };
+};
+
 class UiDropDown: public Ui {
 public:
   UiDropDown(std::string label, std::vector<std::string> options);
@@ -70,8 +90,12 @@ private:
   Color fgColor;
 
   UiText label;
+  UiRect labelBg;
+  std::vector<std::shared_ptr<UiText>> uiOptions;
+  std::vector<std::shared_ptr<UiRect>> uiOptionsBg;
   bool hovered = false;
   bool open = false;
+  int padding = 4;
 };
 
 #endif

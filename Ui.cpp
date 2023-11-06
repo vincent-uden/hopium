@@ -1,6 +1,9 @@
 #include "Ui.h"
 #include "raylib.h"
 #include <cmath>
+#include <iostream>
+
+// TODO: Make this file use Colorscheme from Renderer.h
 
 UiText::UiText() {
     pos.x = 0;
@@ -75,25 +78,95 @@ void UiText::setText(std::string text) {
   size = MeasureTextEx(GetFontDefault(), text.c_str(), 20, 1);
 }
 
+UiRect::UiRect() {
+}
+
+UiRect::~UiRect() {
+}
+
+void UiRect::move(Vector2 distance) {
+    bounds.x += distance.x;
+    bounds.y += distance.y;
+}
+
+void UiRect::setPos(Vector2 pos) {
+    Vector2 diff;
+    diff.x = pos.x - this->bounds.x;
+    diff.y = pos.y - this->bounds.y;
+    move(diff);
+}
+
+void UiRect::draw() {
+  DrawRectangleRec(bounds, bgColor);
+}
+
+void UiRect::receiveMousePos(Vector2 mousePos) {
+  if (CheckCollisionPointRec(mousePos, bounds)) {
+    if (!hovered) {
+      onMouseEnter(this);
+    }
+    hovered = true;
+  } else {
+    if (hovered) {
+      onMouseExit(this);
+    }
+    hovered = false;
+  }
+}
+
+void UiRect::setColor(Color c) {
+  bgColor = c;
+}
+
+void UiRect::setSize(Vector2 size) {
+  bounds.width = size.x;
+  bounds.height = size.y;
+}
+
 UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
   this->options = options;
   btnSize = MeasureTextEx(GetFontDefault(), label.c_str(), 20, 1);
+  btnSize.x += padding * 2;
+  btnSize.y += padding * 2;
 
   size_t widest = 0;
   Vector2 currSize;
   Vector2 biggestSize = MeasureTextEx(GetFontDefault(), options[0].c_str(), 20, 1);
   for (size_t i = 0; i < options.size(); ++i) {
     currSize = MeasureTextEx(GetFontDefault(), options[i].c_str(), 20, 1);
-    if (currSize.y > biggestSize.y) {
+    if (currSize.x > biggestSize.x) {
       biggestSize = currSize;
       widest = i;
     }
   }
+  listSize = { biggestSize.x + padding * 2, (biggestSize.y + padding * 2) * options.size() };
+  size_t i = 0;
+  for (auto& opt : options) {
+    std::shared_ptr<UiText> uiOpt(new UiText(opt));
+    uiOpt->setPos({static_cast<float>(padding), (static_cast<float>(padding) * 2 + biggestSize.y) * (i+1) + padding});
+    uiOpt->setColor({255, 255, 255, 255});
 
-  listSize = { biggestSize.y, 20.0f * options.size() };
+    std::shared_ptr<UiRect> optBg(new UiRect());
+    optBg->setPos({0, (static_cast<float>(padding) * 2 + biggestSize.y) * (i+1)});
+    optBg->setSize({ biggestSize.x + padding * 2, biggestSize.y + padding * 2 });
+    optBg->setColor({30, 30, 30, 255});
+    optBg->setOnMouseEnter([](Ui* p) {
+        UiRect* bg = static_cast<UiRect*>(p);
+        bg->setColor({155, 155, 155, 255});
+    });
+    optBg->setOnMouseExit([](Ui* p) {
+        UiRect* bg = static_cast<UiRect*>(p);
+        bg->setColor({30, 30, 30, 255});
+    });
+
+    ++i;
+    uiOptions.push_back(uiOpt);
+    uiOptionsBg.push_back(optBg);
+  }
 
   this->label.setText(label);
   this->label.setColor({255, 255, 255, 255});
+  this->label.setPos({ static_cast<float>(padding), static_cast<float>(padding)});
 
   this->label.setOnMouseEnter([](Ui* l) {
       UiText* lbl = static_cast<UiText*>(l);
@@ -103,6 +176,9 @@ UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
       UiText* lbl = static_cast<UiText*>(l);
       lbl->setColor({255, 255, 255, 255});
   });
+
+  labelBg.setColor({255, 255, 255, 30});
+  labelBg.setSize(btnSize);
 }
 
 UiDropDown::~UiDropDown() {
@@ -110,6 +186,15 @@ UiDropDown::~UiDropDown() {
 
 void UiDropDown::move(Vector2 distance) {
   label.move(distance);
+  for (auto& uiOpt : uiOptions) {
+    uiOpt->move(distance);
+  }
+  labelBg.move(distance);
+  for (auto& uiOptBg : uiOptionsBg) {
+    uiOptBg->move(distance);
+  }
+  pos.x += distance.x;
+  pos.y += distance.y;
 }
 
 void UiDropDown::setPos(Vector2 pos) {
@@ -120,31 +205,41 @@ void UiDropDown::setPos(Vector2 pos) {
 }
 
 void UiDropDown::draw() {
+  labelBg.draw();
   label.draw();
+  if (open) {
+    for (auto& optBg : uiOptionsBg) {
+      optBg->draw();
+    }
+    for (auto& uiOpt : uiOptions) {
+      uiOpt->draw();
+    }
+  }
 }
 
 void UiDropDown::receiveMousePos(Vector2 mousePos) {
-  label.receiveMousePos(mousePos);
-
-  // TODO: If open, check big collision, if closed check small
-  /*
-  if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
-    if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
-      // Mouse inside of bounds
-      if (!hovered) {
-        onMouseEnter(this);
-      }
+  if (open) {
+    if (
+      CheckCollisionPointRec(mousePos, {pos.x, pos.y + btnSize.y, listSize.x, listSize.y}) ||
+      CheckCollisionPointRec(mousePos, {pos.x, pos.y, btnSize.x, btnSize.y})
+    ) {
       hovered = true;
-      return;
+    } else {
+      hovered = false;
+      open = false;
+    }
+
+    for (auto& optBg : uiOptionsBg) {
+      optBg->receiveMousePos(mousePos);
+    }
+  } else {
+    if (CheckCollisionPointRec(mousePos, {pos.x, pos.y, btnSize.x, btnSize.y})) {
+      hovered = true;
+      open = true;
+    } else {
+      hovered = false;
     }
   }
-
-  if (hovered) {
-    onMouseExit(this);
-  }
-
-  hovered = false;
-  */
 }
 
 void UiDropDown::setOnSelected(std::function<void(std::string)>) {

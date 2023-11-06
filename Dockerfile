@@ -42,7 +42,7 @@ RUN git clone https://github.com/vincent-uden/dotfiles && cd dotfiles && bash ./
 RUN timeout 20 nvim -c PlugInstall > /dev/null; exit 0
 
 RUN apt-get -y install clangd
-RUN apt-get -y install tmux gdb
+RUN apt-get -y install tmux gdb ripgrep
 
 WORKDIR /opt/sources
 
