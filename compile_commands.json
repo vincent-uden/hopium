@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/opt/sources/build",
+  "command": "/usr/bin/c++  -I/opt/sources/include -isystem /usr/include/opencascade  -o CMakeFiles/Lesson_04.dir/main.cpp.o -c /opt/sources/main.cpp",
+  "file": "/opt/sources/main.cpp"
+}
+]
