@@ -57,13 +57,11 @@ int main(int argc, char** argv) {
   float ambColor[3] = { 1.0f, 1.0f, 1.0f };
   SetShaderValue(shader, ambientLoc, ambColor, SHADER_UNIFORM_VEC3);
 
-  // TODO: Update renderer camera with firstperson or orbit to figure out whats going on with the shader
-
   {
     // We need to dealloc the renderer and all it's textures before closing the
     // window
     Renderer renderer(screenWidth, screenHeight);
-    renderer.splitPaneVertical({1, 1});
+    renderer.splitPaneHorizontal({1, 1});
     renderer.areas[0]->addUi(fileDropDown);
     renderer.areas[1]->addUi(viewport);
     renderer.areas[1]->anchor = RenderAnchor::CENTER;
