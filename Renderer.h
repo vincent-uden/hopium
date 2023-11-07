@@ -11,18 +11,10 @@
 #include <raymath.h>
 
 #include "Ui.h"
+#include "Colorscheme.h"
 
 // Forward declarations
 class Area;
-
-class Colorscheme {
-public:
-  Colorscheme();
-  ~Colorscheme();
-
-  Color borderColor = {0, 0, 0, 255};
-  Color paneBg = {0, 0, 0, 255};
-};
 
 enum BoundaryOrientation {
   VERTICAL,
@@ -31,14 +23,13 @@ enum BoundaryOrientation {
 
 class Boundary {
 public:
-  Boundary();
+  Boundary(std::shared_ptr<Colorscheme> colorscheme);
   ~Boundary();
 
   bool canCollapse();
   void collapse(std::shared_ptr<Area> toDelete);
   void deleteArea(Area* toDelete);
   void draw();
-  void setColor(Color color);
   void moveBoundary(Vector2 screenPos);
   float extent();
   float distanceToPoint(Vector2 pos);
@@ -53,17 +44,16 @@ public:
   // Right / Down
   std::vector<std::shared_ptr<Area>> side2;
 private:
-  Color color = { 31, 31, 31, 255 };
+  std::shared_ptr<Colorscheme> colorscheme;
 };
 
 class Area {
 public:
-  Area(int screenW, int screenH, Rectangle screenRect, Vector2 screenPos, int id);
+  Area(int screenW, int screenH, Rectangle screenRect, Vector2 screenPos, int id, std::shared_ptr<Colorscheme> colorscheme);
   ~Area();
 
   // Graphics
   void draw();
-  void setBGColor(Color color);
   bool containsPoint(Vector2 localPos);
   void receiveMousePos(Vector2 mousePos);
 
@@ -91,15 +81,13 @@ public:
   static const int minimumExtent = 10;
 
 private:
-  Color bgColor;
+  std::shared_ptr<Colorscheme> colorscheme;
 
   std::vector<std::shared_ptr<Ui>> contents;
 
   bool hovered = false;
   std::function<void(Area*)> onMouseEnter = nullptr;
   std::function<void(Area*)> onMouseExit = nullptr;
-
-  Colorscheme colorScheme;
 };
 
 class Renderer {
@@ -124,6 +112,9 @@ private:
   int nextBdryId = 1;
 
   float mouseBoundaryTolerance = 15.f;
+
+  std::shared_ptr<Colorscheme> colorscheme;
+  Font font;
 
   std::shared_ptr<Boundary> grabbed = nullptr;
 

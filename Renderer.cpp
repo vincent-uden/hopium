@@ -3,13 +3,8 @@
 #include <cmath>
 #include <limits>
 
-Colorscheme::Colorscheme() {
-}
-
-Colorscheme::~Colorscheme() {
-}
-
-Boundary::Boundary() {
+Boundary::Boundary(std::shared_ptr<Colorscheme> colorscheme) {
+  this->colorscheme = colorscheme;
 }
 
 Boundary::~Boundary() {
@@ -73,13 +68,7 @@ void Boundary::draw() {
     endPos.x += extent();
     break;
   }
-  DrawLineEx(startPos, endPos, thickness, color);
-  //DrawCircleV(startPos, 5.0f, RED);
-  //DrawCircleV(endPos, 5.0f, RED);
-}
-
-void Boundary::setColor(Color color) {
-  this->color = color;
+  DrawLineEx(startPos, endPos, thickness, colorscheme->borderColor);
 }
 
 void Boundary::moveBoundary(Vector2 screenPos) {
@@ -168,15 +157,11 @@ float Boundary::distanceToPoint(Vector2 pos) {
   return std::numeric_limits<float>::infinity();
 }
 
-Area::Area(int screenW, int screenH, Rectangle screenRect, Vector2 screenPos, int id) {
+Area::Area(int screenW, int screenH, Rectangle screenRect, Vector2 screenPos, int id, std::shared_ptr<Colorscheme> colorscheme) {
   paneTexture = LoadRenderTexture(screenW, screenH);
   this->screenRect = screenRect;
   this->screenPos = screenPos;
-
-  colorScheme.paneBg = { 51, 51, 51, 255 };
-  colorScheme.borderColor = { 21, 21, 21, 255 };
-
-  bgColor = colorScheme.paneBg;
+  this->colorscheme = colorscheme;
 
   paneId = id;
 }
@@ -187,7 +172,7 @@ Area::~Area() {
 
 void Area::draw() {
   BeginTextureMode(paneTexture);
-  ClearBackground(bgColor);
+  ClearBackground(colorscheme->background);
   for (std::shared_ptr<Ui>& ui : contents) {
     ui->draw();
   }
@@ -196,10 +181,6 @@ void Area::draw() {
   drawRect.y = -drawRect.height;
   drawRect.height *= -1.f;
   DrawTextureRec(paneTexture.texture, drawRect, screenPos, WHITE);
-}
-
-void Area::setBGColor(Color color) {
-  bgColor = color;
 }
 
 bool Area::containsPoint(Vector2 localPos) {
@@ -220,7 +201,6 @@ void Area::receiveMousePos(Vector2 mousePos) {
       }
     }
     hovered = true;
-
     for (auto& ui : contents) {
       ui->receiveMousePos(Vector2Subtract(mousePos, screenPos));
     }
@@ -231,6 +211,11 @@ void Area::receiveMousePos(Vector2 mousePos) {
       }
     }
     hovered = false;
+    // If the mouse isn't in the active area, treat it as being outside the
+    // entire window.
+    for (auto& ui : contents) {
+      ui->receiveMousePos({-100.f, -100.f});
+    }
   }
 }
 
@@ -267,17 +252,25 @@ Renderer::Renderer(int screenW, int screenH) {
   this->screenW = screenW;
   this->screenH = screenH;
 
+  font = LoadFontEx("../assets/Geist/Geist-Regular.otf", 20, 0, 250);
+  colorscheme = std::shared_ptr<Colorscheme>(new Colorscheme(&font));
+
+  Ui::colorscheme = colorscheme;
+
   areas.push_back(std::shared_ptr<Area>(new Area(
     screenW,
     screenH,
     { 0, 0, static_cast<float>(screenW), static_cast<float>(screenH) },
     { 0, 0 },
-    nextPaneId++
+    nextPaneId++,
+    colorscheme
   )));
 }
 
 Renderer::~Renderer() {
   areas.clear();
+
+  UnloadFont(font);
 }
 
 void Renderer::draw() {
@@ -342,11 +335,12 @@ void Renderer::splitPaneHorizontal(Vector2 mousePos) {
     screenH,
     { 0, 0, toSplit->screenRect.width / 2.0f, toSplit->screenRect.height },
     { toSplit->screenPos.x + toSplit->screenRect.width / 2.0f, toSplit->screenPos.y },
-    nextPaneId++
+    nextPaneId++,
+    colorscheme
   ));
   toSplit->screenRect.width /= 2.0f;
 
-  std::shared_ptr<Boundary> bdry = std::shared_ptr<Boundary>(new Boundary());
+  std::shared_ptr<Boundary> bdry = std::shared_ptr<Boundary>(new Boundary(colorscheme));
   bdry->side1.push_back(toSplit);
   bdry->side2.push_back(newArea);
   newArea->leftBdry = bdry;
@@ -385,11 +379,12 @@ void Renderer::splitPaneVertical(Vector2 mousePos) {
     screenH,
     { 0, 0, toSplit->screenRect.width, toSplit->screenRect.height / 2.0f },
     { toSplit->screenPos.x, toSplit->screenPos.y + toSplit->screenRect.height / 2.0f },
-    nextPaneId++
+    nextPaneId++,
+    colorscheme
   ));
   toSplit->screenRect.height /= 2.0f;
 
-  std::shared_ptr<Boundary> bdry = std::shared_ptr<Boundary>(new Boundary());
+  std::shared_ptr<Boundary> bdry = std::shared_ptr<Boundary>(new Boundary(colorscheme));
   bdry->side1.push_back(toSplit);
   bdry->side2.push_back(newArea);
   newArea->upBdry = bdry;

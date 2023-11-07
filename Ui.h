@@ -1,7 +1,7 @@
 #ifndef UDEN_UI
 #define UDEN_UI
 
-
+#include "Colorscheme.h"
 #include <memory>
 #include <raylib.h>
 #include <string>
@@ -18,11 +18,13 @@ public:
   void setOnClick(std::function<void(Ui*)>);
   void setOnMouseEnter(std::function<void(Ui*)>);
   void setOnMouseExit(std::function<void(Ui*)>);
+  static std::shared_ptr<Colorscheme> colorscheme;
 
 protected:
   std::function<void(Ui*)> onClick;
   std::function<void(Ui*)> onMouseEnter;
   std::function<void(Ui*)> onMouseExit;
+
 };
 
 class UiText: public Ui {

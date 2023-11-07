@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
   std::vector<std::string> fileOptions;
   fileOptions.push_back("New");
   fileOptions.push_back("Open");
+  fileOptions.push_back("Save");
+  fileOptions.push_back("Save as");
   fileOptions.push_back("Exit");
   std::shared_ptr<Ui> fileDropDown(new UiDropDown("File", fileOptions));
   fileDropDown->setPos({10, 10});

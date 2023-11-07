@@ -5,6 +5,8 @@
 
 // TODO: Make this file use Colorscheme from Renderer.h
 
+std::shared_ptr<Colorscheme> Ui::colorscheme = nullptr;
+
 UiText::UiText() {
     pos.x = 0;
     pos.y = 0;
@@ -35,7 +37,7 @@ void UiText::setPos(Vector2 pos) {
 }
 
 void UiText::draw() {
-    DrawTextEx(GetFontDefault(), text.c_str(), pos, 20, 1, color);
+    DrawTextEx(colorscheme->font, text.c_str(), pos, 20, 1, color);
 }
 
 void UiText::receiveMousePos(Vector2 mousePos) {
