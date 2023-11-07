@@ -249,8 +249,8 @@ void UiDropDown::setOnSelected(std::function<void(std::string)>) {
 
 
 Ui3DViewport::Ui3DViewport() {
-  camera.position = { 50.0f, 50.0f, 50.0f };
-  camera.target = { 0.0f, 10.0f, 0.0f };
+  camera.position = { 20.0f, 20.0f, 20.0f };
+  camera.target = { 0.0f, 0.0f, 0.0f };
   camera.up = { 0.0f, 1.0f, 0.0f };
   camera.fovy = 45.0f;
   camera.projection = CAMERA_PERSPECTIVE;
@@ -273,7 +273,7 @@ void Ui3DViewport::draw() {
   if (scene) {
     for (size_t i = 0; i < scene->nBodies(); ++i) {
       std::shared_ptr<RasterBody> body = scene->getBody(i);
-      DrawModel(body->model, body->pos, 5.f, WHITE);
+      DrawModel(body->model, body->pos, 1.f, WHITE);
     }
   }
 

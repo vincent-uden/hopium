@@ -20,8 +20,9 @@ int main(int argc, char** argv) {
   const int screenWidth = 1600;
   const int screenHeight = 900;
 
+  SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(screenWidth, screenHeight, "Raylib Example");
-  SetTraceLogLevel(LOG_ERROR);
+  SetTraceLogLevel(LOG_WARNING);
 
   SetTargetFPS(60);
 
@@ -41,12 +42,22 @@ int main(int argc, char** argv) {
   std::shared_ptr<Ui> viewport(new Ui3DViewport());
   std::shared_ptr<Scene> scene(new Scene());
   std::shared_ptr<RasterBody> utahPot(new RasterBody());
-  utahPot->loadFromFile("../assets/teapot.obj");
+  utahPot->loadFromFile("../assets/toilet_rolls.obj");
   Texture2D utahTexture = LoadTexture("../assets/red.png");
   utahPot->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = utahTexture;
   scene->addBody(utahPot);
   std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
   port->setScene(scene);
+
+  Shader shader = LoadShader("../shaders/vs.glsl", "../shaders/fs.glsl");
+  utahPot->model.materials[0].shader = shader;
+
+  // Ambient light level (some basic lighting)
+  int ambientLoc = GetShaderLocation(shader, "ambientColor");
+  float ambColor[3] = { 1.0f, 1.0f, 1.0f };
+  SetShaderValue(shader, ambientLoc, ambColor, SHADER_UNIFORM_VEC3);
+
+  // TODO: Update renderer camera with firstperson or orbit to figure out whats going on with the shader
 
   {
     // We need to dealloc the renderer and all it's textures before closing the
@@ -77,9 +88,15 @@ int main(int argc, char** argv) {
         renderer.mouseUp(mousePos);
       }
 
+      float cameraPos[3] = { port->camera.position.x, port->camera.position.y, port->camera.position.z };
+      SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+
+      UpdateCamera(&port->camera, CAMERA_ORBITAL);
+
       renderer.draw();
     }
   }
+  UnloadShader(shader);
   CloseWindow();
 
   return 0;

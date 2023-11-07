@@ -114,8 +114,8 @@ public:
 
   void setScene(std::shared_ptr<Scene> scene);
 
-private:
   Camera3D camera = { 0 };
+private:
 
   std::shared_ptr<Scene> scene;
 };

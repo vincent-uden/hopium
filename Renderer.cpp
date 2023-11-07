@@ -300,6 +300,7 @@ void Renderer::draw() {
     bdry->draw();
   }
 
+  DrawFPS(screenW - 100, 10);
   EndDrawing();
 }
 
