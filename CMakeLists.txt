@@ -18,8 +18,8 @@ include_directories ( SYSTEM ${OpenCASCADE_INCLUDE_DIR} )
 include_directories(include)
 
 # Add executable
-add_executable (Lesson_04 main.cpp Ui.cpp Renderer.cpp Colorscheme.cpp Scene.cpp)
-add_executable (test test.cpp Ui.cpp Renderer.cpp Colorscheme.cpp Scene.cpp)
+add_executable (Lesson_04 src/main.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp)
+add_executable (test src/test.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp)
 
 # Add linker options
 foreach (LIB ${OpenCASCADE_LIBRARIES})
