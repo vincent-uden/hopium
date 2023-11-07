@@ -180,6 +180,21 @@ void Area::draw() {
   Rectangle drawRect = screenRect;
   drawRect.y = -drawRect.height;
   drawRect.height *= -1.f;
+  switch (anchor) {
+  case LEFT:
+    break;
+  case CENTER:
+    drawRect.x = (paneTexture.texture.width - screenRect.width) / 2.0f;
+    drawRect.y = (paneTexture.texture.height - screenRect.height) / 2.0f;
+    break;
+  case RIGHT:
+    drawRect.x = paneTexture.texture.width - screenRect.width;
+    break;
+  }
+  drawRect.x = std::round(drawRect.x);
+  drawRect.y = std::round(drawRect.y);
+  drawRect.width = std::round(drawRect.width);
+  drawRect.height = std::round(drawRect.height);
   DrawTextureRec(paneTexture.texture, drawRect, screenPos, WHITE);
 }
 

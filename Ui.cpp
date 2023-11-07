@@ -247,3 +247,42 @@ void UiDropDown::receiveMousePos(Vector2 mousePos) {
 void UiDropDown::setOnSelected(std::function<void(std::string)>) {
 }
 
+
+Ui3DViewport::Ui3DViewport() {
+  camera.position = { 50.0f, 50.0f, 50.0f };
+  camera.target = { 0.0f, 10.0f, 0.0f };
+  camera.up = { 0.0f, 1.0f, 0.0f };
+  camera.fovy = 45.0f;
+  camera.projection = CAMERA_PERSPECTIVE;
+}
+
+Ui3DViewport::~Ui3DViewport() {
+}
+
+void Ui3DViewport::move(Vector2 distance) {
+}
+
+void Ui3DViewport::setPos(Vector2 pos) {
+}
+
+void Ui3DViewport::draw() {
+  BeginMode3D(camera);
+
+  DrawGrid(20, 10.0f);
+
+  if (scene) {
+    for (size_t i = 0; i < scene->nBodies(); ++i) {
+      std::shared_ptr<RasterBody> body = scene->getBody(i);
+      DrawModel(body->model, body->pos, 5.f, WHITE);
+    }
+  }
+
+  EndMode3D();
+}
+
+void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
+}
+
+void Ui3DViewport::setScene(std::shared_ptr<Scene> scene) {
+  this->scene = scene;
+}

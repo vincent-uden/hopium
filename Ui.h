@@ -1,12 +1,14 @@
 #ifndef UDEN_UI
 #define UDEN_UI
 
-#include "Colorscheme.h"
 #include <memory>
 #include <raylib.h>
 #include <string>
 #include <vector>
 #include <functional>
+
+#include "Colorscheme.h"
+#include "Scene.h"
 
 class Ui {
 public:
@@ -98,6 +100,24 @@ private:
   bool hovered = false;
   bool open = false;
   int padding = 4;
+};
+
+class Ui3DViewport: public Ui {
+public:
+  Ui3DViewport();
+  ~Ui3DViewport();
+
+  void move(Vector2 distance);
+  void setPos(Vector2 pos);
+  void draw();
+  void receiveMousePos(Vector2 mousePos);
+
+  void setScene(std::shared_ptr<Scene> scene);
+
+private:
+  Camera3D camera = { 0 };
+
+  std::shared_ptr<Scene> scene;
 };
 
 #endif

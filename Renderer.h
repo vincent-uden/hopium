@@ -47,6 +47,12 @@ private:
   std::shared_ptr<Colorscheme> colorscheme;
 };
 
+enum RenderAnchor {
+  LEFT,
+  CENTER,
+  RIGHT,
+};
+
 class Area {
 public:
   Area(int screenW, int screenH, Rectangle screenRect, Vector2 screenPos, int id, std::shared_ptr<Colorscheme> colorscheme);
@@ -77,6 +83,7 @@ public:
   std::shared_ptr<Boundary> upBdry;
   std::shared_ptr<Boundary> downBdry;
   bool active = true;
+  RenderAnchor anchor = LEFT;
 
   static const int minimumExtent = 10;
 

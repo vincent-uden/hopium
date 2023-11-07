@@ -9,9 +9,11 @@
 
 #include <iostream>
 
+#include <memory>
 #include <raylib.h>
 
 #include "Renderer.h"
+#include "Scene.h"
 #include "Ui.h"
 
 int main(int argc, char** argv) {
@@ -34,14 +36,17 @@ int main(int argc, char** argv) {
   fileOptions.push_back("Save as");
   fileOptions.push_back("Exit");
   std::shared_ptr<Ui> fileDropDown(new UiDropDown("File", fileOptions));
-  fileDropDown->setPos({10, 10});
+  fileDropDown->setPos({0, 0});
 
-  std::vector<std::string> editOptions;
-  editOptions.push_back("Undo");
-  editOptions.push_back("Redo");
-  editOptions.push_back("Preferences");
-  std::shared_ptr<Ui> editDropDown(new UiDropDown("Edit", editOptions));
-  editDropDown->setPos({10, 10});
+  std::shared_ptr<Ui> viewport(new Ui3DViewport());
+  std::shared_ptr<Scene> scene(new Scene());
+  std::shared_ptr<RasterBody> utahPot(new RasterBody());
+  utahPot->loadFromFile("../assets/teapot.obj");
+  Texture2D utahTexture = LoadTexture("../assets/red.png");
+  utahPot->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = utahTexture;
+  scene->addBody(utahPot);
+  std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
+  port->setScene(scene);
 
   {
     // We need to dealloc the renderer and all it's textures before closing the
@@ -49,7 +54,8 @@ int main(int argc, char** argv) {
     Renderer renderer(screenWidth, screenHeight);
     renderer.splitPaneVertical({1, 1});
     renderer.areas[0]->addUi(fileDropDown);
-    renderer.areas[1]->addUi(editDropDown);
+    renderer.areas[1]->addUi(viewport);
+    renderer.areas[1]->anchor = RenderAnchor::CENTER;
 
     while ( !WindowShouldClose() ) {
       if (IsKeyPressed(KEY_H)) {
