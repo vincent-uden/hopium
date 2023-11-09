@@ -21,6 +21,14 @@ include_directories(include)
 add_executable (Lesson_04 src/main.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp)
 add_executable (test src/test.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp)
 
+get_filename_component(libPath ./lib REALPATH)
+get_filename_component(includePath ./include REALPATH)
+
+link_directories(libPath)
+include_directories(includePath)
+target_link_libraries(Lesson_04 raylib)
+target_link_libraries(test raylib)
+
 # Add linker options
 foreach (LIB ${OpenCASCADE_LIBRARIES})
   cmake_print_variables(LIB)
@@ -28,8 +36,7 @@ foreach (LIB ${OpenCASCADE_LIBRARIES})
   target_link_libraries(test ${OpenCASCADE_LIBRARY_DIR}/lib${LIB}.so)
 endforeach()
 
-target_link_libraries(Lesson_04 /opt/sources/lib/libraylib.so.4.5.0)
-target_link_libraries(test /opt/sources/lib/libraylib.so.4.5.0)
+
 
 # Adjust runtime environment
 # set_property(TARGET Lesson_04 PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=$<$<CONFIG:DEBUG>:${OpenCASCADE_BINARY_DIR}d>$<$<NOT:$<CONFIG:DEBUG>>:${OpenCASCADE_BINARY_DIR}>;%PATH%")

@@ -6,3 +6,6 @@
     - `-Wall`
     - `-Werror`
     - `pedantic` ?
+
+## Pacman packages
+- fmt
