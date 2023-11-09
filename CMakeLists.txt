@@ -17,17 +17,19 @@ include_directories ( SYSTEM ${OpenCASCADE_INCLUDE_DIR} )
 
 include_directories(include)
 
+link_directories(${libPath})
+include_directories(${includePath})
+
 # Add executable
 add_executable (Lesson_04 src/main.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp)
 add_executable (test src/test.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp)
 
 get_filename_component(libPath ./lib REALPATH)
 get_filename_component(includePath ./include REALPATH)
+get_filename_component(raylibPath ./lib/libraylib.so.4.5.0 REALPATH)
 
-link_directories(libPath)
-include_directories(includePath)
-target_link_libraries(Lesson_04 raylib)
-target_link_libraries(test raylib)
+target_link_libraries(Lesson_04 ${raylibPath})
+target_link_libraries(test ${raylibPath})
 
 # Add linker options
 foreach (LIB ${OpenCASCADE_LIBRARIES})

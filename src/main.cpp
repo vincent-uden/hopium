@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   InitWindow(screenWidth, screenHeight, "Raylib Example");
   SetTraceLogLevel(LOG_WARNING);
 
-  SetTargetFPS(30);
+  SetTargetFPS(60);
 
   CLITERAL(Color) c { 31, 31, 31, 255 };
 
