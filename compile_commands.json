@@ -1,7 +1,62 @@
 [
 {
-  "directory": "/opt/sources/build",
-  "command": "/usr/bin/c++  -I/opt/sources/include -isystem /usr/include/opencascade  -o CMakeFiles/Lesson_04.dir/main.cpp.o -c /opt/sources/main.cpp",
-  "file": "/opt/sources/main.cpp"
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/Lesson_04.dir/src/main.cpp.o -c /media/hdd/github/hopium/src/main.cpp",
+  "file": "/media/hdd/github/hopium/src/main.cpp",
+  "output": "CMakeFiles/Lesson_04.dir/src/main.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/Lesson_04.dir/src/Ui.cpp.o -c /media/hdd/github/hopium/src/Ui.cpp",
+  "file": "/media/hdd/github/hopium/src/Ui.cpp",
+  "output": "CMakeFiles/Lesson_04.dir/src/Ui.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/Lesson_04.dir/src/Renderer.cpp.o -c /media/hdd/github/hopium/src/Renderer.cpp",
+  "file": "/media/hdd/github/hopium/src/Renderer.cpp",
+  "output": "CMakeFiles/Lesson_04.dir/src/Renderer.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/Lesson_04.dir/src/Colorscheme.cpp.o -c /media/hdd/github/hopium/src/Colorscheme.cpp",
+  "file": "/media/hdd/github/hopium/src/Colorscheme.cpp",
+  "output": "CMakeFiles/Lesson_04.dir/src/Colorscheme.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/Lesson_04.dir/src/Scene.cpp.o -c /media/hdd/github/hopium/src/Scene.cpp",
+  "file": "/media/hdd/github/hopium/src/Scene.cpp",
+  "output": "CMakeFiles/Lesson_04.dir/src/Scene.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/test.dir/src/test.cpp.o -c /media/hdd/github/hopium/src/test.cpp",
+  "file": "/media/hdd/github/hopium/src/test.cpp",
+  "output": "CMakeFiles/test.dir/src/test.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/test.dir/src/Ui.cpp.o -c /media/hdd/github/hopium/src/Ui.cpp",
+  "file": "/media/hdd/github/hopium/src/Ui.cpp",
+  "output": "CMakeFiles/test.dir/src/Ui.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/test.dir/src/Renderer.cpp.o -c /media/hdd/github/hopium/src/Renderer.cpp",
+  "file": "/media/hdd/github/hopium/src/Renderer.cpp",
+  "output": "CMakeFiles/test.dir/src/Renderer.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/test.dir/src/Colorscheme.cpp.o -c /media/hdd/github/hopium/src/Colorscheme.cpp",
+  "file": "/media/hdd/github/hopium/src/Colorscheme.cpp",
+  "output": "CMakeFiles/test.dir/src/Colorscheme.cpp.o"
+},
+{
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -o CMakeFiles/test.dir/src/Scene.cpp.o -c /media/hdd/github/hopium/src/Scene.cpp",
+  "file": "/media/hdd/github/hopium/src/Scene.cpp",
+  "output": "CMakeFiles/test.dir/src/Scene.cpp.o"
 }
 ]
