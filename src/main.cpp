@@ -39,30 +39,12 @@ int main(int argc, char** argv) {
   std::shared_ptr<Ui> fileDropDown(new UiDropDown("File", fileOptions));
   fileDropDown->setPos({0, 0});
 
-  std::shared_ptr<Ui> viewport(new Ui3DViewport());
-  std::shared_ptr<Scene> scene(new Scene());
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->getBody(1)->pos.x = 1.0 * 5;
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->getBody(2)->pos.x = -1.0 * 5;
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->getBody(3)->pos.x = 2.0 * 5;
-
-  std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
-  port->setScene(scene);
-
-  std::shared_ptr<RasterBody> utahPot = scene->getBody(0);
-
-  // Ambient light level (some basic lighting)
-
   {
     // We need to dealloc the renderer and all it's textures before closing the
     // window
     Renderer renderer(screenWidth, screenHeight);
     renderer.splitPaneHorizontal({1, 1});
     renderer.areas[0]->addUi(fileDropDown);
-    renderer.areas[1]->addUi(viewport);
     renderer.areas[1]->anchor = RenderAnchor::CENTER;
 
     while ( !WindowShouldClose() ) {
@@ -85,10 +67,12 @@ int main(int argc, char** argv) {
         renderer.mouseUp(mousePos);
       }
 
+      // TODO: Move to renderer
       float cameraPos[3] = { port->camera.position.x, port->camera.position.y, port->camera.position.z };
       SetShaderValue(Scene::standardModelShader, Scene::standardModelShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
 
       UpdateCamera(&port->camera, CAMERA_ORBITAL);
+      // --
 
       renderer.draw();
     }

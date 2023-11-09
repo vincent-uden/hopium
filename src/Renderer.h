@@ -53,9 +53,22 @@ enum RenderAnchor {
   RIGHT,
 };
 
+enum AreaType {
+  EMPTY,
+  VIEWPORT3D,
+};
+
 class Area {
 public:
-  Area(int screenW, int screenH, Rectangle screenRect, Vector2 screenPos, int id, std::shared_ptr<Colorscheme> colorscheme);
+  Area(
+    int screenW,
+    int screenH,
+    Rectangle screenRect,
+    Vector2 screenPos,
+    int id,
+    AreaType type,
+    std::shared_ptr<Colorscheme> colorscheme
+  );
   ~Area();
 
   // Graphics
@@ -84,10 +97,14 @@ public:
   std::shared_ptr<Boundary> downBdry;
   bool active = true;
   RenderAnchor anchor = LEFT;
+  AreaType type;
 
   static const int minimumExtent = 10;
 
 private:
+  // Internal constructors for different types of areas
+  void buildViewport3D();
+
   std::shared_ptr<Colorscheme> colorscheme;
 
   std::vector<std::shared_ptr<Ui>> contents;

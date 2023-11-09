@@ -157,13 +157,29 @@ float Boundary::distanceToPoint(Vector2 pos) {
   return std::numeric_limits<float>::infinity();
 }
 
-Area::Area(int screenW, int screenH, Rectangle screenRect, Vector2 screenPos, int id, std::shared_ptr<Colorscheme> colorscheme) {
+Area::Area(
+  int screenW,
+  int screenH,
+  Rectangle screenRect,
+  Vector2 screenPos,
+  int id,
+  AreaType type,
+  std::shared_ptr<Colorscheme> colorscheme
+) {
   paneTexture = LoadRenderTexture(screenW, screenH);
   this->screenRect = screenRect;
   this->screenPos = screenPos;
   this->colorscheme = colorscheme;
-
+  this->type = type;
   paneId = id;
+
+  switch (type) {
+  case AreaType::VIEWPORT3D:
+    buildViewport3D();
+    break;
+  case AreaType::EMPTY:
+    break;
+  }
 }
 
 Area::~Area() {
@@ -263,6 +279,25 @@ void Area::deleteThisFromBoundaries() {
   }
 }
 
+void Area::buildViewport3D() {
+  // TODO: Every area should have a header where you can switch the type
+  std::shared_ptr<Ui> viewport(new Ui3DViewport());
+  // TODO: The area should not own the scene. Who owns it?
+  std::shared_ptr<Scene> scene(new Scene());
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->getBody(1)->pos.x = 1.0 * 5;
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->getBody(2)->pos.x = -1.0 * 5;
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->getBody(3)->pos.x = 2.0 * 5;
+
+  std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
+  port->setScene(scene);
+
+  addUi(viewport);
+}
+
 Renderer::Renderer(int screenW, int screenH) {
   this->screenW = screenW;
   this->screenH = screenH;
@@ -278,6 +313,7 @@ Renderer::Renderer(int screenW, int screenH) {
     { 0, 0, static_cast<float>(screenW), static_cast<float>(screenH) },
     { 0, 0 },
     nextPaneId++,
+    AreaType::EMPTY,
     colorscheme
   )));
 }
@@ -352,6 +388,7 @@ void Renderer::splitPaneHorizontal(Vector2 mousePos) {
     { 0, 0, toSplit->screenRect.width / 2.0f, toSplit->screenRect.height },
     { toSplit->screenPos.x + toSplit->screenRect.width / 2.0f, toSplit->screenPos.y },
     nextPaneId++,
+    AreaType::VIEWPORT3D,
     colorscheme
   ));
   toSplit->screenRect.width /= 2.0f;
