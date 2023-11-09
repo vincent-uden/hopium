@@ -41,21 +41,20 @@ int main(int argc, char** argv) {
 
   std::shared_ptr<Ui> viewport(new Ui3DViewport());
   std::shared_ptr<Scene> scene(new Scene());
-  std::shared_ptr<RasterBody> utahPot(new RasterBody());
-  utahPot->loadFromFile("../assets/toilet_rolls.obj");
-  Texture2D utahTexture = LoadTexture("../assets/red.png");
-  utahPot->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = utahTexture;
-  scene->addBody(utahPot);
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->getBody(1)->pos.x = 1.0 * 5;
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->getBody(2)->pos.x = -1.0 * 5;
+  scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  scene->getBody(3)->pos.x = 2.0 * 5;
+
   std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
   port->setScene(scene);
 
-  Shader shader = LoadShader("../shaders/vs.glsl", "../shaders/fs.glsl");
-  utahPot->model.materials[0].shader = shader;
+  std::shared_ptr<RasterBody> utahPot = scene->getBody(0);
 
   // Ambient light level (some basic lighting)
-  int ambientLoc = GetShaderLocation(shader, "ambientColor");
-  float ambColor[3] = { 1.0f, 1.0f, 1.0f };
-  SetShaderValue(shader, ambientLoc, ambColor, SHADER_UNIFORM_VEC3);
 
   {
     // We need to dealloc the renderer and all it's textures before closing the
@@ -87,14 +86,14 @@ int main(int argc, char** argv) {
       }
 
       float cameraPos[3] = { port->camera.position.x, port->camera.position.y, port->camera.position.z };
-      SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+      SetShaderValue(Scene::standardModelShader, Scene::standardModelShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
 
       UpdateCamera(&port->camera, CAMERA_ORBITAL);
 
       renderer.draw();
     }
   }
-  UnloadShader(shader);
+  UnloadShader(Scene::standardModelShader);
   CloseWindow();
 
   return 0;
