@@ -15,10 +15,13 @@
 #include "Renderer.h"
 #include "Scene.h"
 #include "Ui.h"
+#include "OcctTest.h"
 
 int main(int argc, char** argv) {
   const int screenWidth = 1600;
   const int screenHeight = 900;
+
+  createBottle();
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(screenWidth, screenHeight, "Raylib Example");
