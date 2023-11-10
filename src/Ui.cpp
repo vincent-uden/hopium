@@ -128,7 +128,6 @@ void UiRect::receiveMousePos(Vector2 mousePos) {
 }
 
 void UiRect::receiveMouseDown(Vector2 mousePos) {
-  std::cout << "UI RECT MOUSE DOWN" << std::endl;
   if (contains(mousePos)) {
     onClick(this);
   }

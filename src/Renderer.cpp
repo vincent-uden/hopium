@@ -356,11 +356,12 @@ void Area::buildTypeDropDown() {
 
   typePicker->setPos({0, 0});
   typePicker->setOnSelected([this](std::string selected) {
-      std::cout << "Selected: " << selected << std::endl;
       resetType();
       if (selected == "3D Viewport") {
+        this->type = AreaType::VIEWPORT3D;
         buildViewport3D();
       } else if (selected == "Empty") {
+        this->type = AreaType::EMPTY;
         buildEmpty();
       }
   });
@@ -370,6 +371,7 @@ void Area::buildTypeDropDown() {
 }
 
 void Area::resetType() {
+  anchor = RenderAnchor::LEFT;
   contents.clear();
 }
 
