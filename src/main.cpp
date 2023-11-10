@@ -30,22 +30,10 @@ int main(int argc, char** argv) {
 
   Vector2 mousePos;
 
-  std::vector<std::string> fileOptions;
-  fileOptions.push_back("New");
-  fileOptions.push_back("Open");
-  fileOptions.push_back("Save");
-  fileOptions.push_back("Save as");
-  fileOptions.push_back("Exit");
-  std::shared_ptr<Ui> fileDropDown(new UiDropDown("File", fileOptions));
-  fileDropDown->setPos({0, 0});
-
   {
     // We need to dealloc the renderer and all it's textures before closing the
     // window
     Renderer renderer(screenWidth, screenHeight);
-    renderer.splitPaneHorizontal({1, 1});
-    renderer.areas[0]->addUi(fileDropDown);
-    renderer.areas[1]->anchor = RenderAnchor::CENTER;
 
     while ( !WindowShouldClose() ) {
       if (IsKeyPressed(KEY_H)) {
@@ -66,9 +54,6 @@ int main(int argc, char** argv) {
       if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         renderer.mouseUp(mousePos);
       }
-
-      // TODO: Move to renderer
-      // --
 
       renderer.draw();
     }

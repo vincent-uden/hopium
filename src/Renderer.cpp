@@ -177,6 +177,7 @@ Area::Area(
     buildViewport3D();
     break;
   case AreaType::EMPTY:
+    buildEmpty();
     break;
   }
 }
@@ -186,10 +187,25 @@ Area::~Area() {
 }
 
 void Area::draw() {
+  // TODO: 3D Viewport renders the type menu in the wrong place
   BeginTextureMode(paneTexture);
   ClearBackground(colorscheme->background);
+  int i = 0;
   for (std::shared_ptr<Ui>& ui : contents) {
+    if (i != 0 && type == AreaType::VIEWPORT3D) {
+      ui->move({
+        (paneTexture.texture.width - screenRect.width) / 2.0f,
+        (paneTexture.texture.height - screenRect.height) / 2.0f
+      });
+    }
     ui->draw();
+    if (i != 0 && type == AreaType::VIEWPORT3D) {
+      ui->move({
+        -(paneTexture.texture.width - screenRect.width) / 2.0f,
+        -(paneTexture.texture.height - screenRect.height) / 2.0f
+      });
+    }
+    i++;
   }
   EndTextureMode();
   Rectangle drawRect = screenRect;
@@ -249,6 +265,22 @@ void Area::receiveMousePos(Vector2 mousePos) {
   }
 }
 
+void Area::receiveMouseDown(Vector2 mousePos) {
+  if (containsPoint(mousePos)) {
+    for (auto& ui : contents) {
+      ui->receiveMouseDown(Vector2Subtract(mousePos, screenPos));
+    }
+  }
+}
+
+void Area::receiveMouseUp(Vector2 mousePos) {
+  if (containsPoint(mousePos)) {
+    for (auto& ui : contents) {
+      ui->receiveMouseUp(Vector2Subtract(mousePos, screenPos));
+    }
+  }
+}
+
 void Area::updateShaders() {
   for (auto& ui : contents) {
     std::shared_ptr<Ui3DViewport> ui3d = std::dynamic_pointer_cast<Ui3DViewport>(ui);
@@ -290,7 +322,6 @@ void Area::deleteThisFromBoundaries() {
 }
 
 void Area::buildViewport3D() {
-  // TODO: Every area should have a header where you can switch the type
   std::shared_ptr<Ui> viewport(new Ui3DViewport());
   // TODO: The area should not own the scene. Who owns it?
   std::shared_ptr<Scene> scene(new Scene(shaderStore));
@@ -306,6 +337,40 @@ void Area::buildViewport3D() {
   port->setScene(scene);
 
   addUi(viewport);
+
+  anchor = RenderAnchor::CENTER;
+
+  buildTypeDropDown();
+}
+
+void Area::buildEmpty() {
+  buildTypeDropDown();
+}
+
+void Area::buildTypeDropDown() {
+  std::vector<std::string> areaTypes;
+  areaTypes.push_back("3D Viewport");
+  areaTypes.push_back("Empty");
+
+  std::shared_ptr<UiDropDown> typePicker(new UiDropDown("Area Type", areaTypes));
+
+  typePicker->setPos({0, 0});
+  typePicker->setOnSelected([this](std::string selected) {
+      std::cout << "Selected: " << selected << std::endl;
+      resetType();
+      if (selected == "3D Viewport") {
+        buildViewport3D();
+      } else if (selected == "Empty") {
+        buildEmpty();
+      }
+  });
+
+  auto p = std::static_pointer_cast<Ui>(typePicker);
+  addUi(p);
+}
+
+void Area::resetType() {
+  contents.clear();
 }
 
 Renderer::Renderer(int screenW, int screenH) {
@@ -383,6 +448,11 @@ void Renderer::mouseDown(Vector2 mousePos) {
     std::shared_ptr<Boundary> hovered = findBoundary(mousePos, mouseBoundaryTolerance);
     if (hovered) {
       grabbed = hovered;
+    } else {
+      // If we're not grabbing a boundary, pass to areas
+      for (auto& area : areas) {
+        area->receiveMouseDown(mousePos);
+      }
     }
   }
 }
@@ -391,6 +461,10 @@ void Renderer::mouseUp(Vector2 mousePos) {
   // If a border is grabbed, release it
   if (grabbed) {
     grabbed = nullptr;
+  } else {
+      for (auto& area : areas) {
+        area->receiveMouseUp(mousePos);
+      }
   }
 }
 
@@ -405,7 +479,7 @@ void Renderer::splitPaneHorizontal(Vector2 mousePos) {
     { 0, 0, toSplit->screenRect.width / 2.0f, toSplit->screenRect.height },
     { toSplit->screenPos.x + toSplit->screenRect.width / 2.0f, toSplit->screenPos.y },
     nextPaneId++,
-    AreaType::VIEWPORT3D,
+    AreaType::EMPTY,
     colorscheme,
     shaderStore
   ));
@@ -451,7 +525,7 @@ void Renderer::splitPaneVertical(Vector2 mousePos) {
     { 0, 0, toSplit->screenRect.width, toSplit->screenRect.height / 2.0f },
     { toSplit->screenPos.x, toSplit->screenPos.y + toSplit->screenRect.height / 2.0f },
     nextPaneId++,
-    AreaType::VIEWPORT3D,
+    AreaType::EMPTY,
     colorscheme,
     shaderStore
   ));

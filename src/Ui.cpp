@@ -59,6 +59,17 @@ void UiText::receiveMousePos(Vector2 mousePos) {
   hovered = false;
 }
 
+void UiText::receiveMouseDown(Vector2 mousePos) {
+  if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
+    if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
+      onClick(this);
+    }
+  }
+}
+
+void UiText::receiveMouseUp(Vector2 mousePos) {
+}
+
 void Ui::setOnClick(std::function<void (Ui *)> f) {
   onClick = f;
 }
@@ -116,6 +127,16 @@ void UiRect::receiveMousePos(Vector2 mousePos) {
   }
 }
 
+void UiRect::receiveMouseDown(Vector2 mousePos) {
+  std::cout << "UI RECT MOUSE DOWN" << std::endl;
+  if (contains(mousePos)) {
+    onClick(this);
+  }
+}
+
+void UiRect::receiveMouseUp(Vector2 mousePos) {
+}
+
 void UiRect::setColor(Color c) {
   bgColor = c;
 }
@@ -123,6 +144,10 @@ void UiRect::setColor(Color c) {
 void UiRect::setSize(Vector2 size) {
   bounds.width = size.x;
   bounds.height = size.y;
+}
+
+bool UiRect::contains(Vector2 mousePos) {
+  return CheckCollisionPointRec(mousePos, bounds);
 }
 
 UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
@@ -160,6 +185,9 @@ UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
         UiRect* bg = static_cast<UiRect*>(p);
         bg->setColor({30, 30, 30, 255});
     });
+    optBg->setOnClick([this,i](Ui* p) {
+        select(i);
+    });
 
     ++i;
     uiOptions.push_back(uiOpt);
@@ -181,6 +209,8 @@ UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
 
   labelBg.setColor({255, 255, 255, 30});
   labelBg.setSize(btnSize);
+
+  pos = {0, 0};
 }
 
 UiDropDown::~UiDropDown() {
@@ -244,9 +274,35 @@ void UiDropDown::receiveMousePos(Vector2 mousePos) {
   }
 }
 
-void UiDropDown::setOnSelected(std::function<void(std::string)>) {
+void UiDropDown::receiveMouseDown(Vector2 mousePos) {
+  if (open) {
+    if (
+      CheckCollisionPointRec(mousePos, {pos.x, pos.y + btnSize.y, listSize.x, listSize.y})
+    ) {
+      for (auto& optBg : uiOptionsBg) {
+        // If the onclick succeeds, we replace all UI with new UI and thus will
+        // seg fault if we continue to loop over the old ui.
+        if (optBg->contains(mousePos)) {
+          optBg->receiveMouseDown(mousePos);
+          break;
+        }
+      }
+    }
+  }
 }
 
+void UiDropDown::receiveMouseUp(Vector2 mousePos) {
+}
+
+void UiDropDown::setOnSelected(std::function<void(std::string)> f) {
+  onSelected = f;
+}
+
+void UiDropDown::select(size_t i) {
+  if (onSelected) {
+    onSelected(options[i]);
+  }
+}
 
 Ui3DViewport::Ui3DViewport() {
   camera.position = { 20.0f, 20.0f, 20.0f };
@@ -281,6 +337,12 @@ void Ui3DViewport::draw() {
 }
 
 void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
+}
+
+void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
+}
+
+void Ui3DViewport::receiveMouseUp(Vector2 mousePos) {
 }
 
 void Ui3DViewport::setScene(std::shared_ptr<Scene> scene) {

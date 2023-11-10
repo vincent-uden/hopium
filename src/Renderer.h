@@ -79,6 +79,8 @@ public:
   void draw();
   bool containsPoint(Vector2 localPos);
   void receiveMousePos(Vector2 mousePos);
+  void receiveMouseDown(Vector2 mousePos);
+  void receiveMouseUp(Vector2 mousePos);
   void updateShaders();
 
   // Event Listeners
@@ -109,6 +111,9 @@ public:
 private:
   // Internal constructors for different types of areas
   void buildViewport3D();
+  void buildEmpty();
+  void buildTypeDropDown();
+  void resetType();
 
   std::shared_ptr<Colorscheme> colorscheme;
   std::shared_ptr<ShaderStore> shaderStore;

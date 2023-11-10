@@ -16,6 +16,8 @@ public:
   virtual void setPos(Vector2 pos)=0;
   virtual void draw()=0;
   virtual void receiveMousePos(Vector2 mousePos)=0;
+  virtual void receiveMouseDown(Vector2 mousePos)=0;
+  virtual void receiveMouseUp(Vector2 mousePos)=0;
 
   void setOnClick(std::function<void(Ui*)>);
   void setOnMouseEnter(std::function<void(Ui*)>);
@@ -39,6 +41,8 @@ public:
   void setPos(Vector2 pos);
   void draw();
   void receiveMousePos(Vector2 mousePos);
+  void receiveMouseDown(Vector2 mousePos);
+  void receiveMouseUp(Vector2 mousePos);
 
   void setColor(Color c);
   void setText(std::string text);
@@ -62,9 +66,13 @@ public:
   void setPos(Vector2 pos);
   void draw();
   void receiveMousePos(Vector2 mousePos);
+  void receiveMouseDown(Vector2 mousePos);
+  void receiveMouseUp(Vector2 mousePos);
 
   void setColor(Color c);
   void setSize(Vector2 size);
+
+  bool contains(Vector2 mousePos);
 private:
   bool hovered = false;
 
@@ -81,25 +89,33 @@ public:
   void setPos(Vector2 pos);
   void draw();
   void receiveMousePos(Vector2 mousePos);
+  void receiveMouseDown(Vector2 mousePos);
+  void receiveMouseUp(Vector2 mousePos);
 
-  void setOnSelected(std::function<void(std::string)>);
+  void setOnSelected(std::function<void(std::string)> f);
 
 private:
+  void select(size_t i);
+
+  // Click boxes
   Vector2 pos;
   Vector2 btnSize;
   Vector2 listSize;
 
-  std::vector<std::string> options;
+  // Ui components
   Color bgColor;
   Color fgColor;
-
   UiText label;
   UiRect labelBg;
   std::vector<std::shared_ptr<UiText>> uiOptions;
   std::vector<std::shared_ptr<UiRect>> uiOptionsBg;
+  int padding = 4;
+
+  // State
+  std::vector<std::string> options;
+  std::function<void(std::string)> onSelected;
   bool hovered = false;
   bool open = false;
-  int padding = 4;
 };
 
 class Ui3DViewport: public Ui {
@@ -111,6 +127,8 @@ public:
   void setPos(Vector2 pos);
   void draw();
   void receiveMousePos(Vector2 mousePos);
+  void receiveMouseDown(Vector2 mousePos);
+  void receiveMouseUp(Vector2 mousePos);
 
   void setScene(std::shared_ptr<Scene> scene);
 
