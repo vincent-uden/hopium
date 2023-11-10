@@ -9,3 +9,4 @@
 
 ## Pacman packages
 - fmt
+- opencascade

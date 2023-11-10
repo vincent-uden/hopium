@@ -6,6 +6,8 @@
 #include <vector>
 #include <raylib.h>
 
+#include "ShaderStore.h"
+
 class RasterBody {
 public:
   RasterBody();
@@ -21,7 +23,7 @@ private:
 
 class Scene {
 public:
-  Scene();
+  Scene(std::shared_ptr<ShaderStore> shaderStore);
   ~Scene();
 
   void addBody(std::shared_ptr<RasterBody> body);
@@ -29,11 +31,11 @@ public:
   size_t nBodies();
   std::shared_ptr<RasterBody> getBody(size_t i);
 
-  static Shader standardModelShader;
-
 private:
   std::vector<std::shared_ptr<RasterBody>> bodies;
 
   static std::vector<Texture2D> standardModelTextures;
+
+  std::shared_ptr<ShaderStore> shaderStore;
 };
 #endif

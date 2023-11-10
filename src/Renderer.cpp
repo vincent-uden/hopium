@@ -1,7 +1,4 @@
 #include "Renderer.h"
-#include "raylib.h"
-#include <cmath>
-#include <limits>
 
 Boundary::Boundary(std::shared_ptr<Colorscheme> colorscheme) {
   this->colorscheme = colorscheme;
@@ -164,13 +161,15 @@ Area::Area(
   Vector2 screenPos,
   int id,
   AreaType type,
-  std::shared_ptr<Colorscheme> colorscheme
+  std::shared_ptr<Colorscheme> colorscheme,
+  std::shared_ptr<ShaderStore> shaderStore
 ) {
   paneTexture = LoadRenderTexture(screenW, screenH);
   this->screenRect = screenRect;
   this->screenPos = screenPos;
   this->colorscheme = colorscheme;
   this->type = type;
+  this->shaderStore = shaderStore;
   paneId = id;
 
   switch (type) {
@@ -250,6 +249,17 @@ void Area::receiveMousePos(Vector2 mousePos) {
   }
 }
 
+void Area::updateShaders() {
+  for (auto& ui : contents) {
+    std::shared_ptr<Ui3DViewport> ui3d = std::dynamic_pointer_cast<Ui3DViewport>(ui);
+    if (ui3d) {
+      float cameraPos[3] = { ui3d->camera.position.x, ui3d->camera.position.y, ui3d->camera.position.z };
+      SetShaderValue(shaderStore->standardModelShader, shaderStore->standardModelShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+      UpdateCamera(&ui3d->camera, CAMERA_ORBITAL);
+    }
+  }
+}
+
 void Area::addUi(std::shared_ptr<Ui>& ui) {
   contents.push_back(std::move(ui));
 }
@@ -283,7 +293,7 @@ void Area::buildViewport3D() {
   // TODO: Every area should have a header where you can switch the type
   std::shared_ptr<Ui> viewport(new Ui3DViewport());
   // TODO: The area should not own the scene. Who owns it?
-  std::shared_ptr<Scene> scene(new Scene());
+  std::shared_ptr<Scene> scene(new Scene(shaderStore));
   scene->addBodyFromFile("../assets/toilet_rolls.obj");
   scene->addBodyFromFile("../assets/toilet_rolls.obj");
   scene->getBody(1)->pos.x = 1.0 * 5;
@@ -306,6 +316,7 @@ Renderer::Renderer(int screenW, int screenH) {
   colorscheme = std::shared_ptr<Colorscheme>(new Colorscheme(&font));
 
   Ui::colorscheme = colorscheme;
+  shaderStore = std::shared_ptr<ShaderStore>(new ShaderStore());
 
   areas.push_back(std::shared_ptr<Area>(new Area(
     screenW,
@@ -314,8 +325,10 @@ Renderer::Renderer(int screenW, int screenH) {
     { 0, 0 },
     nextPaneId++,
     AreaType::EMPTY,
-    colorscheme
+    colorscheme,
+    shaderStore
   )));
+
 }
 
 Renderer::~Renderer() {
@@ -325,10 +338,14 @@ Renderer::~Renderer() {
 }
 
 void Renderer::draw() {
+
   BeginDrawing();
   ClearBackground(BLACK);
 
   for (auto area : areas) {
+    if (area->type == AreaType::VIEWPORT3D) {
+      area->updateShaders();
+    }
     area->draw();
   }
 
@@ -389,7 +406,8 @@ void Renderer::splitPaneHorizontal(Vector2 mousePos) {
     { toSplit->screenPos.x + toSplit->screenRect.width / 2.0f, toSplit->screenPos.y },
     nextPaneId++,
     AreaType::VIEWPORT3D,
-    colorscheme
+    colorscheme,
+    shaderStore
   ));
   toSplit->screenRect.width /= 2.0f;
 
@@ -433,7 +451,9 @@ void Renderer::splitPaneVertical(Vector2 mousePos) {
     { 0, 0, toSplit->screenRect.width, toSplit->screenRect.height / 2.0f },
     { toSplit->screenPos.x, toSplit->screenPos.y + toSplit->screenRect.height / 2.0f },
     nextPaneId++,
-    colorscheme
+    AreaType::VIEWPORT3D,
+    colorscheme,
+    shaderStore
   ));
   toSplit->screenRect.height /= 2.0f;
 

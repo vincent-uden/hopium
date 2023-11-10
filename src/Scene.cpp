@@ -1,7 +1,6 @@
 #include "Scene.h"
 
 std::vector<Texture2D> Scene::standardModelTextures = std::vector<Texture2D>();
-Shader Scene::standardModelShader = (Shader) {0};
 
 RasterBody::RasterBody() {
 }
@@ -21,7 +20,8 @@ void RasterBody::loadFromFile(std::string path) {
   hasLoadedModel = true;
 }
 
-Scene::Scene() {
+Scene::Scene(std::shared_ptr<ShaderStore> shaderStore) {
+  this->shaderStore = shaderStore;
   if (standardModelTextures.size() == 0) {
     Color colors[7] = {
       {255, 179, 186, 255},
@@ -39,11 +39,6 @@ Scene::Scene() {
       Texture2D texture = LoadTextureFromImage(img);
       standardModelTextures.push_back(texture);
     }
-
-    standardModelShader = LoadShader("../shaders/vs.glsl", "../shaders/fs.glsl");
-    int ambientLoc = GetShaderLocation(standardModelShader, "ambientColor");
-    float ambColor[3] = { 1.0f, 1.0f, 1.0f };
-    SetShaderValue(standardModelShader, ambientLoc, ambColor, SHADER_UNIFORM_VEC3);
   }
 }
 
@@ -58,7 +53,7 @@ void Scene::addBodyFromFile(std::string path) {
   std::shared_ptr<RasterBody> body(new RasterBody());
   body->loadFromFile(path);
   body->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = standardModelTextures[bodies.size() % standardModelTextures.size()];
-  body->model.materials[0].shader = standardModelShader;
+  body->model.materials[0].shader = shaderStore->standardModelShader;
   addBody(body);
 }
 

@@ -6,12 +6,15 @@
 #include <iostream>
 #include <sstream>
 #include <iterator>
+#include <cmath>
+#include <limits>
 
 #include <raylib.h>
 #include <raymath.h>
 
-#include "Ui.h"
 #include "Colorscheme.h"
+#include "ShaderStore.h"
+#include "Ui.h"
 
 // Forward declarations
 class Area;
@@ -67,7 +70,8 @@ public:
     Vector2 screenPos,
     int id,
     AreaType type,
-    std::shared_ptr<Colorscheme> colorscheme
+    std::shared_ptr<Colorscheme> colorscheme,
+    std::shared_ptr<ShaderStore> shaderStore
   );
   ~Area();
 
@@ -75,6 +79,7 @@ public:
   void draw();
   bool containsPoint(Vector2 localPos);
   void receiveMousePos(Vector2 mousePos);
+  void updateShaders();
 
   // Event Listeners
   void setOnMouseEnter(std::function<void(Ui*)>);
@@ -106,6 +111,7 @@ private:
   void buildViewport3D();
 
   std::shared_ptr<Colorscheme> colorscheme;
+  std::shared_ptr<ShaderStore> shaderStore;
 
   std::vector<std::shared_ptr<Ui>> contents;
 
@@ -129,6 +135,7 @@ public:
 
   std::vector<std::shared_ptr<Area>> areas;
   std::vector<std::shared_ptr<Boundary>> boundaries;
+
 private:
   int screenW;
   int screenH;
@@ -138,6 +145,7 @@ private:
   float mouseBoundaryTolerance = 15.f;
 
   std::shared_ptr<Colorscheme> colorscheme;
+  std::shared_ptr<ShaderStore> shaderStore;
   Font font;
 
   std::shared_ptr<Boundary> grabbed = nullptr;

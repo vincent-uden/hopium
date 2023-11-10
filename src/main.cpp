@@ -68,16 +68,11 @@ int main(int argc, char** argv) {
       }
 
       // TODO: Move to renderer
-      float cameraPos[3] = { port->camera.position.x, port->camera.position.y, port->camera.position.z };
-      SetShaderValue(Scene::standardModelShader, Scene::standardModelShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
-
-      UpdateCamera(&port->camera, CAMERA_ORBITAL);
       // --
 
       renderer.draw();
     }
   }
-  UnloadShader(Scene::standardModelShader);
   CloseWindow();
 
   return 0;
