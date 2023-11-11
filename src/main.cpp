@@ -53,6 +53,9 @@ int main(int argc, char** argv) {
       if (IsKeyPressed(KEY_V)) {
         renderer.splitPaneVertical(GetMousePosition());
       }
+      if (IsKeyPressed(KEY_D)) {
+        renderer.collapseBoundary(GetMousePosition());
+      }
       // On space, dump all pane data
       if (IsKeyPressed(KEY_SPACE)) {
         renderer.dumpPanes();

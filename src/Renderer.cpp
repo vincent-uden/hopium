@@ -7,6 +7,54 @@ Boundary::Boundary(std::shared_ptr<Colorscheme> colorscheme) {
 Boundary::~Boundary() {
 }
 
+void Boundary::draw() {
+  Vector2 startPos = side2[0]->screenPos;
+  Vector2 endPos = side2[0]->screenPos;
+  switch (orientation) {
+  case VERTICAL:
+    endPos.y += extent();
+    break;
+  case HORIZONTAL:
+    endPos.x += extent();
+    break;
+  }
+  DrawLineEx(startPos, endPos, thickness, colorscheme->borderColor);
+}
+
+float Boundary::extent() {
+  float total = 0;
+
+  switch(orientation) {
+  case VERTICAL:
+    for (auto& area : side2) {
+      total += area->screenRect.height;
+    }
+    break;
+  case HORIZONTAL:
+    for (auto& area : side2) {
+      total += area->screenRect.width;
+    }
+    break;
+  }
+
+  return total;
+}
+
+float Boundary::distanceToPoint(Vector2 pos) {
+  switch (orientation) {
+  case VERTICAL:
+    if (pos.y > side2[0]->screenPos.y && pos.y < side2[0]->screenPos.y + extent()) {
+      return std::fabs(side2[0]->screenPos.x - pos.x);
+    }
+  case HORIZONTAL:
+    if (pos.x > side2[0]->screenPos.x && pos.x < side2[0]->screenPos.x + extent()) {
+      return std::fabs(side2[0]->screenPos.y - pos.y);
+    }
+  }
+
+  return std::numeric_limits<float>::infinity();
+}
+
 bool Boundary::canCollapse() {
   return side1.size() == 1 && side2.size() == 1;
 }
@@ -15,11 +63,31 @@ void Boundary::collapse(std::shared_ptr<Area> toDelete) {
   if (canCollapse()) {
     toDelete->active = false;
 
+    toDelete->deleteBoundary(this);
+    toDelete->deleteThisFromBoundaries();
+
     if (side1.empty()) {
-      side2[0]->deleteBoundary(this);
+      if (orientation == BoundaryOrientation::VERTICAL) {
+        for (auto& area : side2) {
+          area->screenPos.x -= toDelete->screenRect.width;
+        }
+      } else {
+        for (auto& area : side2) {
+          area->screenPos.y -= toDelete->screenRect.height;
+        }
+      }
     } else {
-      side1[0]->deleteBoundary(this);
+      if (orientation == BoundaryOrientation::VERTICAL) {
+        for (auto& area : side1) {
+          area->screenRect.width += toDelete->screenRect.width;
+        }
+      } else {
+        for (auto& area : side1) {
+          area->screenRect.height += toDelete->screenRect.height;
+        }
+      }
     }
+
     active = false;
   }
 }
@@ -52,20 +120,6 @@ void Boundary::deleteArea(Area* toDelete) {
     std::advance(it, j);
     side2.erase(it);
   }
-}
-
-void Boundary::draw() {
-  Vector2 startPos = side2[0]->screenPos;
-  Vector2 endPos = side2[0]->screenPos;
-  switch (orientation) {
-  case VERTICAL:
-    endPos.y += extent();
-    break;
-  case HORIZONTAL:
-    endPos.x += extent();
-    break;
-  }
-  DrawLineEx(startPos, endPos, thickness, colorscheme->borderColor);
 }
 
 void Boundary::moveBoundary(Vector2 screenPos) {
@@ -120,40 +174,6 @@ void Boundary::moveBoundary(Vector2 screenPos) {
 
 }
 
-float Boundary::extent() {
-  float total = 0;
-
-  switch(orientation) {
-  case VERTICAL:
-    for (auto& area : side2) {
-      total += area->screenRect.height;
-    }
-    break;
-  case HORIZONTAL:
-    for (auto& area : side2) {
-      total += area->screenRect.width;
-    }
-    break;
-  }
-
-  return total;
-}
-
-float Boundary::distanceToPoint(Vector2 pos) {
-  switch (orientation) {
-  case VERTICAL:
-    if (pos.y > side2[0]->screenPos.y && pos.y < side2[0]->screenPos.y + extent()) {
-      return std::fabs(side2[0]->screenPos.x - pos.x);
-    }
-  case HORIZONTAL:
-    if (pos.x > side2[0]->screenPos.x && pos.x < side2[0]->screenPos.x + extent()) {
-      return std::fabs(side2[0]->screenPos.y - pos.y);
-    }
-  }
-
-  return std::numeric_limits<float>::infinity();
-}
-
 json Boundary::serialize() {
   json out = {
     { "id", id },
@@ -163,10 +183,10 @@ json Boundary::serialize() {
   };
 
   for (auto& area : side1) {
-    out["side1"].push_back(area->paneId);
+    out["side1"].push_back(area->id);
   }
   for (auto& area : side2) {
-    out["side2"].push_back(area->paneId);
+    out["side2"].push_back(area->id);
   }
 
   return out;
@@ -188,7 +208,7 @@ Area::Area(
   this->colorscheme = colorscheme;
   this->type = type;
   this->shaderStore = shaderStore;
-  paneId = id;
+  this->id = id;
 
   switch (type) {
   case AreaType::VIEWPORT3D:
@@ -315,7 +335,7 @@ void Area::addUi(std::shared_ptr<Ui>& ui) {
 
 void Area::dumpInfo() {
   std::cout << "--------------" << std::endl;
-  std::cout << "Pane " << paneId << std::endl;
+  std::cout << "Pane " << id << std::endl;
   std::cout << "Pos: " << screenPos.x << " " << screenPos.y << std::endl;
   std::cout << "Rect: " << screenRect.x << " " << screenRect.y << " " << screenRect.width << " " << screenRect.height << std::endl;
 }
@@ -336,12 +356,21 @@ void Area::deleteThisFromBoundaries() {
   if (leftBdry) {
     leftBdry->deleteArea(this);
   }
+  if (rightBdry) {
+    rightBdry->deleteArea(this);
+  }
+  if (downBdry) {
+    downBdry->deleteArea(this);
+  }
+  if (upBdry) {
+    upBdry->deleteArea(this);
+  }
 }
 
 json Area::serialize() {
   json out = {
     { "type", type },
-    { "id", paneId },
+    { "id", id },
     { "pos", { screenPos.x, screenPos.y } },
     { "rect", { screenRect.x, screenRect.y, screenRect.width, screenRect.height } },
     { "leftBdry", leftBdry ? leftBdry->id : -1 },
@@ -411,7 +440,8 @@ Renderer::Renderer(int screenW, int screenH) {
   this->screenW = screenW;
   this->screenH = screenH;
 
-  font = LoadFontEx("../assets/Geist/Geist-Regular.otf", 20, 0, 250);
+  font = LoadFontEx("../assets/Geist/Geist-Regular.otf", 72, 0, 250);
+  SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
   colorscheme = std::shared_ptr<Colorscheme>(new Colorscheme(&font));
 
   Ui::colorscheme = colorscheme;
@@ -594,6 +624,18 @@ void Renderer::splitPaneVertical(Vector2 mousePos) {
   areas.push_back(newArea);
 }
 
+void Renderer::collapseBoundary(Vector2 mousePos) {
+    std::shared_ptr<Boundary> hovered = findBoundary(mousePos, mouseBoundaryTolerance);
+    if (hovered) {
+      if (hovered->canCollapse()) {
+        deleteArea(hovered->side2[0]);
+        deleteBoundary(hovered);
+
+        hovered->collapse(hovered->side2[0]);
+      }
+    }
+}
+
 // Recursively dump information about all panes for debugging purposes.
 void Renderer::dumpPanes() {
   std::cout << std::endl << "Pane information" << std::endl;
@@ -667,22 +709,22 @@ void Renderer::deserialize(json serialized) {
 
   for (auto& jsonArea : serialized["areas"]) {
     if (jsonArea["leftBdry"] != -1) {
-      auto area = findArea(jsonArea["id"]);
+      auto area = findArea((int) jsonArea["id"]);
       auto bdry = findBoundary(jsonArea["leftBdry"]);
       area->leftBdry = bdry;
     }
     if (jsonArea["rightBdry"]!= -1) {
-      auto area = findArea(jsonArea["id"]);
+      auto area = findArea((int) jsonArea["id"]);
       auto bdry = findBoundary(jsonArea["rightBdry"]);
       area->rightBdry = bdry;
     }
     if (jsonArea["upBdry"]  != -1) {
-      auto area = findArea(jsonArea["id"]);
+      auto area = findArea((int) jsonArea["id"]);
       auto bdry = findBoundary(jsonArea["upBdry"]);
       area->upBdry = bdry;
     }
     if (jsonArea["downBdry"]!= -1) {
-      auto area = findArea(jsonArea["id"]);
+      auto area = findArea((int) jsonArea["id"]);
       auto bdry = findBoundary(jsonArea["downBdry"]);
       area->downBdry = bdry;
     }
@@ -719,6 +761,23 @@ std::shared_ptr<Boundary> Renderer::findBoundary(int id) {
   return nullptr;
 }
 
+void Renderer::deleteBoundary(std::shared_ptr<Boundary> bdry) {
+    int j = -1;
+    for (int i = 0; i < boundaries.size(); ++i) {
+      if (boundaries[i]->id == bdry->id) {
+        j = i;
+        break;
+      }
+    }
+
+    if (j != -1) {
+      auto it = boundaries.begin();
+      std::advance(it, j);
+      boundaries.erase(it);
+    }
+}
+
+
 // Finds the pane which contains the position `pos`. Since the root pane covers
 // the entire screen, this will **never** return a null pointer.
 std::shared_ptr<Area> Renderer::findArea(Vector2 pos) {
@@ -733,10 +792,26 @@ std::shared_ptr<Area> Renderer::findArea(Vector2 pos) {
 
 std::shared_ptr<Area> Renderer::findArea(int id) {
   for (auto area : areas) {
-    if (area->paneId == id) {
+    if (area->id == id) {
       return area;
     }
   }
 
   return nullptr;
+}
+
+void Renderer::deleteArea(std::shared_ptr<Area> area) {
+    int j = -1;
+    for (int i = 0; i < areas.size(); ++i) {
+      if (areas[i]->id == area->id) {
+        j = i;
+        break;
+      }
+    }
+
+    if (j != -1) {
+      auto it = areas.begin();
+      std::advance(it, j);
+      areas.erase(it);
+    }
 }

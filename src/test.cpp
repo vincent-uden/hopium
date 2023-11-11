@@ -231,6 +231,31 @@ int serializeAndDeserializeRenderer() {
   return 0;
 }
 
+int canSplitAndCollapseBoundary() {
+  const int screenWidth = 1600;
+  const int screenHeight = 900;
+
+  SetTraceLogLevel(LOG_NONE);
+  InitWindow(screenWidth, screenHeight, "Raylib Example");
+
+  SetTargetFPS(60);
+
+  {
+    Renderer renderer(screenWidth, screenHeight);
+
+    renderer.splitPaneHorizontal({ 10, 10 });
+    renderer.collapseBoundary({ 800, 450 });
+
+    ASSERT(renderer.areas.size() == 1, "Renderer should have 1 area. Actually has: " << renderer.areas.size());
+    ASSERT(renderer.boundaries.size() == 0, "Renderer should have 0 boundaries");
+    ASSERT(renderer.areas[0]->screenRect.width == 1600 && renderer.areas[0]->screenRect.height == 900, "Area should reclaim initially occupied space");
+  }
+
+  CloseWindow();
+
+  return 0;
+}
+
 int main(int argc, char** argv) {
   std::vector<Test> tests;
 
@@ -239,6 +264,7 @@ int main(int argc, char** argv) {
   ADD_TEST(windowCanBeSplitHorizontallyRepeatedly);
   ADD_TEST(deepRecursiveSplittingProducesCorrectSizes);
   ADD_TEST(serializeAndDeserializeRenderer);
+  ADD_TEST(canSplitAndCollapseBoundary);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

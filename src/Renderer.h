@@ -32,13 +32,16 @@ public:
   Boundary(std::shared_ptr<Colorscheme> colorscheme);
   ~Boundary();
 
+  // Graphics
+  void draw();
+  float extent();
+  float distanceToPoint(Vector2 pos);
+
+  // Area/Boundary management
   bool canCollapse();
   void collapse(std::shared_ptr<Area> toDelete);
   void deleteArea(Area* toDelete);
-  void draw();
   void moveBoundary(Vector2 screenPos);
-  float extent();
-  float distanceToPoint(Vector2 pos);
 
   // Serialization
   json serialize();
@@ -106,7 +109,7 @@ public:
   Vector2 screenPos;
 
   RenderTexture paneTexture;
-  int paneId;
+  int id;
   std::shared_ptr<Boundary> leftBdry;
   std::shared_ptr<Boundary> rightBdry;
   std::shared_ptr<Boundary> upBdry;
@@ -145,6 +148,7 @@ public:
   void mouseUp(Vector2 mousePos);
   void splitPaneHorizontal(Vector2 mousePos);
   void splitPaneVertical(Vector2 mousePos);
+  void collapseBoundary(Vector2 mousePos);
   void dumpPanes();
 
   // Serialization
@@ -171,9 +175,11 @@ private:
 
   std::shared_ptr<Boundary> findBoundary(Vector2 pos, float radius);
   std::shared_ptr<Boundary> findBoundary(int id);
+  void deleteBoundary(std::shared_ptr<Boundary> toDelete);
 
   std::shared_ptr<Area> findArea(Vector2 pos);
   std::shared_ptr<Area> findArea(int id);
+  void deleteArea(std::shared_ptr<Area> toDelete);
 };
 
 #endif
