@@ -11,11 +11,15 @@
 
 #include <memory>
 #include <raylib.h>
+#include <json.hpp>
 
+#include "OcctTest.h"
 #include "Renderer.h"
 #include "Scene.h"
+#include "System.h"
 #include "Ui.h"
-#include "OcctTest.h"
+
+const std::string LAYOUT_PATH = "layout.json";
 
 int main(int argc, char** argv) {
   const int screenWidth = 1600;
@@ -37,6 +41,10 @@ int main(int argc, char** argv) {
     // We need to dealloc the renderer and all it's textures before closing the
     // window
     Renderer renderer(screenWidth, screenHeight);
+    if (fileExists(LAYOUT_PATH)) {
+      json layout = json::parse(readFromFile(LAYOUT_PATH));
+      renderer.deserialize(layout);
+    }
 
     while ( !WindowShouldClose() ) {
       if (IsKeyPressed(KEY_H)) {
@@ -60,6 +68,8 @@ int main(int argc, char** argv) {
 
       renderer.draw();
     }
+
+    writeToFile(LAYOUT_PATH, renderer.serialize().dump(-1));
   }
   CloseWindow();
 

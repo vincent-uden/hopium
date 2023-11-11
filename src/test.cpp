@@ -18,6 +18,45 @@
 #define ASSERT(expr, msg) \
   if (expr) { } else { std::cout << msg << std::endl; return(1); }
 
+typedef struct {
+  std::function<int()> f;
+  std::string name;
+} Test;
+
+std::string prettifyFunctionName(std::string name) {
+  std::stringstream ss;
+
+  size_t i = 0;
+  for (char c : name) {
+    if (std::isupper(c)) {
+      ss << " ";
+    }
+    if (i == 0) {
+      c = std::toupper(c);
+    }
+    ss << c;
+    ++i;
+  }
+
+  return ss.str();
+}
+
+void padToWidest(std::vector<Test>& tests) {
+  int maxWidth = 0;
+  for (size_t i = 0; i < tests.size(); ++i) {
+    if (tests[i].name.size() > maxWidth) {
+      maxWidth = tests[i].name.size();
+    }
+  }
+
+  for (size_t i = 0; i < tests.size(); ++i) {
+    size_t beforeLen = tests[i].name.size();
+    for (size_t j = 0; j < maxWidth - beforeLen; ++j) {
+      tests[i].name.push_back(' ');
+    }
+  }
+}
+
 int windowCanBeSplitIntoArea() {
   const int screenWidth = 1600;
   const int screenHeight = 900;
@@ -163,43 +202,33 @@ int deepRecursiveSplittingProducesCorrectSizes() {
   return 0;
 }
 
-typedef struct {
-  std::function<int()> f;
-  std::string name;
-} Test;
+int serializeAndDeserializeRenderer() {
+  const int screenWidth = 1600;
+  const int screenHeight = 900;
 
-std::string prettifyFunctionName(std::string name) {
-  std::stringstream ss;
+  SetTraceLogLevel(LOG_NONE);
+  InitWindow(screenWidth, screenHeight, "Raylib Example");
 
-  size_t i = 0;
-  for (char c : name) {
-    if (std::isupper(c)) {
-      ss << " ";
-    }
-    if (i == 0) {
-      c = std::toupper(c);
-    }
-    ss << c;
-    ++i;
+  SetTargetFPS(60);
+
+  {
+    Renderer renderer(screenWidth, screenHeight);
+
+    renderer.splitPaneVertical({ 10, 10 });
+    renderer.splitPaneHorizontal({ 10, 600 });
+    renderer.splitPaneVertical({ 10, 600 });
+    renderer.splitPaneHorizontal({ 10, 800 });
+
+    json serialized = renderer.serialize();
+    renderer.deserialize(serialized);
+
+    ASSERT(renderer.areas.size() == 5, "Renderer should have the 5 areas it had previously");
+    ASSERT(renderer.boundaries.size() == 4, "Renderer should have the 4 boundaries it had previously");
   }
 
-  return ss.str();
-}
+  CloseWindow();
 
-void padToWidest(std::vector<Test>& tests) {
-  int maxWidth = 0;
-  for (size_t i = 0; i < tests.size(); ++i) {
-    if (tests[i].name.size() > maxWidth) {
-      maxWidth = tests[i].name.size();
-    }
-  }
-
-  for (size_t i = 0; i < tests.size(); ++i) {
-    size_t beforeLen = tests[i].name.size();
-    for (size_t j = 0; j < maxWidth - beforeLen; ++j) {
-      tests[i].name.push_back(' ');
-    }
-  }
+  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -209,6 +238,7 @@ int main(int argc, char** argv) {
   ADD_TEST(windowCanBeSplitVerticallyRepeatedly);
   ADD_TEST(windowCanBeSplitHorizontallyRepeatedly);
   ADD_TEST(deepRecursiveSplittingProducesCorrectSizes);
+  ADD_TEST(serializeAndDeserializeRenderer);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

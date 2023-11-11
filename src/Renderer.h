@@ -11,10 +11,13 @@
 
 #include <raylib.h>
 #include <raymath.h>
+#include <json.hpp>
 
 #include "Colorscheme.h"
 #include "ShaderStore.h"
 #include "Ui.h"
+
+using json = nlohmann::json;
 
 // Forward declarations
 class Area;
@@ -36,6 +39,9 @@ public:
   void moveBoundary(Vector2 screenPos);
   float extent();
   float distanceToPoint(Vector2 pos);
+
+  // Serialization
+  json serialize();
 
   BoundaryOrientation orientation;
   bool active = true;
@@ -93,6 +99,9 @@ public:
   void deleteBoundary(Boundary* toDelete);
   void deleteThisFromBoundaries();
 
+  // Serialization
+  json serialize();
+
   Rectangle screenRect;
   Vector2 screenPos;
 
@@ -138,7 +147,12 @@ public:
   void splitPaneVertical(Vector2 mousePos);
   void dumpPanes();
 
+  // Serialization
+  json serialize();
+  void deserialize(json serialized);
+
   std::vector<std::shared_ptr<Area>> areas;
+
   std::vector<std::shared_ptr<Boundary>> boundaries;
 
 private:
@@ -156,8 +170,10 @@ private:
   std::shared_ptr<Boundary> grabbed = nullptr;
 
   std::shared_ptr<Boundary> findBoundary(Vector2 pos, float radius);
+  std::shared_ptr<Boundary> findBoundary(int id);
 
-  std::shared_ptr<Area> findPane(Vector2 pos);
+  std::shared_ptr<Area> findArea(Vector2 pos);
+  std::shared_ptr<Area> findArea(int id);
 };
 
 #endif

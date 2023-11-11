@@ -154,6 +154,24 @@ float Boundary::distanceToPoint(Vector2 pos) {
   return std::numeric_limits<float>::infinity();
 }
 
+json Boundary::serialize() {
+  json out = {
+    { "id", id },
+    { "orientation", orientation },
+    { "side1", {} },
+    { "side2", {} },
+  };
+
+  for (auto& area : side1) {
+    out["side1"].push_back(area->paneId);
+  }
+  for (auto& area : side2) {
+    out["side2"].push_back(area->paneId);
+  }
+
+  return out;
+}
+
 Area::Area(
   int screenW,
   int screenH,
@@ -187,7 +205,6 @@ Area::~Area() {
 }
 
 void Area::draw() {
-  // TODO: 3D Viewport renders the type menu in the wrong place
   BeginTextureMode(paneTexture);
   ClearBackground(colorscheme->background);
   int i = 0;
@@ -319,6 +336,21 @@ void Area::deleteThisFromBoundaries() {
   if (leftBdry) {
     leftBdry->deleteArea(this);
   }
+}
+
+json Area::serialize() {
+  json out = {
+    { "type", type },
+    { "id", paneId },
+    { "pos", { screenPos.x, screenPos.y } },
+    { "rect", { screenRect.x, screenRect.y, screenRect.width, screenRect.height } },
+    { "leftBdry", leftBdry ? leftBdry->id : -1 },
+    { "rightBdry", rightBdry? rightBdry->id : -1 },
+    { "upBdry", upBdry? upBdry->id : -1 },
+    { "downBdry", downBdry? downBdry->id : -1 },
+  };
+
+  return out;
 }
 
 void Area::buildViewport3D() {
@@ -473,7 +505,7 @@ void Renderer::mouseUp(Vector2 mousePos) {
 // Split a parent pane horizontally and give it one child which occupies the
 // right half of the area intially owned by the parent.
 void Renderer::splitPaneHorizontal(Vector2 mousePos) {
-  std::shared_ptr<Area> toSplit = findPane(mousePos);
+  std::shared_ptr<Area> toSplit = findArea(mousePos);
 
   std::shared_ptr<Area> newArea = std::shared_ptr<Area>(new Area(
     screenW,
@@ -519,7 +551,7 @@ void Renderer::splitPaneHorizontal(Vector2 mousePos) {
 // Split a parent pane vertically and give it one child which occupies the
 // bottom half of the area intially owned by the parent.
 void Renderer::splitPaneVertical(Vector2 mousePos) {
-  std::shared_ptr<Area> toSplit = findPane(mousePos);
+  std::shared_ptr<Area> toSplit = findArea(mousePos);
 
   std::shared_ptr<Area> newArea = std::shared_ptr<Area>(new Area(
     screenW,
@@ -570,16 +602,91 @@ void Renderer::dumpPanes() {
   }
 }
 
-// Finds the pane which contains the position `pos`. Since the root pane covers
-// the entire screen, this will **never** return a null pointer.
-std::shared_ptr<Area> Renderer::findPane(Vector2 pos) {
-  for (auto area : areas) {
-    if (area->containsPoint(pos)) {
-      return area;
-    }
+json Renderer::serialize() {
+  json out = {
+    { "nextPaneId", nextPaneId },
+    { "nextBdryId", nextBdryId },
+    { "areas", {} },
+    { "boundaries", {} },
+  };
+
+  for (auto& area : areas) {
+    out["areas"].push_back(area->serialize());
+  }
+  for (auto& bdry : boundaries) {
+    out["boundaries"].push_back(bdry->serialize());
   }
 
-  return nullptr;
+  return out;
+}
+
+void Renderer::deserialize(json serialized) {
+  grabbed = nullptr;
+  areas.clear();
+  boundaries.clear();
+
+  nextPaneId = serialized["nextPaneId"];
+  nextBdryId = serialized["nextBdryId"];
+
+  for (auto& area : serialized["areas"]) {
+    std::shared_ptr<Area> newArea(new Area(
+      screenW,
+      screenH,
+      { 0, 0, area["rect"][2], area["rect"][3] },
+      { area["pos"][0], area["pos"][1] },
+      area["id"],
+      area["type"],
+      colorscheme,
+      shaderStore
+    ));
+
+    areas.push_back(newArea);
+  }
+
+  for (auto& bdry : serialized["boundaries"]) {
+    std::shared_ptr<Boundary> newBdry(new Boundary(colorscheme));
+    newBdry->id = bdry["id"];
+    newBdry->orientation = bdry["orientation"];
+
+    for (auto& areaId : bdry["side1"]) {
+      auto area = findArea(areaId);
+      if (area) {
+        newBdry->side1.push_back(area);
+      }
+    }
+
+    for (auto& areaId : bdry["side2"]) {
+      auto area = findArea(areaId);
+      if (area) {
+        newBdry->side2.push_back(area);
+      }
+    }
+
+    boundaries.push_back(newBdry);
+  }
+
+  for (auto& jsonArea : serialized["areas"]) {
+    if (jsonArea["leftBdry"] != -1) {
+      auto area = findArea(jsonArea["id"]);
+      auto bdry = findBoundary(jsonArea["leftBdry"]);
+      area->leftBdry = bdry;
+    }
+    if (jsonArea["rightBdry"]!= -1) {
+      auto area = findArea(jsonArea["id"]);
+      auto bdry = findBoundary(jsonArea["rightBdry"]);
+      area->rightBdry = bdry;
+    }
+    if (jsonArea["upBdry"]  != -1) {
+      auto area = findArea(jsonArea["id"]);
+      auto bdry = findBoundary(jsonArea["upBdry"]);
+      area->upBdry = bdry;
+    }
+    if (jsonArea["downBdry"]!= -1) {
+      auto area = findArea(jsonArea["id"]);
+      auto bdry = findBoundary(jsonArea["downBdry"]);
+      area->downBdry = bdry;
+    }
+  }
 }
 
 std::shared_ptr<Boundary> Renderer::findBoundary(Vector2 pos, float radius) {
@@ -601,4 +708,35 @@ std::shared_ptr<Boundary> Renderer::findBoundary(Vector2 pos, float radius) {
   } else {
     return nullptr;
   }
+}
+
+std::shared_ptr<Boundary> Renderer::findBoundary(int id) {
+  for (auto& bdry : boundaries) {
+    if (bdry->id == id) {
+      return bdry;
+    }
+  }
+  return nullptr;
+}
+
+// Finds the pane which contains the position `pos`. Since the root pane covers
+// the entire screen, this will **never** return a null pointer.
+std::shared_ptr<Area> Renderer::findArea(Vector2 pos) {
+  for (auto area : areas) {
+    if (area->containsPoint(pos)) {
+      return area;
+    }
+  }
+
+  return nullptr;
+}
+
+std::shared_ptr<Area> Renderer::findArea(int id) {
+  for (auto area : areas) {
+    if (area->paneId == id) {
+      return area;
+    }
+  }
+
+  return nullptr;
 }
