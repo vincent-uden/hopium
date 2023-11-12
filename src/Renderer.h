@@ -101,6 +101,10 @@ public:
   void dumpInfo();
   void deleteBoundary(Boundary* toDelete);
   void deleteThisFromBoundaries();
+  bool isLeftOf(Boundary* bdry);
+  bool isRightOf(Boundary* bdry);
+  bool isBelow(Boundary* bdry);
+  bool isAbove(Boundary* bdry);
 
   // Serialization
   json serialize();

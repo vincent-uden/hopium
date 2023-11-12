@@ -256,6 +256,72 @@ int canSplitAndCollapseBoundary() {
   return 0;
 }
 
+int collapsingBoundaryReconnectsNowAdjacentAreas() {
+  const int screenWidth = 1600;
+  const int screenHeight = 900;
+
+  SetTraceLogLevel(LOG_NONE);
+  InitWindow(screenWidth, screenHeight, "Raylib Example");
+
+  SetTargetFPS(60);
+
+  {
+    Renderer renderer(screenWidth, screenHeight);
+
+    renderer.splitPaneVertical({ 10, 10 });
+    renderer.splitPaneVertical({ 10, 10 });
+    renderer.collapseBoundary({ 800, screenHeight / 4.0 });
+
+    ASSERT(renderer.boundaries.size() == 1, "There should only be one boundary");
+    ASSERT(renderer.areas.size() == 2, "There should only be two areas");
+    ASSERT(renderer.boundaries[0]->side1.size() == 1, "The first boundary should once again be connected to the first area");
+    ASSERT(renderer.boundaries[0]->side1[0].get() == renderer.areas[0].get(), "The first boundary should once again be connected to the boundary");
+  }
+
+  CloseWindow();
+
+  return 0;
+}
+
+int nestedSplitAndCollapseDoesntBreakGraph() {
+  const int screenWidth = 1600;
+  const int screenHeight = 900;
+
+  SetTraceLogLevel(LOG_NONE);
+  InitWindow(screenWidth, screenHeight, "Raylib Example");
+
+  SetTargetFPS(60);
+
+  {
+    Renderer renderer(screenWidth, screenHeight);
+
+    renderer.splitPaneHorizontal({ 10, 10 });
+    renderer.splitPaneHorizontal({ 10, 10 });
+    renderer.collapseBoundary({ screenWidth / 4.0, screenHeight / 2.0 });
+    renderer.splitPaneVertical({ 10, 10 });
+
+    Area* upLeft = renderer.areas[0].get();
+    Area* right = renderer.areas[1].get();
+    Area* downLeft = renderer.areas[2].get();
+
+    Boundary* vertical = renderer.boundaries[0].get();
+    Boundary* horizontal = renderer.boundaries[1].get();
+
+    ASSERT(renderer.boundaries.size() == 2, "There should only be two boundaries");
+    ASSERT(renderer.areas.size() == 3, "There should only be three areas");
+
+    ASSERT(upLeft->isLeftOf(vertical), "Up left area should be left of the vertical boundary");
+    ASSERT(upLeft->isAbove(horizontal), "Up left area should be above the horizontal boundary");
+    ASSERT(downLeft->isLeftOf(vertical), "Down left area should be left of the vertical boundary");
+    ASSERT(downLeft->isBelow(horizontal), "Down left area should be below the horizontal boundary");
+    ASSERT(right->isRightOf(vertical), "Right area should be right of the vertical boundary");
+  }
+
+  CloseWindow();
+
+  return 0;
+}
+
 int main(int argc, char** argv) {
   std::vector<Test> tests;
 
@@ -265,6 +331,8 @@ int main(int argc, char** argv) {
   ADD_TEST(deepRecursiveSplittingProducesCorrectSizes);
   ADD_TEST(serializeAndDeserializeRenderer);
   ADD_TEST(canSplitAndCollapseBoundary);
+  ADD_TEST(collapsingBoundaryReconnectsNowAdjacentAreas);
+  ADD_TEST(nestedSplitAndCollapseDoesntBreakGraph);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
@@ -275,7 +343,7 @@ int main(int argc, char** argv) {
   std::cout << "=========================" << std::endl;
   int passed = 0;
   for (auto test : tests) {
-    std::cout << test.name << " ";
+    std::cout << test.name << " | ";
     int result = test.f();
     std::cout  << (result == 0 ? "PASSED" : "FAILED") << std::endl;
     if (result == 0) {

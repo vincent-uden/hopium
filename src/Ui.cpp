@@ -1,9 +1,4 @@
 #include "Ui.h"
-#include "raylib.h"
-#include <cmath>
-#include <iostream>
-
-// TODO: Make this file use Colorscheme from Renderer.h
 
 std::shared_ptr<Colorscheme> Ui::colorscheme = nullptr;
 

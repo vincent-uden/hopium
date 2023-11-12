@@ -30,6 +30,23 @@ bool GlobalMode::keyPress(KeyPress key) {
   return consumed;
 }
 
+SketchMode::SketchMode() {
+}
+
+SketchMode::~SketchMode() {
+}
+
+bool SketchMode::keyPress(KeyPress key) {
+  bool consumed = true;
+
+  switch (key.key) {
+  default:
+    consumed = false;
+  }
+
+  return consumed;
+}
+
 ModeStack::ModeStack() {
     allKeys.push_back(KEY_NULL);
     allKeys.push_back(KEY_APOSTROPHE);

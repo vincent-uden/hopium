@@ -30,6 +30,14 @@ private:
   Renderer* renderer;
 };
 
+class SketchMode : public Mode {
+public:
+  SketchMode();
+  ~SketchMode();
+
+  bool keyPress(KeyPress key) override;
+};
+
 class ModeStack {
 public:
   ModeStack();

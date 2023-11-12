@@ -67,23 +67,49 @@ void Boundary::collapse(std::shared_ptr<Area> toDelete) {
     toDelete->deleteThisFromBoundaries();
 
     if (side1.empty()) {
+      // Resizing the areas on the remaining side
       if (orientation == BoundaryOrientation::VERTICAL) {
         for (auto& area : side2) {
           area->screenPos.x -= toDelete->screenRect.width;
+        }
+        if (toDelete->leftBdry) {
+          for (auto& area : side2) {
+            toDelete->leftBdry->side2.push_back(area);
+            area->leftBdry = toDelete->leftBdry;
+          }
         }
       } else {
         for (auto& area : side2) {
           area->screenPos.y -= toDelete->screenRect.height;
         }
+        if (toDelete->upBdry) {
+          for (auto& area : side2) {
+            toDelete->upBdry->side2.push_back(area);
+            area->upBdry = toDelete->upBdry;
+          }
+        }
       }
     } else {
+      // Resizing the areas on the remaining side
       if (orientation == BoundaryOrientation::VERTICAL) {
         for (auto& area : side1) {
           area->screenRect.width += toDelete->screenRect.width;
         }
+        if (toDelete->rightBdry) {
+          for (auto& area : side1) {
+            toDelete->rightBdry->side1.push_back(area);
+            area->rightBdry = toDelete->rightBdry;
+          }
+        }
       } else {
         for (auto& area : side1) {
           area->screenRect.height += toDelete->screenRect.height;
+        }
+        if (toDelete->downBdry) {
+          for (auto& area : side1) {
+            toDelete->downBdry->side1.push_back(area);
+            area->downBdry = toDelete->downBdry;
+          }
         }
       }
     }
@@ -365,6 +391,22 @@ void Area::deleteThisFromBoundaries() {
   if (upBdry) {
     upBdry->deleteArea(this);
   }
+}
+
+bool Area::isLeftOf(Boundary* bdry) {
+  return rightBdry && rightBdry.get() == bdry;
+}
+
+bool Area::isRightOf(Boundary* bdry) {
+  return leftBdry && leftBdry.get() == bdry;
+}
+
+bool Area::isBelow(Boundary* bdry) {
+  return upBdry && upBdry.get() == bdry;
+}
+
+bool Area::isAbove(Boundary* bdry) {
+  return downBdry && downBdry.get() == bdry;
 }
 
 json Area::serialize() {

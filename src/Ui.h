@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <cmath>
+#include <iostream>
 
 #include "Colorscheme.h"
 #include "Scene.h"
@@ -37,12 +39,12 @@ public:
   UiText(std::string text);
   ~UiText();
 
-  void move(Vector2 distance);
-  void setPos(Vector2 pos);
-  void draw();
-  void receiveMousePos(Vector2 mousePos);
-  void receiveMouseDown(Vector2 mousePos);
-  void receiveMouseUp(Vector2 mousePos);
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
 
   void setColor(Color c);
   void setText(std::string text);
@@ -62,12 +64,12 @@ public:
   UiRect();
   ~UiRect();
 
-  void move(Vector2 distance);
-  void setPos(Vector2 pos);
-  void draw();
-  void receiveMousePos(Vector2 mousePos);
-  void receiveMouseDown(Vector2 mousePos);
-  void receiveMouseUp(Vector2 mousePos);
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
 
   void setColor(Color c);
   void setSize(Vector2 size);
@@ -85,12 +87,12 @@ public:
   UiDropDown(std::string label, std::vector<std::string> options);
   ~UiDropDown();
 
-  void move(Vector2 distance);
-  void setPos(Vector2 pos);
-  void draw();
-  void receiveMousePos(Vector2 mousePos);
-  void receiveMouseDown(Vector2 mousePos);
-  void receiveMouseUp(Vector2 mousePos);
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
 
   void setOnSelected(std::function<void(std::string)> f);
 
@@ -123,12 +125,12 @@ public:
   Ui3DViewport();
   ~Ui3DViewport();
 
-  void move(Vector2 distance);
-  void setPos(Vector2 pos);
-  void draw();
-  void receiveMousePos(Vector2 mousePos);
-  void receiveMouseDown(Vector2 mousePos);
-  void receiveMouseUp(Vector2 mousePos);
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
 
   void setScene(std::shared_ptr<Scene> scene);
 
@@ -136,6 +138,19 @@ public:
 private:
 
   std::shared_ptr<Scene> scene;
+};
+
+class UiToolList: public Ui {
+public:
+  UiToolList();
+  ~UiToolList();
+
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
 };
 
 #endif

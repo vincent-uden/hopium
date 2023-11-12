@@ -48,8 +48,10 @@ int main(int argc, char** argv) {
     }
 
     std::shared_ptr<Mode> global(new GlobalMode(&renderer));
+    std::shared_ptr<SketchMode> sketchMode(new SketchMode());
     ModeStack modeStack;
     modeStack.push(global);
+    modeStack.push(sketchMode);
 
     while ( !WindowShouldClose() ) {
       modeStack.update();
