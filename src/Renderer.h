@@ -68,6 +68,7 @@ enum RenderAnchor {
 enum AreaType {
   EMPTY,
   VIEWPORT3D,
+  TOOL_SELECTION,
 };
 
 class Area {
@@ -122,11 +123,12 @@ public:
   RenderAnchor anchor = LEFT;
   AreaType type;
 
-  static const int minimumExtent = 10;
+  int minimumExtent = 10;
 
 private:
   // Internal constructors for different types of areas
   void buildViewport3D();
+  void buildToolSelection();
   void buildEmpty();
   void buildTypeDropDown();
   void resetType();
@@ -169,7 +171,7 @@ private:
   int nextPaneId = 1;
   int nextBdryId = 1;
 
-  float mouseBoundaryTolerance = 15.f;
+  float mouseBoundaryTolerance = 5.f;
 
   std::shared_ptr<Colorscheme> colorscheme;
   std::shared_ptr<ShaderStore> shaderStore;

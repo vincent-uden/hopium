@@ -32,6 +32,12 @@ int main(int argc, char** argv) {
   InitWindow(screenWidth, screenHeight, "Raylib Example");
   SetTraceLogLevel(LOG_WARNING);
 
+  int count = GetMonitorCount();
+  std::cout << "Monitor count: " << count << std::endl;
+  if (count == 4) {
+    SetWindowPosition(1920 + (1920 - 1600)/2, (1080 - 900) / 2);
+  }
+
   SetTargetFPS(60);
 
   CLITERAL(Color) c { 31, 31, 31, 255 };

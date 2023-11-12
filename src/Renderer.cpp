@@ -240,6 +240,9 @@ Area::Area(
   case AreaType::VIEWPORT3D:
     buildViewport3D();
     break;
+  case AreaType::TOOL_SELECTION:
+    buildToolSelection();
+    break;
   case AreaType::EMPTY:
     buildEmpty();
     break;
@@ -446,6 +449,14 @@ void Area::buildViewport3D() {
   buildTypeDropDown();
 }
 
+void Area::buildToolSelection() {
+  std::shared_ptr<Ui> toolList(new UiToolList());
+  minimumExtent = std::static_pointer_cast<UiToolList>(toolList)->btnSize.y;
+  addUi(toolList);
+
+  buildTypeDropDown();
+}
+
 void Area::buildEmpty() {
   buildTypeDropDown();
 }
@@ -453,6 +464,7 @@ void Area::buildEmpty() {
 void Area::buildTypeDropDown() {
   std::vector<std::string> areaTypes;
   areaTypes.push_back("3D Viewport");
+  areaTypes.push_back("Tool Selection");
   areaTypes.push_back("Empty");
 
   std::shared_ptr<UiDropDown> typePicker(new UiDropDown("Area Type", areaTypes));
@@ -463,6 +475,9 @@ void Area::buildTypeDropDown() {
       if (selected == "3D Viewport") {
         this->type = AreaType::VIEWPORT3D;
         buildViewport3D();
+      } else if (selected == "Tool Selection") {
+        this->type = AreaType::TOOL_SELECTION;
+        buildToolSelection();
       } else if (selected == "Empty") {
         this->type = AreaType::EMPTY;
         buildEmpty();

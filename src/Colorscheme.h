@@ -12,8 +12,8 @@ public:
   // https://m2.material.io/design/color/the-color-system.html#color-theme-creation
   Color primary          = {0, 0, 0, 255};
   Color primaryVariant   = {0, 0, 0, 255};
-  Color secondary        = {0, 0, 0, 255};
-  Color secondaryVariant = {0, 0, 0, 255};
+  Color secondary        = {60, 60, 60, 255};
+  Color secondaryVariant = {70, 70, 70, 255};
 
   Color background = {51, 51, 51, 255};
   Color surface    = {30, 30, 30, 255};

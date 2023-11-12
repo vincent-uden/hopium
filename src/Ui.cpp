@@ -40,7 +40,8 @@ void UiText::receiveMousePos(Vector2 mousePos) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
       // Mouse inside of bounds
       if (!hovered) {
-        onMouseEnter(this);
+        if (onMouseEnter) { onMouseEnter(this);
+        }
       }
       hovered = true;
       return;
@@ -48,7 +49,9 @@ void UiText::receiveMousePos(Vector2 mousePos) {
   }
 
   if (hovered) {
-    onMouseExit(this);
+    if (onMouseExit) {
+      onMouseExit(this);
+    }
   }
 
   hovered = false;
@@ -57,7 +60,9 @@ void UiText::receiveMousePos(Vector2 mousePos) {
 void UiText::receiveMouseDown(Vector2 mousePos) {
   if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
-      onClick(this);
+      if (onClick) {
+        onClick(this);
+      }
     }
   }
 }
@@ -111,12 +116,16 @@ void UiRect::draw() {
 void UiRect::receiveMousePos(Vector2 mousePos) {
   if (CheckCollisionPointRec(mousePos, bounds)) {
     if (!hovered) {
-      onMouseEnter(this);
+      if (onMouseEnter) {
+        onMouseEnter(this);
+      }
     }
     hovered = true;
   } else {
     if (hovered) {
-      onMouseExit(this);
+      if (onMouseExit) {
+        onMouseExit(this);
+      }
     }
     hovered = false;
   }
@@ -124,7 +133,9 @@ void UiRect::receiveMousePos(Vector2 mousePos) {
 
 void UiRect::receiveMouseDown(Vector2 mousePos) {
   if (contains(mousePos)) {
-    onClick(this);
+    if (onClick) {
+      onClick(this);
+    }
   }
 }
 
@@ -342,3 +353,81 @@ void Ui3DViewport::receiveMouseUp(Vector2 mousePos) {
 void Ui3DViewport::setScene(std::shared_ptr<Scene> scene) {
   this->scene = scene;
 }
+
+UiToolList::UiToolList() {
+  btnNames.push_back("Sketch");
+  btnNames.push_back("Point");
+  pos = { 0, 0 };
+
+  btnSize = {80, 80};
+  margin = 4;
+
+  int i = 0;
+  for (std::string& btnName : btnNames) {
+    std::shared_ptr<UiText> btnLbl(new UiText(btnName));
+    Vector2 textSize = MeasureTextEx(colorscheme->font, btnName.c_str(), 20, 1);
+    btnLbl->setPos({(btnSize.x + margin) * i + (btnSize.x - textSize.x) / 2.0f, (btnSize.y - textSize.y) / 2.0f});
+    btnLbl->setColor({255, 255, 255, 255});
+    btnLbls.push_back(btnLbl);
+
+    std::shared_ptr<UiRect> btnBg(new UiRect());
+    btnBg->setSize(btnSize);
+    btnBg->setColor(colorscheme->secondary);
+    btnBg->setPos({(btnSize.x + margin) * i, 0});
+    btnBg->setOnMouseEnter([](Ui* p) {
+        UiRect* bg = static_cast<UiRect*>(p);
+        bg->setColor(colorscheme->secondaryVariant);
+    });
+    btnBg->setOnMouseExit([](Ui* p) {
+        UiRect* bg = static_cast<UiRect*>(p);
+        bg->setColor(colorscheme->secondary);
+    });
+    btnBgs.push_back(btnBg);
+
+    i++;
+  }
+}
+
+UiToolList::~UiToolList() {
+}
+
+void UiToolList::move(Vector2 distance) {
+  for (auto& lbl : btnLbls) {
+    lbl->move(distance);
+  }
+  for (auto& bg : btnBgs) {
+    bg->move(distance);
+  }
+}
+
+void UiToolList::setPos(Vector2 pos) {
+    Vector2 diff;
+    diff.x = pos.x - this->pos.x;
+    diff.y = pos.y - this->pos.y;
+    move(diff);
+}
+
+void UiToolList::draw() {
+  for (auto& bg : btnBgs) {
+    bg->draw();
+  }
+  for (auto& lbl : btnLbls) {
+    lbl->draw();
+  }
+}
+
+void UiToolList::receiveMousePos(Vector2 mousePos) {
+  for (auto& bg : btnBgs) {
+    bg->receiveMousePos(mousePos);
+  }
+  for (auto& lbl : btnLbls) {
+    lbl->receiveMousePos(mousePos);
+  }
+}
+
+void UiToolList::receiveMouseDown(Vector2 mousePos) {
+}
+
+void UiToolList::receiveMouseUp(Vector2 mousePos) {
+}
+

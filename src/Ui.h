@@ -151,6 +151,16 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+
+  Vector2 btnSize;
+
+private:
+  Vector2 pos;
+  int margin;
+
+  std::vector<std::string> btnNames;
+  std::vector<std::shared_ptr<UiText>> btnLbls;
+  std::vector<std::shared_ptr<UiRect>> btnBgs;
 };
 
 #endif
