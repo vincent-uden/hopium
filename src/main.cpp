@@ -13,6 +13,7 @@
 #include <raylib.h>
 #include <json.hpp>
 
+#include "Mode.h"
 #include "OcctTest.h"
 #include "Renderer.h"
 #include "Scene.h"
@@ -46,20 +47,13 @@ int main(int argc, char** argv) {
       renderer.deserialize(layout);
     }
 
+    std::shared_ptr<Mode> global(new GlobalMode(&renderer));
+    ModeStack modeStack;
+    modeStack.push(global);
+
     while ( !WindowShouldClose() ) {
-      if (IsKeyPressed(KEY_H)) {
-        renderer.splitPaneHorizontal(GetMousePosition());
-      }
-      if (IsKeyPressed(KEY_V)) {
-        renderer.splitPaneVertical(GetMousePosition());
-      }
-      if (IsKeyPressed(KEY_D)) {
-        renderer.collapseBoundary(GetMousePosition());
-      }
-      // On space, dump all pane data
-      if (IsKeyPressed(KEY_SPACE)) {
-        renderer.dumpPanes();
-      }
+      modeStack.update();
+
       mousePos = GetMousePosition();
       renderer.receiveMousePos(mousePos);
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
