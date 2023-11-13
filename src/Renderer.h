@@ -145,6 +145,7 @@ private:
 
 class Renderer {
 public:
+  Renderer();
   Renderer(int screenW, int screenH);
   ~Renderer();
 

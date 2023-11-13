@@ -22,8 +22,8 @@ link_directories(${libPath})
 include_directories(${includePath})
 
 # Add executable
-add_executable (Lesson_04 src/main.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp src/ShaderStore.cpp src/OcctTest.cpp src/System.cpp src/Mode.cpp)
-add_executable (test src/test.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp src/ShaderStore.cpp src/OcctTest.cpp src/System.cpp src/Mode.cpp)
+add_executable (Lesson_04 src/main.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp src/ShaderStore.cpp src/OcctTest.cpp src/System.cpp src/Mode.cpp src/Application.cpp)
+add_executable (test src/test.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp src/ShaderStore.cpp src/OcctTest.cpp src/System.cpp src/Mode.cpp src/Application.cpp)
 
 get_filename_component(libPath ./lib REALPATH)
 get_filename_component(includePath ./include REALPATH)

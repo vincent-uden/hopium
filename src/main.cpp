@@ -13,69 +13,25 @@
 #include <raylib.h>
 #include <json.hpp>
 
-#include "Mode.h"
-#include "OcctTest.h"
-#include "Renderer.h"
-#include "Scene.h"
-#include "System.h"
-#include "Ui.h"
-
-const std::string LAYOUT_PATH = "layout.json";
+#include "Application.h"
 
 int main(int argc, char** argv) {
-  const int screenWidth = 1600;
-  const int screenHeight = 900;
-
-  createBottle();
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
-  InitWindow(screenWidth, screenHeight, "Raylib Example");
+  InitWindow(1600, 900, "Raylib Example");
   SetTraceLogLevel(LOG_WARNING);
-
-  int count = GetMonitorCount();
-  std::cout << "Monitor count: " << count << std::endl;
-  if (count == 4) {
-    SetWindowPosition(1920 + (1920 - 1600)/2, (1080 - 900) / 2);
-  }
-
   SetTargetFPS(60);
 
-  CLITERAL(Color) c { 31, 31, 31, 255 };
+  Application* app = Application::getInstance();
 
-  Vector2 mousePos;
+  // We need to dealloc the renderer and all it's textures before closing the
+  // window
 
-  {
-    // We need to dealloc the renderer and all it's textures before closing the
-    // window
-    Renderer renderer(screenWidth, screenHeight);
-    if (fileExists(LAYOUT_PATH)) {
-      json layout = json::parse(readFromFile(LAYOUT_PATH));
-      renderer.deserialize(layout);
-    }
-
-    std::shared_ptr<Mode> global(new GlobalMode(&renderer));
-    std::shared_ptr<SketchMode> sketchMode(new SketchMode());
-    ModeStack modeStack;
-    modeStack.push(global);
-    modeStack.push(sketchMode);
-
-    while ( !WindowShouldClose() ) {
-      modeStack.update();
-
-      mousePos = GetMousePosition();
-      renderer.receiveMousePos(mousePos);
-      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        renderer.mouseDown(mousePos);
-      }
-      if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        renderer.mouseUp(mousePos);
-      }
-
-      renderer.draw();
-    }
-
-    writeToFile(LAYOUT_PATH, renderer.serialize().dump(-1));
+  while ( !WindowShouldClose() ) {
+    app->update();
   }
+
+  delete app;
   CloseWindow();
 
   return 0;

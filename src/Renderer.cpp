@@ -489,6 +489,7 @@ void Area::buildTypeDropDown() {
 }
 
 void Area::resetType() {
+  minimumExtent = 10;
   anchor = RenderAnchor::LEFT;
   contents.clear();
 }
@@ -514,7 +515,6 @@ Renderer::Renderer(int screenW, int screenH) {
     colorscheme,
     shaderStore
   )));
-
 }
 
 Renderer::~Renderer() {
