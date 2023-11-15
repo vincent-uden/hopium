@@ -9,6 +9,7 @@
 #include <string>
 #include <unistd.h>
 
+#include "Mode.h"
 #include "Renderer.h"
 #include "Ui.h"
 
@@ -322,6 +323,22 @@ int nestedSplitAndCollapseDoesntBreakGraph() {
   return 0;
 }
 
+int modeStackManipulatesCorrectly() {
+  class TestMode : public Mode {
+  public:
+    TestMode() {
+    }
+
+    bool keyPress(KeyPress key) {
+      return true;
+    }
+  };
+  std::shared_ptr<Mode> global(new TestMode());
+  ModeStack modeStack;
+
+  return 0;
+}
+
 int main(int argc, char** argv) {
   std::vector<Test> tests;
 
@@ -333,6 +350,7 @@ int main(int argc, char** argv) {
   ADD_TEST(canSplitAndCollapseBoundary);
   ADD_TEST(collapsingBoundaryReconnectsNowAdjacentAreas);
   ADD_TEST(nestedSplitAndCollapseDoesntBreakGraph);
+  ADD_TEST(modeStackManipulatesCorrectly);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

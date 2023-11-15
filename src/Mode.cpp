@@ -163,6 +163,25 @@ ModeStack::ModeStack() {
 ModeStack::~ModeStack() {
 }
 
+void ModeStack::exit(std::shared_ptr<Mode> mode) {
+  bool foundMode = false;
+  for (auto it = modes.rbegin(); it != modes.rend(); ++it) {
+    if (it->get() == mode.get()) {
+      foundMode = true;
+    }
+  }
+
+  if (foundMode) {
+    for (auto it = modes.rbegin(); it != modes.rend(); ++it) {
+      if (it->get() == mode.get()) {
+        modes.pop_back();
+        break;
+      }
+      modes.pop_back();
+    }
+  }
+}
+
 // Fetch all key presses and pass them down the mode stack. The first modes get
 // precedence on key presses.
 void ModeStack::update() {
@@ -191,3 +210,4 @@ void ModeStack::push(std::shared_ptr<Mode> mode) {
 void ModeStack::pop() {
   modes.pop_back();
 }
+

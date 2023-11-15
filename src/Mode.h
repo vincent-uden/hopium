@@ -43,6 +43,7 @@ public:
   ModeStack();
   ~ModeStack();
 
+  void exit(std::shared_ptr<Mode> mode);
   void update();
   void push(std::shared_ptr<Mode> mode);
   void pop();
