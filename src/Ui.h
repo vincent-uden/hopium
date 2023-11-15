@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iostream>
 
+#include "Event.h"
 #include "Colorscheme.h"
 #include "Scene.h"
 

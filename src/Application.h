@@ -1,39 +1,33 @@
 #ifndef UDEN_APPLICATION
 #define UDEN_APPLICATION
 
-#include <queue>
-#include <variant>
 
 #include <raylib.h>
 
+#include "Event.h"
 #include "OcctTest.h"
 #include "Renderer.h"
 #include "Mode.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "System.h"
-#include "Ui.h"
-
-struct enableSketchMode {};
-struct disableSketchMode {};
-
-using AppEvent = std::variant<enableSketchMode, disableSketchMode>;
 
 class Application {
 public:
   static Application* getInstance();
   ~Application();
 
-  void postEvent(AppEvent event);
   void update();
-
 
 private:
   Application();
 
+  void processEvent(enableSketchMode event);
+  void processEvent(disableSketchMode event);
+  void processEvent(toggleSketchMode event);
+
   static Application* instance;
 
-  std::queue<AppEvent> eventQueue;
 
   int screenWidth = 1600;
   int screenHeight = 900;
@@ -41,6 +35,7 @@ private:
 
   Renderer renderer;
   ModeStack modeStack;
+  EventQueue eventQueue;
 };
 
 #endif

@@ -386,6 +386,13 @@ UiToolList::UiToolList() {
 
     i++;
   }
+
+  btnBgs[0]->setOnClick([](Ui* p) {
+      EventQueue::getInstance()->postEvent(toggleSketchMode {});
+  });
+  btnBgs[1]->setOnClick([](Ui* p) {
+      EventQueue::getInstance()->postEvent(enableSketchMode {});
+  });
 }
 
 UiToolList::~UiToolList() {
@@ -426,8 +433,20 @@ void UiToolList::receiveMousePos(Vector2 mousePos) {
 }
 
 void UiToolList::receiveMouseDown(Vector2 mousePos) {
+  for (auto& bg : btnBgs) {
+    bg->receiveMouseDown(mousePos);
+  }
+  for (auto& lbl : btnLbls) {
+    lbl->receiveMouseDown(mousePos);
+  }
 }
 
 void UiToolList::receiveMouseUp(Vector2 mousePos) {
+  for (auto& bg : btnBgs) {
+    bg->receiveMouseUp(mousePos);
+  }
+  for (auto& lbl : btnLbls) {
+    lbl->receiveMouseUp(mousePos);
+  }
 }
 

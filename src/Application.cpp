@@ -10,10 +10,6 @@ Application* Application::getInstance() {
   return instance;
 }
 
-void Application::postEvent(AppEvent event) {
-  eventQueue.push(event);
-}
-
 void Application::update() {
   modeStack.update();
 
@@ -24,6 +20,12 @@ void Application::update() {
   }
   if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
     renderer.mouseUp(mousePos);
+  }
+
+  while (!eventQueue.empty()) {
+    AppEvent event = eventQueue.pop();
+    // Visit is the type-safe way to call a function on a variant
+    std::visit([this](auto&& arg){ processEvent(arg); }, event);
   }
 
   renderer.draw();
@@ -46,6 +48,18 @@ Application::Application(): renderer(1600, 900) {
 
   std::shared_ptr<Mode> global(new GlobalMode(&renderer));
   modeStack.push(global);
+}
+
+void Application::processEvent(enableSketchMode event) {
+  std::cout << "sketch mode enabled" << std::endl;
+}
+
+void Application::processEvent(disableSketchMode event) {
+  std::cout << "sketch mode disabled" << std::endl;
+}
+
+void Application::processEvent(toggleSketchMode event) {
+  std::cout << "sketch mode toggled" << std::endl;
 }
 
 Application::~Application() {
