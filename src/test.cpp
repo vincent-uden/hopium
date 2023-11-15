@@ -345,7 +345,9 @@ int main(int argc, char** argv) {
   for (auto test : tests) {
     std::cout << test.name << " | ";
     int result = test.f();
+    printf("%c[%dm", 0x1B, result == 0 ? 32 : 31);
     std::cout  << (result == 0 ? "PASSED" : "FAILED") << std::endl;
+    printf("%c[%dm", 0x1B, 0);
     if (result == 0) {
       ++passed;
     }

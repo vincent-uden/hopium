@@ -1,6 +1,6 @@
 build
-./build
-./build/
-./build/**/*
 .cache
 .ccls-cache
+assets/Geist/**
+assets/Noto/**
+lib
