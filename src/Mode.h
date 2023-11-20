@@ -1,10 +1,11 @@
 #ifndef UDEN_MODE
 #define UDEN_MODE
 
-#include "Renderer.h"
 #include <memory>
 #include <raylib.h>
 #include <vector>
+
+#include "Renderer.h"
 
 typedef struct {
   KeyboardKey key;
@@ -47,6 +48,10 @@ public:
   void update();
   void push(std::shared_ptr<Mode> mode);
   void pop();
+
+  std::shared_ptr<Mode> peek(int index);
+
+  int size();
 
 private:
   std::vector<std::shared_ptr<Mode>> modes;

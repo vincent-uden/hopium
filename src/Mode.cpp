@@ -211,3 +211,15 @@ void ModeStack::pop() {
   modes.pop_back();
 }
 
+std::shared_ptr<Mode> ModeStack::peek(int index) {
+  if (index >= 0 && index < modes.size()) {
+    return modes[index];
+  }
+
+  return nullptr;
+}
+
+
+int ModeStack::size() {
+  return modes.size();
+}

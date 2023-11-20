@@ -333,8 +333,21 @@ int modeStackManipulatesCorrectly() {
       return true;
     }
   };
-  std::shared_ptr<Mode> global(new TestMode());
+  std::shared_ptr<Mode> mode1(new TestMode());
+  std::shared_ptr<Mode> mode2(new TestMode());
+  std::shared_ptr<Mode> mode3(new TestMode());
+  std::shared_ptr<Mode> mode4(new TestMode());
+
   ModeStack modeStack;
+  modeStack.push(mode1);
+  modeStack.push(mode2);
+  modeStack.push(mode3);
+  modeStack.push(mode4);
+
+  modeStack.exit(mode2);
+
+  ASSERT(modeStack.size() == 1, "Mode stack should only have 1 element");
+  ASSERT(modeStack.peek(0) == mode1, "Mode 1 should be on top of the stack ");
 
   return 0;
 }
