@@ -10,6 +10,8 @@ struct disableSketchMode {};
 struct toggleSketchMode {};
 struct popMode {};
 struct togglePointMode {};
+struct startPan {};
+struct stopPan {};
 
 struct exitProgram {};
 
@@ -18,6 +20,8 @@ using AppEvent = std::variant<
   disableSketchMode,
   toggleSketchMode,
   popMode,
+  startPan,
+  stopPan,
   exitProgram
 >;
 

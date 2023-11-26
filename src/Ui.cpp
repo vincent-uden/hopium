@@ -1,4 +1,5 @@
 #include "Ui.h"
+#include "raylib.h"
 
 std::shared_ptr<Colorscheme> Ui::colorscheme = nullptr;
 
@@ -329,7 +330,16 @@ void Ui3DViewport::setPos(Vector2 pos) {
 void Ui3DViewport::draw() {
   BeginMode3D(camera);
 
-  DrawGrid(20, 10.0f);
+  DrawSphere(g0, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+  DrawSphere(g1, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+  DrawSphere(g2, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+  DrawSphere(g3, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+  DrawLine3D(g0, g1, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+  DrawLine3D(g1, g2, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+  DrawLine3D(g2, g3, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+  DrawLine3D(g3, g0, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
+
+  DrawLine3D(lastRay.position, Vector3Add(lastRay.position, Vector3Scale(lastRay.direction, lastDist)), BLUE);
 
   if (scene) {
     for (size_t i = 0; i < scene->nBodies(); ++i) {
@@ -342,6 +352,24 @@ void Ui3DViewport::draw() {
 }
 
 void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
+  if (ApplicationState::getInstance()->holdingRotate) {
+    Vector2 diff = Vector2Subtract(mousePos, lastMousePos);
+
+    double azimuthalDiff = diff.x * cameraSensetivity;
+    double inclinationDiff = -diff.y * cameraSensetivity;
+
+    double cameraAzimuthal = std::acos(camera.position.x / std::sqrt(camera.position.x * camera.position.x + camera.position.z * camera.position.z));
+    if (camera.position.z < 0.0) {
+      cameraAzimuthal = -cameraAzimuthal;
+    }
+    double cameraInclination = std::acos(camera.position.y / cameraRadius);
+
+    camera.position.x = cameraRadius * std::cos(cameraAzimuthal + azimuthalDiff) * std::sin(cameraInclination + inclinationDiff);
+    camera.position.z = cameraRadius * std::sin(cameraAzimuthal + azimuthalDiff) * std::sin(cameraInclination + inclinationDiff);
+    camera.position.y = cameraRadius * std::cos(cameraInclination + inclinationDiff);
+  }
+
+  lastMousePos = mousePos;
 }
 
 void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
@@ -349,11 +377,21 @@ void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
   collision.distance = FLT_MAX;
   collision.hit = false;
 
+  // Calculate ray offset since the viewport in centered vertically and
+  // horizontally in the rendered area.
+  Vector2 offset = { 0.0, 0.0 };
+  if (areaSreenRect != nullptr && areaScreenPos != nullptr && areaTexture != nullptr) {
+    offset.x = (areaSreenRect->width - areaTexture->texture.width) / 2.0;
+    offset.y = (areaSreenRect->height - areaTexture->texture.height) / 2.0;
+  }
+
   Ray ray = { 0 };
-  ray = GetMouseRay(mousePos, camera);
+  ray = GetMouseRay(Vector2Subtract(mousePos, offset), camera);
+  lastRay = ray;
 
   // Maybe we should attempt to raycast in the scene itself rather than the viewport?
   RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
+  lastDist = groundHitInfo.distance;
 
   if ((groundHitInfo.hit && groundHitInfo.distance < collision.distance)) {
   }
@@ -364,6 +402,16 @@ void Ui3DViewport::receiveMouseUp(Vector2 mousePos) {
 
 void Ui3DViewport::setScene(std::shared_ptr<Scene> scene) {
   this->scene = scene;
+}
+
+void Ui3DViewport::setAreaPointers(
+  Rectangle* screenRect,
+  Vector2* screenPos,
+  RenderTexture* texture
+) {
+  areaSreenRect = screenRect;
+  areaScreenPos = screenPos;
+  areaTexture = texture;
 }
 
 UiToolList::UiToolList() {

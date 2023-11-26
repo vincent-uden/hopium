@@ -353,7 +353,6 @@ void Area::updateShaders() {
     if (ui3d) {
       float cameraPos[3] = { ui3d->camera.position.x, ui3d->camera.position.y, ui3d->camera.position.z };
       SetShaderValue(shaderStore->standardModelShader, shaderStore->standardModelShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
-      UpdateCamera(&ui3d->camera, CAMERA_ORBITAL);
     }
   }
 }
@@ -431,7 +430,9 @@ void Area::buildViewport3D() {
   std::shared_ptr<Ui> viewport(new Ui3DViewport());
 
   std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
+  std::cout << ApplicationState::getInstance() << std::endl;
   port->setScene(ApplicationState::getInstance()->scene);
+  port->setAreaPointers(&screenRect, &screenPos, &paneTexture);
 
   addUi(viewport);
 

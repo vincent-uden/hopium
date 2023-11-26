@@ -21,10 +21,24 @@ bool GlobalMode::keyPress(KeyPress key) {
     renderer->collapseBoundary(GetMousePosition());
     break;
   case KEY_SPACE:
-    renderer->dumpPanes();
+    EventQueue::getInstance()->postEvent(startPan {});
     break;
   case KEY_Q:
     EventQueue::getInstance()->postEvent(exitProgram {});
+    break;
+  default:
+    consumed = false;
+  }
+
+  return consumed;
+}
+
+bool GlobalMode::keyRelease(KeyPress key) {
+  bool consumed = true;
+
+  switch (key.key) {
+  case KEY_SPACE:
+    EventQueue::getInstance()->postEvent(stopPan {});
     break;
   default:
     consumed = false;
@@ -46,6 +60,17 @@ bool SketchMode::keyPress(KeyPress key) {
   case KEY_ESCAPE:
     EventQueue::getInstance()->postEvent(popMode {});
     break;
+  default:
+    consumed = false;
+  }
+
+  return consumed;
+}
+
+bool SketchMode::keyRelease(KeyPress key) {
+  bool consumed = true;
+
+  switch (key.key) {
   default:
     consumed = false;
   }
@@ -195,6 +220,15 @@ void ModeStack::update() {
 
       for (auto& mode : modes) {
         if (mode->keyPress(press)) {
+          break;
+        }
+      }
+    }
+    if (IsKeyReleased(key)) {
+      KeyPress press = { key, shift, ctrl, lAlt, rAlt };
+
+      for (auto& mode : modes) {
+        if (mode->keyRelease(press)) {
           break;
         }
       }

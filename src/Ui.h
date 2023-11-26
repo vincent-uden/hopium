@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <raylib.h>
+#include <raymath.h>
 #include <string>
 #include <vector>
 #include <functional>
@@ -10,8 +11,9 @@
 #include <cfloat>
 #include <iostream>
 
-#include "Event.h"
+#include "ApplicationState.h"
 #include "Colorscheme.h"
+#include "Event.h"
 #include "Scene.h"
 
 class Ui {
@@ -32,7 +34,6 @@ protected:
   std::function<void(Ui*)> onClick;
   std::function<void(Ui*)> onMouseEnter;
   std::function<void(Ui*)> onMouseExit;
-
 };
 
 class UiText: public Ui {
@@ -135,17 +136,29 @@ public:
   void receiveMouseUp(Vector2 mousePos) override;
 
   void setScene(std::shared_ptr<Scene> scene);
+  void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
 
   Camera3D camera = { 0 };
 private:
 
   std::shared_ptr<Scene> scene;
 
+  Rectangle* areaSreenRect = nullptr;
+  Vector2* areaScreenPos = nullptr;
+  RenderTexture* areaTexture = nullptr;
+
   // Ground Quad
-  Vector3 g0 = { -50.0f, 0.0f, -50.0f };
-  Vector3 g1 = { -50.0f, 0.0f,  50.0f };
-  Vector3 g2 = {  50.0f, 0.0f,  50.0f };
-  Vector3 g3 = {  50.0f, 0.0f, -50.0f };
+  Vector3 g0 = { -20.0f, 0.0f, -20.0f };
+  Vector3 g1 = { -20.0f, 0.0f,  20.0f };
+  Vector3 g2 = {  20.0f, 0.0f,  20.0f };
+  Vector3 g3 = {  20.0f, 0.0f, -20.0f };
+
+  Vector2 lastMousePos = { 0, 0 };
+  double cameraSensetivity = 0.01;
+  double cameraRadius = 34.64;
+
+  Ray lastRay = { 0 };
+  float lastDist = FLT_MAX;
 };
 
 class UiToolList: public Ui {

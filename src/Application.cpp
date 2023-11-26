@@ -33,6 +33,7 @@ void Application::update() {
 
 Application::Application() {
   state = ApplicationState::getInstance();
+  std::cout << "Application initialized: " << ApplicationState::getInstance() << std::endl;
 
   layoutPath = "layout.json";
   renderer.init(1600, 900, state->shaderStore);
@@ -54,7 +55,6 @@ Application::Application() {
 
   sketch = std::shared_ptr<Mode>(new SketchMode());
 
-  state->scene = std::shared_ptr<Scene>(new Scene(state->shaderStore));
   state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
   state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
   state->scene->getBody(1)->pos.x = 1.0 * 5;
@@ -86,12 +86,21 @@ void Application::processEvent(popMode event) {
   }
 }
 
+void Application::processEvent(togglePointMode event) {
+}
+
+void Application::processEvent(startPan event) {
+  state->holdingRotate = true;
+}
+
+void Application::processEvent(stopPan event) {
+  state->holdingRotate = false;
+}
+
 void Application::processEvent(exitProgram event) {
   shouldExit = true;
 }
 
-void Application::processEvent(togglePointMode event) {
-}
 
 Application::~Application() {
   writeToFile(layoutPath, renderer.serialize().dump(-1));

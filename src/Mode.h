@@ -18,6 +18,7 @@ typedef struct {
 class Mode {
 public:
   virtual bool keyPress(KeyPress key)=0;
+  virtual bool keyRelease(KeyPress key)=0;
 };
 
 class GlobalMode : public Mode {
@@ -26,6 +27,7 @@ public:
   ~GlobalMode();
 
   bool keyPress(KeyPress key) override;
+  bool keyRelease(KeyPress key) override;
 
 private:
   Renderer* renderer;
@@ -37,6 +39,7 @@ public:
   ~SketchMode();
 
   bool keyPress(KeyPress key) override;
+  bool keyRelease(KeyPress key) override;
 };
 
 class PointMode : public Mode {
@@ -45,6 +48,7 @@ public:
   ~PointMode();
 
   bool keyPress(KeyPress key) override;
+  bool keyRelease(KeyPress key) override;
 };
 
 class ModeStack {

@@ -30,6 +30,8 @@ private:
   void processEvent(toggleSketchMode event);
   void processEvent(popMode event);
   void processEvent(togglePointMode event);
+  void processEvent(startPan event);
+  void processEvent(stopPan event);
   void processEvent(exitProgram event);
 
   static Application* instance;
