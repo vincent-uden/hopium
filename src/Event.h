@@ -10,8 +10,10 @@ struct disableSketchMode {};
 struct toggleSketchMode {};
 struct popMode {};
 struct togglePointMode {};
-struct startPan {};
-struct stopPan {};
+struct startRotate {};
+struct stopRotate {};
+// Is subject to change in the future. Think about how hit's should be handled.
+struct groundPlaneHit { double x, y, z; };
 
 struct exitProgram {};
 
@@ -20,8 +22,10 @@ using AppEvent = std::variant<
   disableSketchMode,
   toggleSketchMode,
   popMode,
-  startPan,
-  stopPan,
+  togglePointMode,
+  startRotate,
+  stopRotate,
+  groundPlaneHit,
   exitProgram
 >;
 

@@ -20,6 +20,21 @@ void RasterBody::loadFromFile(std::string path) {
   hasLoadedModel = true;
 }
 
+RasterPoint::RasterPoint() {
+  x = 0.0;
+  y = 0.0;
+  z = 0.0;
+}
+
+RasterPoint::RasterPoint(double x, double y, double z) {
+  this->x = x;
+  this->y = y;
+  this->z = z;
+}
+
+RasterPoint::~RasterPoint() {
+}
+
 Scene::Scene(std::shared_ptr<ShaderStore> shaderStore) {
   this->shaderStore = shaderStore;
   if (standardModelTextures.size() == 0) {
@@ -49,6 +64,11 @@ void Scene::addBody(std::shared_ptr<RasterBody> body) {
   bodies.push_back(body);
 }
 
+void Scene::setPoints(std::vector<std::shared_ptr<RasterPoint>> points) {
+  this->points.clear();
+  this->points = points;
+}
+
 void Scene::addBodyFromFile(std::string path) {
   std::shared_ptr<RasterBody> body(new RasterBody());
   body->loadFromFile(path);
@@ -61,6 +81,14 @@ size_t Scene::nBodies() {
   return bodies.size();
 }
 
+size_t Scene::nPoints() {
+  return points.size();
+}
+
 std::shared_ptr<RasterBody> Scene::getBody(size_t i) {
   return bodies.at(i);
+}
+
+std::shared_ptr<RasterPoint> Scene::getPoint(size_t i) {
+  return points.at(i);
 }

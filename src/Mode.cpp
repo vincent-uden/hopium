@@ -21,7 +21,7 @@ bool GlobalMode::keyPress(KeyPress key) {
     renderer->collapseBoundary(GetMousePosition());
     break;
   case KEY_SPACE:
-    EventQueue::getInstance()->postEvent(startPan {});
+    EventQueue::getInstance()->postEvent(startRotate {});
     break;
   case KEY_Q:
     EventQueue::getInstance()->postEvent(exitProgram {});
@@ -38,7 +38,7 @@ bool GlobalMode::keyRelease(KeyPress key) {
 
   switch (key.key) {
   case KEY_SPACE:
-    EventQueue::getInstance()->postEvent(stopPan {});
+    EventQueue::getInstance()->postEvent(stopRotate {});
     break;
   default:
     consumed = false;
@@ -68,6 +68,37 @@ bool SketchMode::keyPress(KeyPress key) {
 }
 
 bool SketchMode::keyRelease(KeyPress key) {
+  bool consumed = true;
+
+  switch (key.key) {
+  default:
+    consumed = false;
+  }
+
+  return consumed;
+}
+
+PointMode::PointMode() {
+}
+
+PointMode::~PointMode() {
+}
+
+bool PointMode::keyPress(KeyPress key) {
+  bool consumed = true;
+
+  switch (key.key) {
+  case KEY_ESCAPE:
+    EventQueue::getInstance()->postEvent(popMode {});
+    break;
+  default:
+    consumed = false;
+  }
+
+  return consumed;
+}
+
+bool PointMode::keyRelease(KeyPress key) {
   bool consumed = true;
 
   switch (key.key) {

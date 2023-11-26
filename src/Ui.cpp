@@ -1,5 +1,4 @@
 #include "Ui.h"
-#include "raylib.h"
 
 std::shared_ptr<Colorscheme> Ui::colorscheme = nullptr;
 
@@ -346,6 +345,11 @@ void Ui3DViewport::draw() {
       std::shared_ptr<RasterBody> body = scene->getBody(i);
       DrawModel(body->model, body->pos, 1.f, WHITE);
     }
+
+    for (size_t i = 0; i < scene->nPoints(); ++i) {
+      std::shared_ptr<RasterPoint> point = scene->getPoint(i);
+      DrawSphere((Vector3) { (float) point->x, (float) point->y, (float) point->z }, 0.2, YELLOW);
+    }
   }
 
   EndMode3D();
@@ -394,6 +398,11 @@ void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
   lastDist = groundHitInfo.distance;
 
   if ((groundHitInfo.hit && groundHitInfo.distance < collision.distance)) {
+    EventQueue::getInstance()->postEvent(groundPlaneHit {
+        groundHitInfo.point.x,
+        groundHitInfo.point.y,
+        groundHitInfo.point.z
+    });
   }
 }
 
@@ -451,7 +460,7 @@ UiToolList::UiToolList() {
       EventQueue::getInstance()->postEvent(toggleSketchMode {});
   });
   btnBgs[1]->setOnClick([](Ui* p) {
-      EventQueue::getInstance()->postEvent(enableSketchMode {});
+      EventQueue::getInstance()->postEvent(togglePointMode {});
   });
 }
 

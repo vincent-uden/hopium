@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "OcctScene.h"
 #include "Scene.h"
 
 class ApplicationState {
@@ -12,6 +13,7 @@ public:
 
   std::shared_ptr<ShaderStore> shaderStore = std::make_shared<ShaderStore>();
   std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new Scene(shaderStore));;
+  std::shared_ptr<OcctScene> occtScene = std::shared_ptr<OcctScene>(new OcctScene());;
 
   bool holdingRotate = false;
 

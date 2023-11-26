@@ -6,9 +6,10 @@
 
 #include "ApplicationState.h"
 #include "Event.h"
+#include "Mode.h"
+#include "OcctScene.h"
 #include "OcctTest.h"
 #include "Renderer.h"
-#include "Mode.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "System.h"
@@ -30,8 +31,9 @@ private:
   void processEvent(toggleSketchMode event);
   void processEvent(popMode event);
   void processEvent(togglePointMode event);
-  void processEvent(startPan event);
-  void processEvent(stopPan event);
+  void processEvent(startRotate event);
+  void processEvent(stopRotate event);
+  void processEvent(groundPlaneHit event);
   void processEvent(exitProgram event);
 
   static Application* instance;
@@ -46,6 +48,7 @@ private:
 
   std::shared_ptr<Mode> global;
   std::shared_ptr<Mode> sketch;
+  std::shared_ptr<Mode> point;
 
   ApplicationState* state;
 };

@@ -54,6 +54,7 @@ Application::Application() {
   modeStack.push(global);
 
   sketch = std::shared_ptr<Mode>(new SketchMode());
+  point = std::shared_ptr<Mode>(new PointMode());
 
   state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
   state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
@@ -87,13 +88,18 @@ void Application::processEvent(popMode event) {
 }
 
 void Application::processEvent(togglePointMode event) {
+  if (modeStack.isActive(point)) {
+    modeStack.exit(point);
+  } else {
+    modeStack.push(point);
+  }
 }
 
-void Application::processEvent(startPan event) {
+void Application::processEvent(startRotate event) {
   state->holdingRotate = true;
 }
 
-void Application::processEvent(stopPan event) {
+void Application::processEvent(stopRotate event) {
   state->holdingRotate = false;
 }
 
@@ -101,6 +107,12 @@ void Application::processEvent(exitProgram event) {
   shouldExit = true;
 }
 
+void Application::processEvent(groundPlaneHit event) {
+  if (modeStack.isActive(point)) {
+    state->occtScene->createPoint(event.x, event.y, event.z);
+    state->scene->setPoints(state->occtScene->rasterizePoints());
+  }
+}
 
 Application::~Application() {
   writeToFile(layoutPath, renderer.serialize().dump(-1));
