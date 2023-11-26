@@ -39,6 +39,14 @@ public:
   bool keyPress(KeyPress key) override;
 };
 
+class PointMode : public Mode {
+public:
+  PointMode();
+  ~PointMode();
+
+  bool keyPress(KeyPress key) override;
+};
+
 class ModeStack {
 public:
   ModeStack();
@@ -52,6 +60,8 @@ public:
   std::shared_ptr<Mode> peek(int index);
 
   int size();
+
+  bool isActive(std::shared_ptr<Mode> mode);
 
 private:
   std::vector<std::shared_ptr<Mode>> modes;

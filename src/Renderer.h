@@ -13,6 +13,7 @@
 #include <raymath.h>
 #include <json.hpp>
 
+#include "ApplicationState.h"
 #include "Colorscheme.h"
 #include "ShaderStore.h"
 #include "Ui.h"
@@ -146,9 +147,9 @@ private:
 class Renderer {
 public:
   Renderer();
-  Renderer(int screenW, int screenH);
   ~Renderer();
 
+  void init(int screenW, int screenH, std::shared_ptr<ShaderStore> shaderStore);
   void draw();
   void receiveMousePos(Vector2 mousePos);
   void mouseDown(Vector2 mousePos);

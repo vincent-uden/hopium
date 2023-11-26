@@ -429,18 +429,9 @@ json Area::serialize() {
 
 void Area::buildViewport3D() {
   std::shared_ptr<Ui> viewport(new Ui3DViewport());
-  // TODO: The area should not own the scene. Who owns it?
-  std::shared_ptr<Scene> scene(new Scene(shaderStore));
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->getBody(1)->pos.x = 1.0 * 5;
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->getBody(2)->pos.x = -1.0 * 5;
-  scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  scene->getBody(3)->pos.x = 2.0 * 5;
 
   std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
-  port->setScene(scene);
+  port->setScene(ApplicationState::getInstance()->scene);
 
   addUi(viewport);
 
@@ -494,7 +485,10 @@ void Area::resetType() {
   contents.clear();
 }
 
-Renderer::Renderer(int screenW, int screenH) {
+Renderer::Renderer() {
+}
+
+void Renderer::init(int screenW, int screenH, std::shared_ptr<ShaderStore> shaderStore) {
   this->screenW = screenW;
   this->screenH = screenH;
 
@@ -503,7 +497,7 @@ Renderer::Renderer(int screenW, int screenH) {
   colorscheme = std::shared_ptr<Colorscheme>(new Colorscheme(&font));
 
   Ui::colorscheme = colorscheme;
-  shaderStore = std::shared_ptr<ShaderStore>(new ShaderStore());
+  this->shaderStore = shaderStore;
 
   areas.push_back(std::shared_ptr<Area>(new Area(
     screenW,

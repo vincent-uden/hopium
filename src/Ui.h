@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 #include <cmath>
+#include <cfloat>
 #include <iostream>
 
 #include "Event.h"
@@ -139,6 +140,12 @@ public:
 private:
 
   std::shared_ptr<Scene> scene;
+
+  // Ground Quad
+  Vector3 g0 = { -50.0f, 0.0f, -50.0f };
+  Vector3 g1 = { -50.0f, 0.0f,  50.0f };
+  Vector3 g2 = {  50.0f, 0.0f,  50.0f };
+  Vector3 g3 = {  50.0f, 0.0f, -50.0f };
 };
 
 class UiToolList: public Ui {

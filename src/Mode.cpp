@@ -23,6 +23,9 @@ bool GlobalMode::keyPress(KeyPress key) {
   case KEY_SPACE:
     renderer->dumpPanes();
     break;
+  case KEY_Q:
+    EventQueue::getInstance()->postEvent(exitProgram {});
+    break;
   default:
     consumed = false;
   }
@@ -40,6 +43,9 @@ bool SketchMode::keyPress(KeyPress key) {
   bool consumed = true;
 
   switch (key.key) {
+  case KEY_ESCAPE:
+    EventQueue::getInstance()->postEvent(popMode {});
+    break;
   default:
     consumed = false;
   }
@@ -164,14 +170,7 @@ ModeStack::~ModeStack() {
 }
 
 void ModeStack::exit(std::shared_ptr<Mode> mode) {
-  bool foundMode = false;
-  for (auto it = modes.rbegin(); it != modes.rend(); ++it) {
-    if (it->get() == mode.get()) {
-      foundMode = true;
-    }
-  }
-
-  if (foundMode) {
+  if (isActive(mode)) {
     for (auto it = modes.rbegin(); it != modes.rend(); ++it) {
       if (it->get() == mode.get()) {
         modes.pop_back();
@@ -222,4 +221,15 @@ std::shared_ptr<Mode> ModeStack::peek(int index) {
 
 int ModeStack::size() {
   return modes.size();
+}
+
+bool ModeStack::isActive(std::shared_ptr<Mode> mode) {
+  bool foundMode = false;
+  for (auto it = modes.rbegin(); it != modes.rend(); ++it) {
+    if (it->get() == mode.get()) {
+      foundMode = true;
+    }
+  }
+
+  return foundMode;
 }

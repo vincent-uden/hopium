@@ -31,8 +31,11 @@ void Application::update() {
   renderer.draw();
 }
 
-Application::Application(): renderer(1600, 900) {
+Application::Application() {
+  state = ApplicationState::getInstance();
+
   layoutPath = "layout.json";
+  renderer.init(1600, 900, state->shaderStore);
 
   createBottle();
 
@@ -46,20 +49,48 @@ Application::Application(): renderer(1600, 900) {
     renderer.deserialize(layout);
   }
 
-  std::shared_ptr<Mode> global(new GlobalMode(&renderer));
+  global = std::shared_ptr<Mode>(new GlobalMode(&renderer));
   modeStack.push(global);
+
+  sketch = std::shared_ptr<Mode>(new SketchMode());
+
+  state->scene = std::shared_ptr<Scene>(new Scene(state->shaderStore));
+  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  state->scene->getBody(1)->pos.x = 1.0 * 5;
+  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  state->scene->getBody(2)->pos.x = -1.0 * 5;
+  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  state->scene->getBody(3)->pos.x = 2.0 * 5;
 }
 
 void Application::processEvent(enableSketchMode event) {
-  std::cout << "sketch mode enabled" << std::endl;
+  modeStack.push(sketch);
 }
 
 void Application::processEvent(disableSketchMode event) {
-  std::cout << "sketch mode disabled" << std::endl;
+  modeStack.exit(sketch);
 }
 
 void Application::processEvent(toggleSketchMode event) {
-  std::cout << "sketch mode toggled" << std::endl;
+  if (modeStack.isActive(sketch)) {
+    modeStack.exit(sketch);
+  } else {
+    modeStack.push(sketch);
+  }
+}
+
+void Application::processEvent(popMode event) {
+  if (modeStack.size() > 1) {
+    modeStack.pop();
+  }
+}
+
+void Application::processEvent(exitProgram event) {
+  shouldExit = true;
+}
+
+void Application::processEvent(togglePointMode event) {
 }
 
 Application::~Application() {

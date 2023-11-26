@@ -8,11 +8,17 @@
 struct enableSketchMode {};
 struct disableSketchMode {};
 struct toggleSketchMode {};
+struct popMode {};
+struct togglePointMode {};
+
+struct exitProgram {};
 
 using AppEvent = std::variant<
   enableSketchMode,
   disableSketchMode,
-  toggleSketchMode
+  toggleSketchMode,
+  popMode,
+  exitProgram
 >;
 
 class EventQueue {

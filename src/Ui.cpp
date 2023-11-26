@@ -345,6 +345,18 @@ void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
 }
 
 void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
+  RayCollision collision = { 0 };
+  collision.distance = FLT_MAX;
+  collision.hit = false;
+
+  Ray ray = { 0 };
+  ray = GetMouseRay(mousePos, camera);
+
+  // Maybe we should attempt to raycast in the scene itself rather than the viewport?
+  RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
+
+  if ((groundHitInfo.hit && groundHitInfo.distance < collision.distance)) {
+  }
 }
 
 void Ui3DViewport::receiveMouseUp(Vector2 mousePos) {
