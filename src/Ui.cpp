@@ -329,26 +329,26 @@ void Ui3DViewport::setPos(Vector2 pos) {
 void Ui3DViewport::draw() {
   BeginMode3D(camera);
 
-  DrawSphere(g0, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
-  DrawSphere(g1, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
-  DrawSphere(g2, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
-  DrawSphere(g3, 0.5, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
   DrawLine3D(g0, g1, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
   DrawLine3D(g1, g2, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
   DrawLine3D(g2, g3, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
   DrawLine3D(g3, g0, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
 
-  DrawLine3D(lastRay.position, Vector3Add(lastRay.position, Vector3Scale(lastRay.direction, lastDist)), BLUE);
+  // DrawLine3D(lastRay.position, Vector3Add(lastRay.position, Vector3Scale(lastRay.direction, lastDist)), BLUE);
 
   if (scene) {
     for (size_t i = 0; i < scene->nBodies(); ++i) {
-      std::shared_ptr<RasterBody> body = scene->getBody(i);
-      DrawModel(body->model, body->pos, 1.f, WHITE);
+      scene->getBody(i)->draw();
     }
 
     for (size_t i = 0; i < scene->nPoints(); ++i) {
-      std::shared_ptr<RasterPoint> point = scene->getPoint(i);
-      DrawSphere((Vector3) { (float) point->x, (float) point->y, (float) point->z }, 0.2, YELLOW);
+      std::shared_ptr<RasterVertex> v = scene->getPoint(i);
+      if (hoveredId == v->id) {
+        v->color = GREEN;
+      } else {
+        v->color = YELLOW;
+      }
+      v->draw();
     }
   }
 
@@ -373,6 +373,25 @@ void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
     camera.position.y = cameraRadius * std::cos(cameraInclination + inclinationDiff);
   }
 
+  if (scene->nPoints() > 0) {
+    Ray ray = getNonOffsetMouseRay(mousePos);
+    int closestPoint = -1;
+    double closestDist = std::numeric_limits<double>::max();
+
+    for (int i = 0; i < scene->nPoints(); ++i) {
+      double dist = scene->getPoint(i)->distanceFromRay(ray) ;
+      if (dist < selectionThreshold && dist < closestDist) {
+        closestPoint = i;
+        closestDist = dist;
+      }
+    }
+    if (closestPoint!= -1) {
+      hoveredId = scene->getPoint(closestPoint)->id;
+    } else {
+      hoveredId = -1;
+    }
+  }
+
   lastMousePos = mousePos;
 }
 
@@ -381,16 +400,7 @@ void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
   collision.distance = FLT_MAX;
   collision.hit = false;
 
-  // Calculate ray offset since the viewport in centered vertically and
-  // horizontally in the rendered area.
-  Vector2 offset = { 0.0, 0.0 };
-  if (areaSreenRect != nullptr && areaScreenPos != nullptr && areaTexture != nullptr) {
-    offset.x = (areaSreenRect->width - areaTexture->texture.width) / 2.0;
-    offset.y = (areaSreenRect->height - areaTexture->texture.height) / 2.0;
-  }
-
-  Ray ray = { 0 };
-  ray = GetMouseRay(Vector2Subtract(mousePos, offset), camera);
+  Ray ray = getNonOffsetMouseRay(mousePos);
   lastRay = ray;
 
   // Maybe we should attempt to raycast in the scene itself rather than the viewport?
@@ -421,6 +431,19 @@ void Ui3DViewport::setAreaPointers(
   areaSreenRect = screenRect;
   areaScreenPos = screenPos;
   areaTexture = texture;
+}
+
+Ray Ui3DViewport::getNonOffsetMouseRay(Vector2 mousePos) {
+  Vector2 offset = { 0.0, 0.0 };
+  if (areaSreenRect != nullptr && areaScreenPos != nullptr && areaTexture != nullptr) {
+    offset.x = (areaSreenRect->width - areaTexture->texture.width) / 2.0;
+    offset.y = (areaSreenRect->height - areaTexture->texture.height) / 2.0;
+  }
+
+  Ray ray = { 0 };
+  ray = GetMouseRay(Vector2Subtract(mousePos, offset), camera);
+
+  return ray;
 }
 
 UiToolList::UiToolList() {
@@ -460,7 +483,9 @@ UiToolList::UiToolList() {
       EventQueue::getInstance()->postEvent(toggleSketchMode {});
   });
   btnBgs[1]->setOnClick([](Ui* p) {
-      EventQueue::getInstance()->postEvent(togglePointMode {});
+      if (ApplicationState::getInstance()->sketchModeActive) {
+        EventQueue::getInstance()->postEvent(togglePointMode {});
+      }
   });
 }
 
@@ -484,20 +509,36 @@ void UiToolList::setPos(Vector2 pos) {
 }
 
 void UiToolList::draw() {
+  int i = 0;
   for (auto& bg : btnBgs) {
-    bg->draw();
+    if (i == 0 || ApplicationState::getInstance()->sketchModeActive) {
+      bg->draw();
+    }
+    ++i;
   }
+  i = 0;
   for (auto& lbl : btnLbls) {
-    lbl->draw();
+    if (i == 0 || ApplicationState::getInstance()->sketchModeActive) {
+      lbl->draw();
+    }
+    ++i;
   }
 }
 
 void UiToolList::receiveMousePos(Vector2 mousePos) {
+  int i = 0;
   for (auto& bg : btnBgs) {
-    bg->receiveMousePos(mousePos);
+    if (i == 0 || ApplicationState::getInstance()->sketchModeActive) {
+      bg->receiveMousePos(mousePos);
+    }
+    ++i;
   }
+  i = 0;
   for (auto& lbl : btnLbls) {
-    lbl->receiveMousePos(mousePos);
+    if (i == 0 || ApplicationState::getInstance()->sketchModeActive) {
+      lbl->receiveMousePos(mousePos);
+    }
+    ++i;
   }
 }
 

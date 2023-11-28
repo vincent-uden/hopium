@@ -11,6 +11,15 @@ RasterBody::~RasterBody() {
   }
 }
 
+void RasterBody::draw() {
+  DrawModel(model, pos, 1.f, WHITE);
+}
+
+double RasterBody::distanceFromRay(const Ray ray) {
+  // TODO: Finish
+  return 0.0;
+}
+
 void RasterBody::loadFromFile(std::string path) {
   if (hasLoadedModel) {
     UnloadModel(model);
@@ -20,19 +29,38 @@ void RasterBody::loadFromFile(std::string path) {
   hasLoadedModel = true;
 }
 
-RasterPoint::RasterPoint() {
+RasterVertex::RasterVertex() {
   x = 0.0;
   y = 0.0;
   z = 0.0;
 }
 
-RasterPoint::RasterPoint(double x, double y, double z) {
+RasterVertex::RasterVertex(double x, double y, double z) {
   this->x = x;
   this->y = y;
   this->z = z;
 }
 
-RasterPoint::~RasterPoint() {
+RasterVertex::~RasterVertex() {
+}
+
+void RasterVertex::draw() {
+  DrawSphere((Vector3) { (float) x, (float) y, (float) z }, 0.2, color);
+}
+
+double RasterVertex::distanceFromRay(const Ray ray) {
+  Vector3 pos = (Vector3) { (float) x, (float) y, (float) z };
+  Vector3 posMinusRayPos = Vector3Subtract(pos, ray.position);
+
+  Vector3 intermediate = Vector3Subtract(
+    posMinusRayPos,
+    Vector3Scale(
+      ray.direction,
+      Vector3DotProduct(posMinusRayPos, ray.direction)
+    )
+  );
+
+  return Vector3Length(intermediate);
 }
 
 Scene::Scene(std::shared_ptr<ShaderStore> shaderStore) {
@@ -64,7 +92,7 @@ void Scene::addBody(std::shared_ptr<RasterBody> body) {
   bodies.push_back(body);
 }
 
-void Scene::setPoints(std::vector<std::shared_ptr<RasterPoint>> points) {
+void Scene::setPoints(std::vector<std::shared_ptr<RasterVertex>> points) {
   this->points.clear();
   this->points = points;
 }
@@ -89,6 +117,6 @@ std::shared_ptr<RasterBody> Scene::getBody(size_t i) {
   return bodies.at(i);
 }
 
-std::shared_ptr<RasterPoint> Scene::getPoint(size_t i) {
+std::shared_ptr<RasterVertex> Scene::getPoint(size_t i) {
   return points.at(i);
 }

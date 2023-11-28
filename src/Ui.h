@@ -141,6 +141,8 @@ public:
   Camera3D camera = { 0 };
 private:
 
+  Ray getNonOffsetMouseRay(Vector2 mousePos);
+
   std::shared_ptr<Scene> scene;
 
   Rectangle* areaSreenRect = nullptr;
@@ -157,7 +159,10 @@ private:
   double cameraSensetivity = 0.01;
   double cameraRadius = 34.64;
 
+
   Ray lastRay = { 0 };
+  int hoveredId = -1;
+  double selectionThreshold = 0.6;
   float lastDist = FLT_MAX;
 };
 

@@ -24,7 +24,6 @@ void Application::update() {
 
   while (!eventQueue.empty()) {
     AppEvent event = eventQueue.pop();
-    // Visit is the type-safe way to call a function on a variant
     std::visit([this](auto&& arg){ processEvent(arg); }, event);
   }
 
@@ -33,7 +32,6 @@ void Application::update() {
 
 Application::Application() {
   state = ApplicationState::getInstance();
-  std::cout << "Application initialized: " << ApplicationState::getInstance() << std::endl;
 
   layoutPath = "layout.json";
   renderer.init(1600, 900, state->shaderStore);
@@ -67,17 +65,21 @@ Application::Application() {
 
 void Application::processEvent(enableSketchMode event) {
   modeStack.push(sketch);
+  state->sketchModeActive = true;
 }
 
 void Application::processEvent(disableSketchMode event) {
   modeStack.exit(sketch);
+  state->sketchModeActive = false;
 }
 
 void Application::processEvent(toggleSketchMode event) {
   if (modeStack.isActive(sketch)) {
     modeStack.exit(sketch);
+    state->sketchModeActive = false;
   } else {
     modeStack.push(sketch);
+    state->sketchModeActive = true;
   }
 }
 
@@ -85,6 +87,8 @@ void Application::processEvent(popMode event) {
   if (modeStack.size() > 1) {
     modeStack.pop();
   }
+
+  state->sketchModeActive = modeStack.isActive(sketch);
 }
 
 void Application::processEvent(togglePointMode event) {

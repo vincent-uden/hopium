@@ -16,6 +16,7 @@ public:
   std::shared_ptr<OcctScene> occtScene = std::shared_ptr<OcctScene>(new OcctScene());;
 
   bool holdingRotate = false;
+  bool sketchModeActive = false;
 
 private:
   ApplicationState();
