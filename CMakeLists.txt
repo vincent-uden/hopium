@@ -12,6 +12,7 @@ find_package(OpenCASCADE)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 20)
 
 # Configure C++ compiler's includes dir
 include_directories ( SYSTEM ${OpenCASCADE_INCLUDE_DIR} )

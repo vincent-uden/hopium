@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "Mode.h"
 #include "OcctScene.h"
 #include "Scene.h"
 
@@ -17,6 +18,12 @@ public:
 
   bool holdingRotate = false;
   bool sketchModeActive = false;
+
+  ModeStack modeStack;
+
+  std::shared_ptr<Mode> global;
+  std::shared_ptr<Mode> sketch;
+  std::shared_ptr<Mode> point;
 
 private:
   ApplicationState();

@@ -1,7 +1,6 @@
 #include "Mode.h"
 
-GlobalMode::GlobalMode(Renderer* renderer) {
-  this->renderer = renderer;
+GlobalMode::GlobalMode() {
 }
 
 GlobalMode::~GlobalMode() {
@@ -12,13 +11,13 @@ bool GlobalMode::keyPress(KeyPress key) {
 
   switch (key.key) {
   case KEY_H:
-    renderer->splitPaneHorizontal(GetMousePosition());
+    EventQueue::getInstance()->postEvent(splitPaneHorizontally { GetMousePosition() });
     break;
   case KEY_V:
-    renderer->splitPaneVertical(GetMousePosition());
+    EventQueue::getInstance()->postEvent(splitPaneVertically { GetMousePosition() });
     break;
   case KEY_D:
-    renderer->collapseBoundary(GetMousePosition());
+    EventQueue::getInstance()->postEvent(collapseBoundary { GetMousePosition() });
     break;
   case KEY_SPACE:
     EventQueue::getInstance()->postEvent(startRotate {});
@@ -47,6 +46,14 @@ bool GlobalMode::keyRelease(KeyPress key) {
   return consumed;
 }
 
+bool GlobalMode::mousePress(MouseKeyPress button) {
+  return false;
+}
+
+bool GlobalMode::mouseRelease(MouseKeyPress button) {
+  return false;
+}
+
 SketchMode::SketchMode() {
 }
 
@@ -59,6 +66,9 @@ bool SketchMode::keyPress(KeyPress key) {
   switch (key.key) {
   case KEY_ESCAPE:
     EventQueue::getInstance()->postEvent(popMode {});
+    break;
+  case KEY_P:
+    EventQueue::getInstance()->postEvent(togglePointMode {});
     break;
   default:
     consumed = false;
@@ -78,6 +88,14 @@ bool SketchMode::keyRelease(KeyPress key) {
   return consumed;
 }
 
+bool SketchMode::mousePress(MouseKeyPress button) {
+  return false;
+}
+
+bool SketchMode::mouseRelease(MouseKeyPress button) {
+  return false;
+}
+
 PointMode::PointMode() {
 }
 
@@ -90,6 +108,8 @@ bool PointMode::keyPress(KeyPress key) {
   switch (key.key) {
   case KEY_ESCAPE:
     EventQueue::getInstance()->postEvent(popMode {});
+    break;
+  case KEY_P:
     break;
   default:
     consumed = false;
@@ -107,6 +127,25 @@ bool PointMode::keyRelease(KeyPress key) {
   }
 
   return consumed;
+}
+
+bool PointMode::mousePress(MouseKeyPress button) {
+  bool consumed = false;
+
+  return consumed;
+}
+
+bool PointMode::mouseRelease(MouseKeyPress button) {
+  bool consumed = true;
+  switch (button.button) {
+  case MOUSE_BUTTON_LEFT:
+    EventQueue::getInstance()->postEvent(togglePointMode {});
+    break;
+  default:
+    consumed = false;
+  }
+
+  return false;
 }
 
 ModeStack::ModeStack() {
@@ -220,6 +259,14 @@ ModeStack::ModeStack() {
     allKeys.push_back(KEY_MENU);
     allKeys.push_back(KEY_VOLUME_UP);
     allKeys.push_back(KEY_VOLUME_DOWN);
+
+    allMouseButtons.push_back(MOUSE_BUTTON_LEFT);
+    allMouseButtons.push_back(MOUSE_BUTTON_RIGHT);
+    allMouseButtons.push_back(MOUSE_BUTTON_MIDDLE);
+    allMouseButtons.push_back(MOUSE_BUTTON_SIDE);
+    allMouseButtons.push_back(MOUSE_BUTTON_EXTRA);
+    allMouseButtons.push_back(MOUSE_BUTTON_FORWARD);
+    allMouseButtons.push_back(MOUSE_BUTTON_BACK);
 }
 
 ModeStack::~ModeStack() {
@@ -249,7 +296,7 @@ void ModeStack::update() {
     if (IsKeyPressed(key)) {
       KeyPress press = { key, shift, ctrl, lAlt, rAlt };
 
-      for (auto& mode : modes) {
+      for (auto& mode : std::views::reverse(modes)) {
         if (mode->keyPress(press)) {
           break;
         }
@@ -258,8 +305,29 @@ void ModeStack::update() {
     if (IsKeyReleased(key)) {
       KeyPress press = { key, shift, ctrl, lAlt, rAlt };
 
-      for (auto& mode : modes) {
+      for (auto& mode : std::views::reverse(modes)) {
         if (mode->keyRelease(press)) {
+          break;
+        }
+      }
+    }
+  }
+
+  for (MouseButton button : allMouseButtons) {
+    if (IsMouseButtonPressed(button)) {
+      MouseKeyPress press = { button, shift, ctrl, lAlt, rAlt };
+
+      for (auto& mode : std::views::reverse(modes)) {
+        if (mode->mousePress(press)) {
+          break;
+        }
+      }
+    }
+    if (IsMouseButtonReleased(button)) {
+      MouseKeyPress press = { button, shift, ctrl, lAlt, rAlt };
+
+      for (auto& mode : std::views::reverse(modes)) {
+        if (mode->mouseRelease(press)) {
           break;
         }
       }

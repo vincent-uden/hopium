@@ -24,6 +24,8 @@ public:
   Color onBackground = {255, 255, 255, 255};
   Color onSurface    = {255, 255, 255, 255};
   Color onError      = {0, 0, 0, 255};
+
+  Color active       = {200, 200, 255, 255};
   // ---
 
   Color borderColor = {31, 31, 31, 255};

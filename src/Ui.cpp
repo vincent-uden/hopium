@@ -58,6 +58,9 @@ void UiText::receiveMousePos(Vector2 mousePos) {
 }
 
 void UiText::receiveMouseDown(Vector2 mousePos) {
+}
+
+void UiText::receiveMouseUp(Vector2 mousePos) {
   if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
       if (onClick) {
@@ -65,9 +68,6 @@ void UiText::receiveMouseDown(Vector2 mousePos) {
       }
     }
   }
-}
-
-void UiText::receiveMouseUp(Vector2 mousePos) {
 }
 
 void Ui::setOnClick(std::function<void (Ui *)> f) {
@@ -132,14 +132,14 @@ void UiRect::receiveMousePos(Vector2 mousePos) {
 }
 
 void UiRect::receiveMouseDown(Vector2 mousePos) {
+}
+
+void UiRect::receiveMouseUp(Vector2 mousePos) {
   if (contains(mousePos)) {
     if (onClick) {
       onClick(this);
     }
   }
-}
-
-void UiRect::receiveMouseUp(Vector2 mousePos) {
 }
 
 void UiRect::setColor(Color c) {
@@ -518,8 +518,18 @@ void UiToolList::draw() {
   }
   i = 0;
   for (auto& lbl : btnLbls) {
-    if (i == 0 || ApplicationState::getInstance()->sketchModeActive) {
+    if (i == 0) {
       lbl->draw();
+    } else {
+      ApplicationState* state = ApplicationState::getInstance();
+      if (state->modeStack.isActive(state->point)) {
+        lbl->setColor(colorscheme->active);
+      } else {
+        lbl->setColor(colorscheme->onBackground);
+      }
+      if (ApplicationState::getInstance()->sketchModeActive) {
+        lbl->draw();
+      }
     }
     ++i;
   }

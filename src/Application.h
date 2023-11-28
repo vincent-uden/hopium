@@ -1,7 +1,6 @@
 #ifndef UDEN_APPLICATION
 #define UDEN_APPLICATION
 
-
 #include <raylib.h>
 
 #include "ApplicationState.h"
@@ -9,7 +8,6 @@
 #include "Mode.h"
 #include "OcctScene.h"
 #include "OcctTest.h"
-#include "Renderer.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "System.h"
@@ -33,6 +31,9 @@ private:
   void processEvent(togglePointMode event);
   void processEvent(startRotate event);
   void processEvent(stopRotate event);
+  void processEvent(splitPaneHorizontally event);
+  void processEvent(splitPaneVertically event);
+  void processEvent(collapseBoundary event);
   void processEvent(groundPlaneHit event);
   void processEvent(exitProgram event);
 
@@ -43,12 +44,7 @@ private:
   std::string layoutPath;
 
   Renderer renderer;
-  ModeStack modeStack;
   EventQueue eventQueue;
-
-  std::shared_ptr<Mode> global;
-  std::shared_ptr<Mode> sketch;
-  std::shared_ptr<Mode> point;
 
   ApplicationState* state;
 };

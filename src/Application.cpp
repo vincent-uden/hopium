@@ -11,7 +11,7 @@ Application* Application::getInstance() {
 }
 
 void Application::update() {
-  modeStack.update();
+  state->modeStack.update();
 
   Vector2 mousePos = GetMousePosition();
   renderer.receiveMousePos(mousePos);
@@ -48,11 +48,11 @@ Application::Application() {
     renderer.deserialize(layout);
   }
 
-  global = std::shared_ptr<Mode>(new GlobalMode(&renderer));
-  modeStack.push(global);
+  state->global = std::shared_ptr<Mode>(new GlobalMode());
+  state->modeStack.push(state->global);
 
-  sketch = std::shared_ptr<Mode>(new SketchMode());
-  point = std::shared_ptr<Mode>(new PointMode());
+  state->sketch = std::shared_ptr<Mode>(new SketchMode());
+  state->point = std::shared_ptr<Mode>(new PointMode());
 
   state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
   state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
@@ -64,38 +64,38 @@ Application::Application() {
 }
 
 void Application::processEvent(enableSketchMode event) {
-  modeStack.push(sketch);
+  state->modeStack.push(state->sketch);
   state->sketchModeActive = true;
 }
 
 void Application::processEvent(disableSketchMode event) {
-  modeStack.exit(sketch);
+  state->modeStack.exit(state->sketch);
   state->sketchModeActive = false;
 }
 
 void Application::processEvent(toggleSketchMode event) {
-  if (modeStack.isActive(sketch)) {
-    modeStack.exit(sketch);
+  if (state->modeStack.isActive(state->sketch)) {
+    state->modeStack.exit(state->sketch);
     state->sketchModeActive = false;
   } else {
-    modeStack.push(sketch);
+    state->modeStack.push(state->sketch);
     state->sketchModeActive = true;
   }
 }
 
 void Application::processEvent(popMode event) {
-  if (modeStack.size() > 1) {
-    modeStack.pop();
+  if (state->modeStack.size() > 1) {
+    state->modeStack.pop();
   }
 
-  state->sketchModeActive = modeStack.isActive(sketch);
+  state->sketchModeActive = state->modeStack.isActive(state->sketch);
 }
 
 void Application::processEvent(togglePointMode event) {
-  if (modeStack.isActive(point)) {
-    modeStack.exit(point);
+  if (state->modeStack.isActive(state->point)) {
+    state->modeStack.exit(state->point);
   } else {
-    modeStack.push(point);
+    state->modeStack.push(state->point);
   }
 }
 
@@ -107,12 +107,25 @@ void Application::processEvent(stopRotate event) {
   state->holdingRotate = false;
 }
 
+void Application::processEvent(splitPaneHorizontally event) {
+    renderer.splitPaneHorizontal(event.mousePos);
+}
+
+void Application::processEvent(splitPaneVertically event) {
+    renderer.splitPaneVertical(event.mousePos);
+}
+
+void Application::processEvent(collapseBoundary event) {
+    renderer.collapseBoundary(event.mousePos);
+}
+
+
 void Application::processEvent(exitProgram event) {
   shouldExit = true;
 }
 
 void Application::processEvent(groundPlaneHit event) {
-  if (modeStack.isActive(point)) {
+  if (state->modeStack.isActive(state->point)) {
     state->occtScene->createPoint(event.x, event.y, event.z);
     state->scene->setPoints(state->occtScene->rasterizePoints());
   }

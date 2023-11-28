@@ -1,6 +1,7 @@
 #ifndef UDEN_EVENT
 #define UDEN_EVENT
 
+#include "raylib.h"
 #include <variant>
 #include <queue>
 #include <iostream>
@@ -12,6 +13,9 @@ struct popMode {};
 struct togglePointMode {};
 struct startRotate {};
 struct stopRotate {};
+struct splitPaneHorizontally { Vector2 mousePos; };
+struct splitPaneVertically { Vector2 mousePos; };
+struct collapseBoundary { Vector2 mousePos; };
 // Is subject to change in the future. Think about how hit's should be handled.
 struct groundPlaneHit { double x, y, z; };
 
@@ -24,6 +28,9 @@ using AppEvent = std::variant<
   popMode,
   togglePointMode,
   startRotate,
+  splitPaneHorizontally,
+  splitPaneVertically,
+  collapseBoundary,
   stopRotate,
   groundPlaneHit,
   exitProgram
