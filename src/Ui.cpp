@@ -297,6 +297,20 @@ void UiDropDown::receiveMouseDown(Vector2 mousePos) {
 }
 
 void UiDropDown::receiveMouseUp(Vector2 mousePos) {
+  if (open) {
+    if (
+      CheckCollisionPointRec(mousePos, {pos.x, pos.y + btnSize.y, listSize.x, listSize.y})
+    ) {
+      for (auto& optBg : uiOptionsBg) {
+        // If the onclick succeeds, we replace all UI with new UI and thus will
+        // seg fault if we continue to loop over the old ui.
+        if (optBg->contains(mousePos)) {
+          optBg->receiveMouseUp(mousePos);
+          break;
+        }
+      }
+    }
+  }
 }
 
 void UiDropDown::setOnSelected(std::function<void(std::string)> f) {

@@ -10,3 +10,4 @@
 ## Pacman packages
 - fmt
 - opencascade
+- verdict
