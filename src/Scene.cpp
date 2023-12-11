@@ -1,4 +1,6 @@
 #include "Scene.h"
+#include "raylib.h"
+#include <cmath>
 
 std::vector<Texture2D> Scene::standardModelTextures = std::vector<Texture2D>();
 
@@ -63,6 +65,40 @@ double RasterVertex::distanceFromRay(const Ray ray) {
   return Vector3Length(intermediate);
 }
 
+RasterLine::RasterLine() {
+}
+
+RasterLine::RasterLine(Vector3 p1, Vector3 p2) {
+  this->p1 = p1;
+  this->p2 = p2;
+}
+
+RasterLine::~RasterLine() {
+}
+
+void RasterLine::draw() {
+  DrawLine3D(p1, p2, color);
+}
+
+double RasterLine::distanceFromRay(const Ray ray) {
+  // TODO
+  return INFINITY;
+}
+
+RasterTodo::RasterTodo() {
+}
+
+RasterTodo::~RasterTodo() {
+}
+
+void RasterTodo::draw() {
+}
+
+double RasterTodo::distanceFromRay(const Ray ray) {
+  return INFINITY;
+}
+
+
 Scene::Scene(std::shared_ptr<ShaderStore> shaderStore) {
   this->shaderStore = shaderStore;
   if (standardModelTextures.size() == 0) {
@@ -97,6 +133,11 @@ void Scene::setPoints(std::vector<std::shared_ptr<RasterVertex>> points) {
   this->points = points;
 }
 
+void Scene::setShapes(std::vector<std::shared_ptr<RasterShape>> shapes) {
+  this->shapes.clear();
+  this->shapes = shapes;
+}
+
 void Scene::addBodyFromFile(std::string path) {
   std::shared_ptr<RasterBody> body(new RasterBody());
   body->loadFromFile(path);
@@ -113,10 +154,18 @@ size_t Scene::nPoints() {
   return points.size();
 }
 
+size_t Scene::nShapes() {
+  return shapes.size();
+}
+
 std::shared_ptr<RasterBody> Scene::getBody(size_t i) {
   return bodies.at(i);
 }
 
 std::shared_ptr<RasterVertex> Scene::getPoint(size_t i) {
   return points.at(i);
+}
+
+std::shared_ptr<RasterShape> Scene::getShape(size_t i) {
+  return shapes.at(i);
 }

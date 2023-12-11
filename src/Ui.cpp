@@ -364,6 +364,10 @@ void Ui3DViewport::draw() {
       }
       v->draw();
     }
+
+    for (size_t i = 0; i < scene->nShapes(); ++i) {
+      scene->getShape(i)->draw();
+    }
   }
 
   EndMode3D();
@@ -463,6 +467,7 @@ Ray Ui3DViewport::getNonOffsetMouseRay(Vector2 mousePos) {
 UiToolList::UiToolList() {
   btnNames.push_back("Sketch");
   btnNames.push_back("Point");
+  btnNames.push_back("Line");
   pos = { 0, 0 };
 
   btnSize = {80, 80};
@@ -501,6 +506,11 @@ UiToolList::UiToolList() {
         EventQueue::getInstance()->postEvent(togglePointMode {});
       }
   });
+  btnBgs[2]->setOnClick([](Ui* p) {
+      if (ApplicationState::getInstance()->sketchModeActive) {
+        EventQueue::getInstance()->postEvent(toggleLineMode {});
+      }
+  });
 }
 
 UiToolList::~UiToolList() {
@@ -536,11 +546,22 @@ void UiToolList::draw() {
       lbl->draw();
     } else {
       ApplicationState* state = ApplicationState::getInstance();
-      if (state->modeStack.isActive(state->point)) {
-        lbl->setColor(colorscheme->active);
-      } else {
-        lbl->setColor(colorscheme->onBackground);
-      }
+      switch (i) {
+      case 1:
+        if (state->modeStack.isActive(state->point)) {
+          lbl->setColor(colorscheme->active);
+        } else {
+          lbl->setColor(colorscheme->onBackground);
+        }
+        break;
+      case 2:
+        if (state->modeStack.isActive(state->line)) {
+          lbl->setColor(colorscheme->active);
+        } else {
+          lbl->setColor(colorscheme->onBackground);
+        }
+        break;
+      };
       if (ApplicationState::getInstance()->sketchModeActive) {
         lbl->draw();
       }

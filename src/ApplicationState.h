@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <gp_Pnt.hxx>
+
 #include "Mode.h"
 #include "OcctScene.h"
 #include "Scene.h"
@@ -24,6 +26,11 @@ public:
   std::shared_ptr<Mode> global;
   std::shared_ptr<Mode> sketch;
   std::shared_ptr<Mode> point;
+  std::shared_ptr<Mode> line;
+
+  // Name subject to change. Active doesn't really descibe the usage well. This
+  // is for actions requiring multiple points such as drawing a line or arc.
+  std::vector<gp_Pnt> activePoints;
 
 private:
   ApplicationState();

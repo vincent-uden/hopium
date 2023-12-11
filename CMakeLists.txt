@@ -22,9 +22,11 @@ include_directories(include)
 link_directories(${libPath})
 include_directories(${includePath})
 
+file(GLOB_RECURSE SRCS src/*.cpp)
+
 # Add executable
-add_executable (Lesson_04 src/main.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp src/ShaderStore.cpp src/OcctTest.cpp src/System.cpp src/Mode.cpp src/Application.cpp src/Event.cpp src/ApplicationState.cpp src/OcctScene.cpp)
-add_executable (test src/test.cpp src/Ui.cpp src/Renderer.cpp src/Colorscheme.cpp src/Scene.cpp src/ShaderStore.cpp src/OcctTest.cpp src/System.cpp src/Mode.cpp src/Application.cpp src/Event.cpp src/ApplicationState.cpp src/OcctScene.cpp)
+add_executable (Lesson_04 main.cpp ${SRCS})
+add_executable (test test/test.cpp ${SRCS})
 
 get_filename_component(libPath ./lib REALPATH)
 get_filename_component(includePath ./include REALPATH)

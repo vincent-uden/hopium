@@ -1,0 +1,18 @@
+#ifndef UDEN_POINT_MODE
+#define UDEN_POINT_MODE
+
+#include "../Event.h"
+#include "../Mode.h"
+
+class PointMode : public Mode {
+public:
+  PointMode();
+  ~PointMode();
+
+  bool keyPress(KeyPress key) override;
+  bool keyRelease(KeyPress key) override;
+  bool mousePress(MouseKeyPress button) override;
+  bool mouseRelease(MouseKeyPress button) override;
+};
+
+#endif

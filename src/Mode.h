@@ -32,39 +32,6 @@ public:
   virtual bool mouseRelease(MouseKeyPress button)=0;
 };
 
-class GlobalMode : public Mode {
-public:
-  GlobalMode();
-  ~GlobalMode();
-
-  bool keyPress(KeyPress key) override;
-  bool keyRelease(KeyPress key) override;
-  bool mousePress(MouseKeyPress button) override;
-  bool mouseRelease(MouseKeyPress button) override;
-};
-
-class SketchMode : public Mode {
-public:
-  SketchMode();
-  ~SketchMode();
-
-  bool keyPress(KeyPress key) override;
-  bool keyRelease(KeyPress key) override;
-  bool mousePress(MouseKeyPress button) override;
-  bool mouseRelease(MouseKeyPress button) override;
-};
-
-class PointMode : public Mode {
-public:
-  PointMode();
-  ~PointMode();
-
-  bool keyPress(KeyPress key) override;
-  bool keyRelease(KeyPress key) override;
-  bool mousePress(MouseKeyPress button) override;
-  bool mouseRelease(MouseKeyPress button) override;
-};
-
 class ModeStack {
 public:
   ModeStack();

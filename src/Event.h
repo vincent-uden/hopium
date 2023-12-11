@@ -11,6 +11,7 @@ struct disableSketchMode {};
 struct toggleSketchMode {};
 struct popMode {};
 struct togglePointMode {};
+struct toggleLineMode {};
 struct startRotate {};
 struct stopRotate {};
 struct splitPaneHorizontally { Vector2 mousePos; };
@@ -27,6 +28,7 @@ using AppEvent = std::variant<
   toggleSketchMode,
   popMode,
   togglePointMode,
+  toggleLineMode,
   startRotate,
   splitPaneHorizontally,
   splitPaneVertically,

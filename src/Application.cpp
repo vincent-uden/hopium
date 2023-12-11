@@ -53,9 +53,9 @@ Application::Application() {
 
   state->sketch = std::shared_ptr<Mode>(new SketchMode());
   state->point = std::shared_ptr<Mode>(new PointMode());
+  state->line = std::shared_ptr<Mode>(new LineMode());
 
-  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
+  state->scene->addBodyFromFile("../assets/toilet_rolls.obj"); state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
   state->scene->getBody(1)->pos.x = 1.0 * 5;
   state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
   state->scene->getBody(2)->pos.x = -1.0 * 5;
@@ -99,6 +99,14 @@ void Application::processEvent(togglePointMode event) {
   }
 }
 
+void Application::processEvent(toggleLineMode event) {
+  if (state->modeStack.isActive(state->line)) {
+    state->modeStack.exit(state->line);
+  } else {
+    state->modeStack.push(state->line);
+  }
+}
+
 void Application::processEvent(startRotate event) {
   state->holdingRotate = true;
 }
@@ -128,6 +136,18 @@ void Application::processEvent(groundPlaneHit event) {
   if (state->modeStack.isActive(state->point)) {
     state->occtScene->createPoint(event.x, event.y, event.z);
     state->scene->setPoints(state->occtScene->rasterizePoints());
+  }
+  if (state->modeStack.isActive(state->line)) {
+    // Snap to existing points if possible
+    if (state->activePoints.size() < 1) {
+      state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
+    } else {
+      state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
+      state->occtScene->createLine(state->activePoints[0], state->activePoints[1]);
+      state->scene->setShapes(state->occtScene->rasterizeShapes());
+      state->activePoints.clear();
+      EventQueue::getInstance()->postEvent(toggleLineMode {});
+    }
   }
 }
 

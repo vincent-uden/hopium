@@ -6,6 +6,10 @@
 #include "ApplicationState.h"
 #include "Event.h"
 #include "Mode.h"
+#include "modes/GlobalMode.h"
+#include "modes/LineMode.h"
+#include "modes/PointMode.h"
+#include "modes/SketchMode.h"
 #include "OcctScene.h"
 #include "OcctTest.h"
 #include "Renderer.h"
@@ -29,6 +33,7 @@ private:
   void processEvent(toggleSketchMode event);
   void processEvent(popMode event);
   void processEvent(togglePointMode event);
+  void processEvent(toggleLineMode event);
   void processEvent(startRotate event);
   void processEvent(stopRotate event);
   void processEvent(splitPaneHorizontally event);

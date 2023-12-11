@@ -4,7 +4,7 @@
 #include <raylib.h>
 #include <json.hpp>
 
-#include "Application.h"
+#include "src/Application.h"
 
 int main(int argc, char** argv) {
 
