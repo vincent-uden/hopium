@@ -2,9 +2,11 @@
 #define UDEN_SCENE
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 #include <raylib.h>
 #include <raymath.h>
@@ -91,6 +93,8 @@ public:
   std::shared_ptr<RasterBody> getBody(size_t i);
   std::shared_ptr<RasterVertex> getPoint(size_t i);
   std::shared_ptr<RasterShape> getShape(size_t i);
+
+  std::optional<std::shared_ptr<RasterVertex>> queryVertex(Ray ray, double selectionThreshold);
 
 private:
   std::vector<std::shared_ptr<RasterBody>> bodies;

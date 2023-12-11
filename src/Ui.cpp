@@ -393,18 +393,10 @@ void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
 
   if (scene->nPoints() > 0) {
     Ray ray = getNonOffsetMouseRay(mousePos);
-    int closestPoint = -1;
-    double closestDist = std::numeric_limits<double>::max();
+    std::optional<std::shared_ptr<RasterVertex>> maybeClosest = scene->queryVertex(ray, ApplicationState::getInstance()->selectionThreshold);
 
-    for (int i = 0; i < scene->nPoints(); ++i) {
-      double dist = scene->getPoint(i)->distanceFromRay(ray) ;
-      if (dist < selectionThreshold && dist < closestDist) {
-        closestPoint = i;
-        closestDist = dist;
-      }
-    }
-    if (closestPoint!= -1) {
-      hoveredId = scene->getPoint(closestPoint)->id;
+    if (maybeClosest.has_value()) {
+      hoveredId = maybeClosest.value()->id;
     } else {
       hoveredId = -1;
     }
@@ -429,7 +421,8 @@ void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
     EventQueue::getInstance()->postEvent(groundPlaneHit {
         groundHitInfo.point.x,
         groundHitInfo.point.y,
-        groundHitInfo.point.z
+        groundHitInfo.point.z,
+        ray
     });
   }
 }

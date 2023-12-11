@@ -138,12 +138,17 @@ void Application::processEvent(groundPlaneHit event) {
     state->scene->setPoints(state->occtScene->rasterizePoints());
   }
   if (state->modeStack.isActive(state->line)) {
-    // Snap to existing points if possible
+    std::optional<std::shared_ptr<RasterVertex>> p = state->scene->queryVertex(event.ray, state->selectionThreshold);
+    if (p.has_value()) {
+      event.x = p.value()->x;
+      event.y = p.value()->y;
+      event.z = p.value()->z;
+    }
     if (state->activePoints.size() < 1) {
       state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
     } else {
       state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
-      state->occtScene->createLine(state->activePoints[0], state->activePoints[1]);
+      state->occtScene->createLine(state->activePoints[0], state->activePoints[1], 1e-5);
       state->scene->setShapes(state->occtScene->rasterizeShapes());
       state->activePoints.clear();
       EventQueue::getInstance()->postEvent(toggleLineMode {});

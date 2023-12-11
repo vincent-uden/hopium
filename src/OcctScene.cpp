@@ -17,8 +17,18 @@ void OcctScene::createPoint(double x, double y, double z) {
   ids.push_back(nextId++);
 }
 
-void OcctScene::createLine(gp_Pnt p1, gp_Pnt p2) {
-  Handle(Geom_TrimmedCurve) segment = GC_MakeSegment(p1, p2);
+void OcctScene::createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold) {
+  gp_Pnt* start = &p1;
+  gp_Pnt* end = &p2;
+  for (gp_Pnt& p: points) {
+    if (p1.Distance(p) < snapThreshold) {
+      start = &p;
+    }
+    if (p2.Distance(p) < snapThreshold) {
+      end = &p;
+    }
+  }
+  Handle(Geom_TrimmedCurve) segment = GC_MakeSegment(*start, *end);
   TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(segment);
   shapes.push_back(edge);
 }
@@ -50,7 +60,7 @@ std::shared_ptr<RasterShape> OcctScene::createRasterShape(const TopoDS_Edge &sha
     points.push_back(BRep_Tool::Pnt(TopoDS::Vertex(ex.Current())));
   }
 
-  return std::shared_ptr<RasterLine>(new RasterLine(
+  std::shared_ptr<RasterLine> out = std::shared_ptr<RasterLine>(new RasterLine(
         Vector3 {
           static_cast<float>(points[0].X()),
           static_cast<float>(points[0].Y()),
@@ -62,8 +72,12 @@ std::shared_ptr<RasterShape> OcctScene::createRasterShape(const TopoDS_Edge &sha
           static_cast<float>(points[1].Z())
         }
   ));
+  out->id = nextId++;
+  return out;
 }
 
 std::shared_ptr<RasterShape> OcctScene::createRasterShape(const TopoDS_Shape &shape) {
-  return std::make_shared<RasterTodo>();
+  std::shared_ptr<RasterTodo> out = std::make_shared<RasterTodo>();
+  out->id = nextId++;
+  return out;
 }

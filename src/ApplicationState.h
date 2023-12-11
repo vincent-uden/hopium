@@ -32,6 +32,8 @@ public:
   // is for actions requiring multiple points such as drawing a line or arc.
   std::vector<gp_Pnt> activePoints;
 
+  double selectionThreshold = 0.6;
+
 private:
   ApplicationState();
   static ApplicationState* instance;

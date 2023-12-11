@@ -20,7 +20,7 @@ public:
   ~OcctScene();
 
   void createPoint(double x, double y, double z);
-  void createLine(gp_Pnt p1, gp_Pnt p2);
+  void createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold);
 
   // This API is mega-subject to change.
   std::vector<std::shared_ptr<RasterVertex>> rasterizePoints();

@@ -18,7 +18,7 @@ struct splitPaneHorizontally { Vector2 mousePos; };
 struct splitPaneVertically { Vector2 mousePos; };
 struct collapseBoundary { Vector2 mousePos; };
 // Is subject to change in the future. Think about how hit's should be handled.
-struct groundPlaneHit { double x, y, z; };
+struct groundPlaneHit { double x, y, z; Ray ray; };
 
 struct exitProgram {};
 

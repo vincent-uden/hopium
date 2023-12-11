@@ -1,6 +1,4 @@
 #include "Scene.h"
-#include "raylib.h"
-#include <cmath>
 
 std::vector<Texture2D> Scene::standardModelTextures = std::vector<Texture2D>();
 
@@ -168,4 +166,23 @@ std::shared_ptr<RasterVertex> Scene::getPoint(size_t i) {
 
 std::shared_ptr<RasterShape> Scene::getShape(size_t i) {
   return shapes.at(i);
+}
+
+std::optional<std::shared_ptr<RasterVertex>> Scene::queryVertex(Ray ray, double selectionThreshold) {
+  int closestPoint = -1;
+  double closestDist = std::numeric_limits<double>::max();
+
+  for (int i = 0; i < nPoints(); ++i) {
+    double dist = getPoint(i)->distanceFromRay(ray) ;
+    if (dist < selectionThreshold && dist < closestDist) {
+      closestPoint = i;
+      closestDist = dist;
+    }
+  }
+
+  if (closestPoint == -1) {
+    return std::nullopt;
+  } else {
+    return std::optional<std::shared_ptr<RasterVertex>>(getPoint(closestPoint));
+  }
 }
