@@ -22,6 +22,9 @@ bool GlobalMode::keyPress(KeyPress key) {
   case KEY_SPACE:
     EventQueue::getInstance()->postEvent(startRotate {});
     break;
+  case KEY_S:
+    EventQueue::getInstance()->postEvent(dumpShapes {});
+    break;
   case KEY_Q:
     EventQueue::getInstance()->postEvent(exitProgram {});
     break;

@@ -127,6 +127,9 @@ void Application::processEvent(collapseBoundary event) {
     renderer.collapseBoundary(event.mousePos);
 }
 
+void Application::processEvent(dumpShapes event) {
+  state->occtScene->dumpShapes();
+}
 
 void Application::processEvent(exitProgram event) {
   shouldExit = true;

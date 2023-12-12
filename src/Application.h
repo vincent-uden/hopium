@@ -40,6 +40,7 @@ private:
   void processEvent(splitPaneVertically event);
   void processEvent(collapseBoundary event);
   void processEvent(groundPlaneHit event);
+  void processEvent(dumpShapes event);
   void processEvent(exitProgram event);
 
   static Application* instance;

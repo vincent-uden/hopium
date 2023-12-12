@@ -68,6 +68,20 @@ public:
   Color color = YELLOW;
 };
 
+class RasterFace: public RasterShape {
+public:
+  RasterFace();
+  RasterFace(std::vector<Vector3> vertices);
+  ~RasterFace();
+
+  void draw() override;
+  double distanceFromRay(const Ray ray) override;
+
+  Color color = YELLOW;
+private:
+  std::vector<Vector3> triangles;
+};
+
 class RasterTodo: public RasterShape {
 public:
   RasterTodo();

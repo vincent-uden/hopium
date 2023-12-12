@@ -83,6 +83,29 @@ double RasterLine::distanceFromRay(const Ray ray) {
   return INFINITY;
 }
 
+RasterFace::RasterFace() {
+}
+
+RasterFace::RasterFace(std::vector<Vector3> vertices) {
+  triangles = vertices;
+  color.a = 150;
+}
+
+RasterFace::~RasterFace() {
+}
+
+void RasterFace::draw() {
+  for (int i = 0; i < triangles.size(); i += 3) {
+    DrawTriangle3D(triangles[i], triangles[i + 1], triangles[i + 2], color);
+    DrawTriangle3D(triangles[i + 2], triangles[i + 1], triangles[i], color);
+  }
+}
+
+double RasterFace::distanceFromRay(const Ray ray) {
+  // TODO
+  return INFINITY;
+}
+
 RasterTodo::RasterTodo() {
 }
 

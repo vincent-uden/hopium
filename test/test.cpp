@@ -1,6 +1,9 @@
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <TopoDS_Wire.hxx>
 #include <cctype>
 #include <cmath>
 #include <functional>
+#include <gp_Pln.hxx>
 #include <iostream>
 #include <cassert>
 
@@ -9,9 +12,10 @@
 #include <string>
 #include <unistd.h>
 
-#include "Mode.h"
-#include "Renderer.h"
-#include "Ui.h"
+#include "../src/Mode.h"
+#include "../src/Renderer.h"
+#include "../src/Ui.h"
+#include "../src/OcctScene.h"
 
 #define ADD_TEST(func) \
   tests.push_back({ func, #func});
@@ -68,7 +72,8 @@ int windowCanBeSplitIntoArea() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneVertical({ 10, 10 });
 
@@ -100,7 +105,8 @@ int windowCanBeSplitVerticallyRepeatedly() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneVertical({ 10, 10 });
     renderer.splitPaneVertical({ 10, 10 });
@@ -139,7 +145,8 @@ int windowCanBeSplitHorizontallyRepeatedly() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneHorizontal({ 10, 10 });
     renderer.splitPaneHorizontal({ 10, 10 });
@@ -182,7 +189,8 @@ int deepRecursiveSplittingProducesCorrectSizes() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneVertical({ 10, 10 });
     renderer.splitPaneHorizontal({ 10, 600 });
@@ -213,7 +221,8 @@ int serializeAndDeserializeRenderer() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneVertical({ 10, 10 });
     renderer.splitPaneHorizontal({ 10, 600 });
@@ -242,7 +251,8 @@ int canSplitAndCollapseBoundary() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneHorizontal({ 10, 10 });
     renderer.collapseBoundary({ 800, 450 });
@@ -267,7 +277,8 @@ int collapsingBoundaryReconnectsNowAdjacentAreas() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneVertical({ 10, 10 });
     renderer.splitPaneVertical({ 10, 10 });
@@ -294,7 +305,8 @@ int nestedSplitAndCollapseDoesntBreakGraph() {
   SetTargetFPS(60);
 
   {
-    Renderer renderer(screenWidth, screenHeight);
+    Renderer renderer;
+    renderer.init(screenWidth, screenHeight, ApplicationState::getInstance()->shaderStore);
 
     renderer.splitPaneHorizontal({ 10, 10 });
     renderer.splitPaneHorizontal({ 10, 10 });
@@ -332,6 +344,18 @@ int modeStackManipulatesCorrectly() {
     bool keyPress(KeyPress key) {
       return true;
     }
+
+    bool keyRelease(KeyPress key) {
+      return true;
+    }
+
+    bool mousePress(MouseKeyPress button) {
+      return true;
+    }
+
+    bool mouseRelease(MouseKeyPress button) {
+      return true;
+    }
   };
   std::shared_ptr<Mode> mode1(new TestMode());
   std::shared_ptr<Mode> mode2(new TestMode());
@@ -352,6 +376,53 @@ int modeStackManipulatesCorrectly() {
   return 0;
 }
 
+int wireFixProducesWorkingWire() {
+  OcctScene scene;
+
+  gp_Pnt p1(0.0, 0.0, 0.0);
+  gp_Pnt p2(0.1, 0.0, 0.0);
+  gp_Pnt p3(0.0, 0.1, 0.0);
+
+  Handle(Geom_TrimmedCurve) c1 = GC_MakeSegment(p1, p2);
+  Handle(Geom_TrimmedCurve) c2 = GC_MakeSegment(p1, p3);
+
+  TopoDS_Edge e1 = BRepBuilderAPI_MakeEdge(c1);
+  TopoDS_Edge e2 = BRepBuilderAPI_MakeEdge(c2);
+
+  TopoDS_Wire w1 = BRepBuilderAPI_MakeWire(e1, e2).Wire();
+
+  gp_Pln plane;
+  TopoDS_Face f = BRepBuilderAPI_MakeFace(plane);
+
+  ShapeAnalysis_Wire checkWire;
+  checkWire.SetPrecision(1.e-3);
+  checkWire.Load(w1);
+  checkWire.SetFace(f);
+
+  ASSERT(checkWire.IsLoaded(), "Checker should be loaded");
+  ASSERT(checkWire.IsReady(), "Checker should be ready");
+  ASSERT(checkWire.CheckOrder(), "Wire should not be ordered");
+  ASSERT(!checkWire.CheckConnected(), "Wire should be connected");
+  ASSERT(!checkWire.CheckSmall(), "Wire should not contain any small edges");
+
+  ShapeFix_Wire fixWire;
+  fixWire.Load(w1);
+  fixWire.SetFace(f);
+  fixWire.Perform();
+
+  w1 = fixWire.Wire();
+  checkWire.Load(w1);
+
+  TopoDS_Face f2 = BRepBuilderAPI_MakeFace(w1).Face();
+  ASSERT(!f2.IsNull(), "F2 should've been created");
+
+  ASSERT(!checkWire.CheckOrder(), "Wire should be ordered");
+  ASSERT(!checkWire.CheckConnected(), "Wire should be connected");
+  ASSERT(!checkWire.CheckSmall(), "Wire should not contain any small edges");
+
+  return 0;
+}
+
 int main(int argc, char** argv) {
   std::vector<Test> tests;
 
@@ -364,6 +435,7 @@ int main(int argc, char** argv) {
   ADD_TEST(collapsingBoundaryReconnectsNowAdjacentAreas);
   ADD_TEST(nestedSplitAndCollapseDoesntBreakGraph);
   ADD_TEST(modeStackManipulatesCorrectly);
+  ADD_TEST(wireFixProducesWorkingWire);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
