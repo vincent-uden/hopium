@@ -423,6 +423,49 @@ int wireFixProducesWorkingWire() {
   return 0;
 }
 
+int serializeAndDeserializeEventHistoryProducesUnity() {
+  class TestEventQueue: public EventQueue {
+  public:
+    std::vector<AppEvent> getHistory() { return history; }
+  };
+  TestEventQueue queue;
+
+  queue.postEvent(enableSketchMode {});
+  queue.postEvent(togglePointMode {});
+  queue.postEvent(groundPlaneHit { 1.0, 0.0, 0.0, Ray { Vector3 { 1.0, 0.0, 0.0 }, Vector3 { 2.0, 0.0, 0.0 } }});
+  queue.postEvent(groundPlaneHit { 0.0, 2.0, 0.0, Ray { Vector3 { -1.0, 0.0, 0.0 }, Vector3 { 1.0, 0.0, 0.0 } }});
+  queue.postEvent(groundPlaneHit { 0.0, 0.0, 3.0, Ray { Vector3 { 2.0, 0.0, 0.0 }, Vector3 { -1.0, 0.0, 0.0 } }});
+
+  std::vector<AppEvent> beforeSerialization = queue.getHistory();
+  size_t histLen = beforeSerialization.size();
+
+  json serialized = queue.serializeHistory();
+
+  queue.deserializeHistory(serialized);
+  std::vector<AppEvent> afterSerialization = queue.getHistory();
+
+  ASSERT(beforeSerialization.size() == histLen, "We should have a clone of the history");
+  ASSERT(beforeSerialization.size() == afterSerialization.size(), "There should be as many events after serialzation as there were before");
+
+  for (size_t i = 0; i < beforeSerialization.size(); i++) {
+    ASSERT(beforeSerialization[i].index() == afterSerialization[i].index(), "The events should be the same");
+
+    if (std::holds_alternative<groundPlaneHit>(beforeSerialization[i])) {
+      groundPlaneHit hit1 = std::get<groundPlaneHit>(beforeSerialization[i]);
+      groundPlaneHit hit2 = std::get<groundPlaneHit>(afterSerialization[i]);
+
+      ASSERT(
+        hit1.x == hit2.x && hit1.y == hit2.y && hit1.z == hit2.z &&
+        hit1.ray.position.x == hit2.ray.position.x && hit1.ray.position.y == hit2.ray.position.y && hit1.ray.position.z == hit2.ray.position.z &&
+        hit1.ray.direction.x == hit2.ray.direction.x && hit1.ray.direction.y == hit2.ray.direction.y && hit1.ray.direction.z == hit2.ray.direction.z,
+        "Rays should be identical"
+      );
+    }
+  }
+
+  return 0;
+}
+
 int main(int argc, char** argv) {
   std::vector<Test> tests;
 
@@ -436,6 +479,7 @@ int main(int argc, char** argv) {
   ADD_TEST(nestedSplitAndCollapseDoesntBreakGraph);
   ADD_TEST(modeStackManipulatesCorrectly);
   ADD_TEST(wireFixProducesWorkingWire);
+  ADD_TEST(serializeAndDeserializeEventHistoryProducesUnity);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

@@ -2,6 +2,8 @@
 #define UDEN_EVENT
 
 #include "raylib.h"
+#include "json.hpp"
+
 #include <variant>
 #include <queue>
 #include <iostream>
@@ -40,6 +42,25 @@ using AppEvent = std::variant<
   exitProgram
 >;
 
+const AppEvent APP_EVENTS[] = {
+  enableSketchMode {},
+  disableSketchMode {},
+  toggleSketchMode {},
+  popMode {},
+  togglePointMode {},
+  toggleLineMode {},
+  startRotate {},
+  splitPaneHorizontally {},
+  splitPaneVertically {},
+  collapseBoundary {},
+  stopRotate {},
+  groundPlaneHit {},
+  dumpShapes {},
+  exitProgram {}
+};
+
+using json = nlohmann::json;
+
 class EventQueue {
 public:
   EventQueue();
@@ -48,14 +69,26 @@ public:
   static EventQueue* getInstance();
 
   void postEvent(AppEvent event);
+  void resetHistoryIndex();
 
   AppEvent pop();
+  std::optional<AppEvent> getNextHistoryEvent();
 
   bool empty();
 
+  size_t historySize();
+
+  json serializeHistory();
+  void deserializeHistory(json state);
+
 private:
   static EventQueue* instance;
+
+protected:
   std::queue<AppEvent> eventQueue;
+  std::vector<AppEvent> history;
+
+  size_t historyIndex = -1;
 };
 
 #endif

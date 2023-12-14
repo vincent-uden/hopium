@@ -358,15 +358,20 @@ void Ui3DViewport::draw() {
     for (size_t i = 0; i < scene->nPoints(); ++i) {
       std::shared_ptr<RasterVertex> v = scene->getPoint(i);
       if (hoveredId == v->id) {
-        v->color = GREEN;
+        v->color = v->activeColor();
       } else {
-        v->color = YELLOW;
+        v->color = v->passiveColor();
       }
       v->draw();
     }
 
     for (size_t i = 0; i < scene->nShapes(); ++i) {
       scene->getShape(i)->draw();
+      if (hoveredId == scene->getShape(i)->id) {
+        scene->getShape(i)->color = scene->getShape(i)->activeColor();
+      } else {
+        scene->getShape(i)->color = scene->getShape(i)->passiveColor();
+      }
     }
   }
 
@@ -391,14 +396,26 @@ void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
     camera.position.y = cameraRadius * std::cos(cameraInclination + inclinationDiff);
   }
 
+  Ray ray = getNonOffsetMouseRay(mousePos);
+  RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
+  lastDist = groundHitInfo.distance;
+  if (groundHitInfo.hit) {
+    std::optional<size_t> maybeId = ApplicationState::getInstance()
+      ->occtScene->idContainingPoint(
+        groundHitInfo.point.x, groundHitInfo.point.y, groundHitInfo.point.z
+      );
+    if (maybeId.has_value()) {
+      hoveredId = maybeId.value();
+    } else  {
+      hoveredId = -1;
+    }
+  }
+
   if (scene->nPoints() > 0) {
-    Ray ray = getNonOffsetMouseRay(mousePos);
     std::optional<std::shared_ptr<RasterVertex>> maybeClosest = scene->queryVertex(ray, ApplicationState::getInstance()->selectionThreshold);
 
     if (maybeClosest.has_value()) {
       hoveredId = maybeClosest.value()->id;
-    } else {
-      hoveredId = -1;
     }
   }
 

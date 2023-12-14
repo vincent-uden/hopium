@@ -17,8 +17,11 @@ class RasterShape {
 public:
   virtual void draw() = 0;
   virtual double distanceFromRay(const Ray ray) = 0;
+  virtual Color passiveColor();
+  virtual Color activeColor();
 
   size_t id = -1;
+  Color color = YELLOW;
 };
 
 // This does not correspond to any TopoDS object from OCCT. It instead signifies
@@ -51,7 +54,6 @@ public:
   double x;
   double y;
   double z;
-  Color color = YELLOW;
 };
 
 class RasterLine: public RasterShape {
@@ -65,7 +67,6 @@ public:
 
   Vector3 p1;
   Vector3 p2;
-  Color color = YELLOW;
 };
 
 class RasterFace: public RasterShape {
@@ -76,10 +77,24 @@ public:
 
   void draw() override;
   double distanceFromRay(const Ray ray) override;
+  Color activeColor() override;
+  Color passiveColor() override;
 
-  Color color = YELLOW;
 private:
   std::vector<Vector3> triangles;
+};
+
+class RasterSolid: public RasterShape {
+public:
+  RasterSolid();
+  RasterSolid(Mesh mesh);
+  ~RasterSolid();
+
+  void draw() override;
+  double distanceFromRay(const Ray ray) override;
+
+private:
+  Mesh mesh;
 };
 
 class RasterTodo: public RasterShape {

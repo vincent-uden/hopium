@@ -2,6 +2,14 @@
 
 std::vector<Texture2D> Scene::standardModelTextures = std::vector<Texture2D>();
 
+Color RasterShape::activeColor() {
+  return GREEN;
+}
+
+Color RasterShape::passiveColor() {
+  return YELLOW;
+}
+
 RasterBody::RasterBody() {
 }
 
@@ -102,6 +110,38 @@ void RasterFace::draw() {
 }
 
 double RasterFace::distanceFromRay(const Ray ray) {
+  // TODO
+  return INFINITY;
+}
+
+Color RasterFace::activeColor() {
+  Color out = GREEN;
+  out.a = 150;
+  return out;
+}
+
+Color RasterFace::passiveColor() {
+  Color out = YELLOW;
+  out.a = 150;
+  return out;
+}
+
+RasterSolid::RasterSolid() {
+}
+
+RasterSolid::RasterSolid(Mesh mesh) {
+  this->mesh = mesh;
+  color.a = 150;
+}
+
+RasterSolid::~RasterSolid() {
+}
+
+void RasterSolid::draw() {
+  // TODO
+}
+
+double RasterSolid::distanceFromRay(const Ray ray) {
   // TODO
   return INFINITY;
 }

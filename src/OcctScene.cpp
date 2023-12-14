@@ -2,6 +2,7 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <ShapeAnalysis_Wire.hxx>
 #include <ShapeExtend_Status.hxx>
+#include <TopoDS_Solid.hxx>
 #include <gp_Pln.hxx>
 
 OcctScene::OcctScene() {
@@ -34,7 +35,7 @@ void OcctScene::createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold) {
 
   bool connected = false;
   int i = 0;
-  for (TopoDS_Shape& shape: shapes) {
+  for (const auto& [id, shape]: shapes) {
     if (shape.ShapeType() == TopAbs_EDGE) {
       TopoDS_Edge existingEdge = TopoDS::Edge(shape);
       std::pair<gp_Pnt, gp_Pnt> existingPoints = getEdgePoints(existingEdge);
@@ -47,7 +48,7 @@ void OcctScene::createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold) {
         TopoDS_Wire combined = BRepBuilderAPI_MakeWire(existingEdge, edge);
 
         shapes.erase(std::next(shapes.begin(), i));
-        shapes.push_back(combined);
+        shapes.push_back(std::pair(nextId++, combined));
 
         connected = true;
         break;
@@ -75,7 +76,7 @@ void OcctScene::createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold) {
         wire = wireFix.Wire();
 
         shapes.erase(std::next(shapes.begin(), i));
-        shapes.push_back(wire);
+        shapes.push_back(std::pair(nextId++,wire));
         connected = true;
 
         checkWire.Load(wire);
@@ -84,7 +85,7 @@ void OcctScene::createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold) {
         if (isWireCyclic(wire)) {
           BRepBuilderAPI_MakeFace faceMaker(wire);
           if (faceMaker.IsDone()) {
-            shapes.push_back((TopoDS_Face) faceMaker);
+            shapes.push_back(std::pair(nextId++, (TopoDS_Face) faceMaker));
           }
         }
         break;
@@ -94,13 +95,13 @@ void OcctScene::createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold) {
   }
 
   if (!connected) {
-    shapes.push_back(edge);
+    shapes.push_back(std::pair(nextId++, edge));
   }
 }
 
 void OcctScene::dumpShapes() {
   std::cout << "Dumping shapes:" << std::endl;
-  for (TopoDS_Shape& shape: shapes) {
+  for (const auto& [id, shape]: shapes) {
     std::cout << "Shape: " << shapeType(shape.ShapeType()) << std::endl;
     if (shape.ShapeType() == TopAbs_EDGE) {
       for (TopExp_Explorer ex(shape, TopAbs_VERTEX); ex.More(); ex.Next()) {
@@ -127,20 +128,20 @@ std::vector<std::shared_ptr<RasterVertex>> OcctScene::rasterizePoints() {
 
 std::vector<std::shared_ptr<RasterShape>> OcctScene::rasterizeShapes() {
   std::vector<std::shared_ptr<RasterShape>> rasterShapes;
-  for (const TopoDS_Shape &shape : shapes) {
+  for (const auto& [id, shape] : shapes) {
     if (shape.ShapeType() == TopAbs_EDGE) {
       TopoDS_Edge edge = TopoDS::Edge(shape);
-      for (std::shared_ptr<RasterShape>& rs:  createRasterShape(edge)) {
+      for (std::shared_ptr<RasterShape>& rs:  createRasterShape(id, edge)) {
         rasterShapes.push_back(rs);
       }
     } else if (shape.ShapeType() == TopAbs_WIRE) {
       TopoDS_Wire wire = TopoDS::Wire(shape);
-      for (std::shared_ptr<RasterShape>& rs:  createRasterShape(wire)) {
+      for (std::shared_ptr<RasterShape>& rs:  createRasterShape(id, wire)) {
         rasterShapes.push_back(rs);
       }
     } else if (shape.ShapeType() == TopAbs_FACE) {
       TopoDS_Face face = TopoDS::Face(shape);
-      for (std::shared_ptr<RasterShape>& rs:  createRasterShape(face)) {
+      for (std::shared_ptr<RasterShape>& rs:  createRasterShape(id, face)) {
         rasterShapes.push_back(rs);
       }
     }
@@ -149,7 +150,7 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::rasterizeShapes() {
   return rasterShapes;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const TopoDS_Edge &shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Edge &shape) {
   std::pair<gp_Pnt, gp_Pnt> points = getEdgePoints(shape);
 
   std::shared_ptr<RasterLine> line = std::shared_ptr<RasterLine>(new RasterLine(
@@ -164,24 +165,24 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const Top
           static_cast<float>(points.second.Z())
         }
   ));
-  line->id = nextId++;
+  line->id = id;
   std::vector<std::shared_ptr<RasterShape>> out;
   out.push_back(line);
   return out;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const TopoDS_Wire& shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Wire& shape) {
   std::vector<std::shared_ptr<RasterShape>> out;
   for (TopExp_Explorer ex(shape, TopAbs_EDGE); ex.More(); ex.Next()) {
     TopoDS_Edge edge = TopoDS::Edge(ex.Current());
-    for (std::shared_ptr<RasterShape>& rs: createRasterShape(edge)) {
+    for (std::shared_ptr<RasterShape>& rs: createRasterShape(id, edge)) {
       out.push_back(rs);
     }
   }
   return out;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const TopoDS_Face &shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Face &shape) {
   std::vector<std::shared_ptr<RasterShape>> out;
   std::vector<Vector3> vertices;
 
@@ -205,15 +206,46 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const Top
   }
 
   std::shared_ptr<RasterFace> face(new RasterFace(vertices));
-  face->id = nextId++;
+  face->id = id;
   out.push_back(face);
 
   return out;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const TopoDS_Shape &shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Solid &shape) {
+  std::vector<std::shared_ptr<RasterShape>> out;
+
+  IMeshTools_Parameters params;
+  params.Deflection = 0.01;
+  params.Angle = 0.1;
+  params.Relative = Standard_False;
+  params.InParallel = Standard_True;
+  params.MinSize = Precision::Confusion();
+  params.InternalVerticesMode = Standard_True;
+  params.ControlSurfaceDeflection = Standard_True;
+
+  BRepMesh_IncrementalMesh mesh(shape, params);
+  mesh.Perform();
+  TopLoc_Location loc = shape.Location();
+
+  for (TopExp_Explorer ex(shape, TopAbs_FACE); ex.More(); ex.Next()) {
+    TopoDS_Face face = TopoDS::Face(ex.Current());
+    TopLoc_Location loc = face.Location();
+    Handle(Poly_Triangulation) triangulation = BRep_Tool::Triangulation(face, loc);
+
+    // TODO: Continue here once we can serialize scenes
+  }
+
+  std::shared_ptr<RasterSolid> solid(new RasterSolid());
+  solid->id = id;
+  out.push_back(solid);
+
+  return out;
+}
+
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Shape &shape) {
   std::shared_ptr<RasterTodo> todoShape = std::make_shared<RasterTodo>();
-  todoShape->id = nextId++;
+  todoShape->id = id;
   std::vector<std::shared_ptr<RasterShape>> out;
   out.push_back(todoShape);
   return out;
@@ -226,6 +258,21 @@ std::pair<gp_Pnt, gp_Pnt> OcctScene::getEdgePoints(const TopoDS_Edge& edge) {
   }
 
   return std::pair<gp_Pnt, gp_Pnt>(points[0], points[1]);
+}
+
+std::optional<size_t> OcctScene::idContainingPoint(double x, double y, double z) {
+  for (const auto& [id, shape]: shapes) {
+    if (shape.ShapeType() == TopAbs_FACE) {
+      TopoDS_Face face = TopoDS::Face(shape);
+      gp_Pnt p(x, y, z);
+      BRepClass_FaceClassifier classifier(face, p, 1.e-3);
+      if ((classifier.State() == TopAbs_IN)) {
+        return std::optional(id);
+      }
+    }
+  }
+
+  return std::nullopt;
 }
 
 std::string OcctScene::shapeType(const TopAbs_ShapeEnum& shapeType) {

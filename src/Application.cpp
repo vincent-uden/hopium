@@ -54,13 +54,6 @@ Application::Application() {
   state->sketch = std::shared_ptr<Mode>(new SketchMode());
   state->point = std::shared_ptr<Mode>(new PointMode());
   state->line = std::shared_ptr<Mode>(new LineMode());
-
-  state->scene->addBodyFromFile("../assets/toilet_rolls.obj"); state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  state->scene->getBody(1)->pos.x = 1.0 * 5;
-  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  state->scene->getBody(2)->pos.x = -1.0 * 5;
-  state->scene->addBodyFromFile("../assets/toilet_rolls.obj");
-  state->scene->getBody(3)->pos.x = 2.0 * 5;
 }
 
 void Application::processEvent(enableSketchMode event) {
@@ -161,4 +154,5 @@ void Application::processEvent(groundPlaneHit event) {
 
 Application::~Application() {
   writeToFile(layoutPath, renderer.serialize().dump(-1));
+  writeToFile("history.json", eventQueue.serializeHistory().dump(-1));
 }
