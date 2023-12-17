@@ -34,6 +34,7 @@ Application::Application() {
   state = ApplicationState::getInstance();
 
   layoutPath = "layout.json";
+  scenePath = "history.json";
   renderer.init(1600, 900, state->shaderStore);
 
   createBottle();
@@ -54,6 +55,18 @@ Application::Application() {
   state->sketch = std::shared_ptr<Mode>(new SketchMode());
   state->point = std::shared_ptr<Mode>(new PointMode());
   state->line = std::shared_ptr<Mode>(new LineMode());
+
+  if (fileExists(scenePath)) {
+    json history = json::parse(readFromFile(scenePath));
+    eventQueue.deserializeHistory(history);
+    eventQueue.resetHistoryIndex();
+    for (size_t i = 0; i < eventQueue.historySize(); ++i) {
+      std::optional<AppEvent> nextEvent = eventQueue.getNextHistoryEvent();
+      if (nextEvent.has_value()) {
+        std::visit([this](auto&& arg){ processEvent(arg); }, nextEvent.value());
+      }
+    }
+  }
 }
 
 void Application::processEvent(enableSketchMode event) {
@@ -125,6 +138,7 @@ void Application::processEvent(dumpShapes event) {
 }
 
 void Application::processEvent(exitProgram event) {
+  std::cout << "EXITING" << std::endl;
   shouldExit = true;
 }
 
@@ -154,5 +168,5 @@ void Application::processEvent(groundPlaneHit event) {
 
 Application::~Application() {
   writeToFile(layoutPath, renderer.serialize().dump(-1));
-  writeToFile("history.json", eventQueue.serializeHistory().dump(-1));
+  writeToFile(scenePath, eventQueue.serializeHistory().dump(-1));
 }

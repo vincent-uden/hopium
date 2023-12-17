@@ -59,6 +59,15 @@ const AppEvent APP_EVENTS[] = {
   exitProgram {}
 };
 
+const AppEvent NON_SERIALIZABLE[] = {
+  startRotate {},
+  splitPaneHorizontally {},
+  splitPaneVertically {},
+  collapseBoundary {},
+  stopRotate {},
+  exitProgram {}
+};
+
 using json = nlohmann::json;
 
 class EventQueue {
@@ -89,6 +98,8 @@ protected:
   std::vector<AppEvent> history;
 
   size_t historyIndex = -1;
+
+  bool serializable(const AppEvent& event);
 };
 
 #endif

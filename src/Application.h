@@ -48,6 +48,7 @@ private:
   int screenWidth = 1600;
   int screenHeight = 900;
   std::string layoutPath;
+  std::string scenePath;
 
   Renderer renderer;
   EventQueue eventQueue;

@@ -26,7 +26,7 @@ void EventQueue::postEvent(AppEvent event) {
 }
 
 void EventQueue::resetHistoryIndex() {
-  historyIndex = -1;
+  historyIndex = 0;
 }
 
 AppEvent EventQueue::pop() {
@@ -48,6 +48,10 @@ bool EventQueue::empty() {
   return eventQueue.empty();
 }
 
+size_t EventQueue::historySize() {
+  return history.size();
+}
+
 json EventQueue::serializeHistory() {
   json out;
 
@@ -57,8 +61,7 @@ json EventQueue::serializeHistory() {
     if (std::holds_alternative<groundPlaneHit>(e)) {
       groundPlaneHit hit = std::get<groundPlaneHit>(e);
       data["data"]["x"] = hit.x;
-      data["data"]["y"] = hit.y;
-      data["data"]["z"] = hit.z;
+      data["data"]["y"] = hit.y; data["data"]["z"] = hit.z;
       data["data"]["ray"]["position"]["x"] = hit.ray.position.x;
       data["data"]["ray"]["position"]["y"] = hit.ray.position.y;
       data["data"]["ray"]["position"]["z"] = hit.ray.position.z;
@@ -67,7 +70,9 @@ json EventQueue::serializeHistory() {
       data["data"]["ray"]["direction"]["z"] = hit.ray.direction.z;
     }
 
-    out["history"].push_back(data);
+    if (serializable(e)) {
+      out["history"].push_back(data);
+    }
   }
 
   return out;
@@ -96,4 +101,14 @@ void EventQueue::deserializeHistory(json state) {
 
     history.push_back(event);
   }
+}
+
+bool EventQueue::serializable(const AppEvent& event) {
+  bool serializable = true;
+  for (size_t i = 0; i < sizeof(NON_SERIALIZABLE) / sizeof(AppEvent); ++i) {
+    if (NON_SERIALIZABLE[i].index() == event.index()) {
+      serializable = false;
+    }
+  }
+  return serializable;
 }
