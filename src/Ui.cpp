@@ -478,6 +478,7 @@ UiToolList::UiToolList() {
   btnNames.push_back("Sketch");
   btnNames.push_back("Point");
   btnNames.push_back("Line");
+  btnNames.push_back("Extrude");
   pos = { 0, 0 };
 
   btnSize = {80, 80};
@@ -519,6 +520,11 @@ UiToolList::UiToolList() {
   btnBgs[2]->setOnClick([](Ui* p) {
       if (ApplicationState::getInstance()->sketchModeActive) {
         EventQueue::getInstance()->postEvent(toggleLineMode {});
+      }
+  });
+  btnBgs[3]->setOnClick([](Ui* p) {
+      if (ApplicationState::getInstance()->sketchModeActive) {
+        EventQueue::getInstance()->postEvent(toggleExtrudeMode {});
       }
   });
 }
@@ -566,6 +572,13 @@ void UiToolList::draw() {
         break;
       case 2:
         if (state->modeStack.isActive(state->line)) {
+          lbl->setColor(colorscheme->active);
+        } else {
+          lbl->setColor(colorscheme->onBackground);
+        }
+        break;
+      case 3:
+        if (state->modeStack.isActive(state->extrude)) {
           lbl->setColor(colorscheme->active);
         } else {
           lbl->setColor(colorscheme->onBackground);

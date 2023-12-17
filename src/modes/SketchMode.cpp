@@ -19,6 +19,9 @@ bool SketchMode::keyPress(KeyPress key) {
   case KEY_P:
     EventQueue::getInstance()->postEvent(togglePointMode {});
     break;
+  case KEY_E:
+    EventQueue::getInstance()->postEvent(toggleExtrudeMode {});
+    break;
   default:
     consumed = false;
   }

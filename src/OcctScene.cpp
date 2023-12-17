@@ -163,6 +163,11 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::rasterizeShapes() {
       for (std::shared_ptr<RasterShape>& rs:  createRasterShape(id, face)) {
         rasterShapes.push_back(rs);
       }
+    } else if (shape.ShapeType() == TopAbs_SOLID) {
+      TopoDS_Solid solid = TopoDS::Solid(shape);
+      for (std::shared_ptr<RasterShape>& rs:  createRasterShape(id, solid)) {
+        rasterShapes.push_back(rs);
+      }
     }
   }
 

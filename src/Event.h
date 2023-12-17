@@ -14,6 +14,7 @@ struct toggleSketchMode {};
 struct popMode {};
 struct togglePointMode {};
 struct toggleLineMode {};
+struct toggleExtrudeMode {};
 struct startRotate {};
 struct stopRotate {};
 struct splitPaneHorizontally { Vector2 mousePos; };
@@ -32,6 +33,7 @@ using AppEvent = std::variant<
   popMode,
   togglePointMode,
   toggleLineMode,
+  toggleExtrudeMode,
   startRotate,
   splitPaneHorizontally,
   splitPaneVertically,
@@ -49,6 +51,7 @@ const AppEvent APP_EVENTS[] = {
   popMode {},
   togglePointMode {},
   toggleLineMode {},
+  toggleExtrudeMode {},
   startRotate {},
   splitPaneHorizontally {},
   splitPaneVertically {},
@@ -65,6 +68,7 @@ const AppEvent NON_SERIALIZABLE[] = {
   splitPaneVertically {},
   collapseBoundary {},
   stopRotate {},
+  dumpShapes {},
   exitProgram {}
 };
 

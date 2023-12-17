@@ -55,6 +55,7 @@ Application::Application() {
   state->sketch = std::shared_ptr<Mode>(new SketchMode());
   state->point = std::shared_ptr<Mode>(new PointMode());
   state->line = std::shared_ptr<Mode>(new LineMode());
+  state->extrude = std::shared_ptr<Mode>(new ExtrudeMode());
 
   if (fileExists(scenePath)) {
     json history = json::parse(readFromFile(scenePath));
@@ -66,6 +67,7 @@ Application::Application() {
         std::visit([this](auto&& arg){ processEvent(arg); }, nextEvent.value());
       }
     }
+    state->scene->setShapes(state->occtScene->rasterizeShapes());
   }
 }
 
@@ -113,6 +115,14 @@ void Application::processEvent(toggleLineMode event) {
   }
 }
 
+void Application::processEvent(toggleExtrudeMode event) {
+  if (state->modeStack.isActive(state->extrude)) {
+    state->modeStack.exit(state->extrude);
+  } else {
+    state->modeStack.push(state->extrude);
+  }
+}
+
 void Application::processEvent(startRotate event) {
   state->holdingRotate = true;
 }
@@ -146,8 +156,7 @@ void Application::processEvent(groundPlaneHit event) {
   if (state->modeStack.isActive(state->point)) {
     state->occtScene->createPoint(event.x, event.y, event.z);
     state->scene->setPoints(state->occtScene->rasterizePoints());
-  }
-  if (state->modeStack.isActive(state->line)) {
+  } else if (state->modeStack.isActive(state->line)) {
     std::optional<std::shared_ptr<RasterVertex>> p = state->scene->queryVertex(event.ray, state->selectionThreshold);
     if (p.has_value()) {
       event.x = p.value()->x;
@@ -162,6 +171,14 @@ void Application::processEvent(groundPlaneHit event) {
       state->scene->setShapes(state->occtScene->rasterizeShapes());
       state->activePoints.clear();
       EventQueue::getInstance()->postEvent(toggleLineMode {});
+    }
+  } else if (state->modeStack.isActive(state->extrude)) {
+    std::optional<size_t> maybeId = ApplicationState::getInstance()
+      ->occtScene->idContainingPoint(event.x, event.y, event.z);
+
+    if (maybeId.has_value()) {
+      state->occtScene->extrude(maybeId.value(), 0.5);
+      state->scene->setShapes(state->occtScene->rasterizeShapes());
     }
   }
 }

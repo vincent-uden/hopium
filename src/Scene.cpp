@@ -127,6 +127,7 @@ Color RasterFace::passiveColor() {
 }
 
 RasterSolid::RasterSolid() {
+  color = WHITE;
 }
 
 RasterSolid::RasterSolid(std::vector<Vector3> vertices) {
