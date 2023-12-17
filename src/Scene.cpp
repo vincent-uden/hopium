@@ -129,8 +129,8 @@ Color RasterFace::passiveColor() {
 RasterSolid::RasterSolid() {
 }
 
-RasterSolid::RasterSolid(Mesh mesh) {
-  this->mesh = mesh;
+RasterSolid::RasterSolid(std::vector<Vector3> vertices) {
+  triangles = vertices;
   color.a = 150;
 }
 
@@ -138,7 +138,10 @@ RasterSolid::~RasterSolid() {
 }
 
 void RasterSolid::draw() {
-  // TODO
+  for (int i = 0; i < triangles.size(); i += 3) {
+    DrawTriangle3D(triangles[i], triangles[i + 1], triangles[i + 2], color);
+    DrawTriangle3D(triangles[i + 2], triangles[i + 1], triangles[i], color);
+  }
 }
 
 double RasterSolid::distanceFromRay(const Ray ray) {

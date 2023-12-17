@@ -87,14 +87,14 @@ private:
 class RasterSolid: public RasterShape {
 public:
   RasterSolid();
-  RasterSolid(Mesh mesh);
+  RasterSolid(std::vector<Vector3> vertices);
   ~RasterSolid();
 
   void draw() override;
   double distanceFromRay(const Ray ray) override;
 
 private:
-  Mesh mesh;
+  std::vector<Vector3> triangles;
 };
 
 class RasterTodo: public RasterShape {

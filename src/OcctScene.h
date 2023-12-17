@@ -34,6 +34,7 @@ public:
 
   void createPoint(double x, double y, double z);
   void createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold);
+  void extrude(size_t id, double extent);
   void dumpShapes();
 
   // This API is mega-subject to change.

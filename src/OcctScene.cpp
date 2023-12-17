@@ -1,5 +1,6 @@
 #include "OcctScene.h"
 #include <BRepMesh_IncrementalMesh.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
 #include <ShapeAnalysis_Wire.hxx>
 #include <ShapeExtend_Status.hxx>
 #include <TopoDS_Solid.hxx>
@@ -99,6 +100,24 @@ void OcctScene::createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold) {
   }
 }
 
+//TODO: Trigger this somehow
+void OcctScene::extrude(size_t id, double extent) {
+  TopoDS_Face toBeExtruded;
+  bool found = false;
+  for (const auto& [shapeId, shape]: shapes) {
+    if (shapeId == id && shape.ShapeType() == TopAbs_FACE) {
+      found = true;
+      toBeExtruded = TopoDS::Face(shape);
+    }
+  }
+
+  if (found) {
+    gp_Vec extrudeDirection(0, extent, 0);
+    TopoDS_Shape myBody = BRepPrimAPI_MakePrism(toBeExtruded, extrudeDirection);
+    shapes.push_back(std::pair(nextId++, myBody));
+  }
+}
+
 void OcctScene::dumpShapes() {
   std::cout << "Dumping shapes:" << std::endl;
   for (const auto& [id, shape]: shapes) {
@@ -150,7 +169,10 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::rasterizeShapes() {
   return rasterShapes;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Edge &shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(
+  const size_t& id,
+  const TopoDS_Edge &shape
+) {
   std::pair<gp_Pnt, gp_Pnt> points = getEdgePoints(shape);
 
   std::shared_ptr<RasterLine> line = std::shared_ptr<RasterLine>(new RasterLine(
@@ -171,7 +193,10 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const siz
   return out;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Wire& shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(
+  const size_t& id,
+  const TopoDS_Wire& shape
+) {
   std::vector<std::shared_ptr<RasterShape>> out;
   for (TopExp_Explorer ex(shape, TopAbs_EDGE); ex.More(); ex.Next()) {
     TopoDS_Edge edge = TopoDS::Edge(ex.Current());
@@ -182,7 +207,10 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const siz
   return out;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Face &shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(
+  const size_t& id,
+  const TopoDS_Face &shape
+) {
   std::vector<std::shared_ptr<RasterShape>> out;
   std::vector<Vector3> vertices;
 
@@ -190,7 +218,7 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const siz
   mesh.Perform();
   TopLoc_Location loc = shape.Location();
   Handle(Poly_Triangulation) triangulation = BRep_Tool::Triangulation(shape, loc);
-  for (int i = 0; i < triangulation->NbTriangles(); i++) {
+  for (int i = 0; i < triangulation->NbTriangles(); ++i) {
     Poly_Triangle tri = triangulation->Triangle(i+1);
 
     for (int j = 1; j < 4; j++) {
@@ -212,8 +240,12 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const siz
   return out;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Solid &shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(
+  const size_t& id,
+  const TopoDS_Solid &shape
+) {
   std::vector<std::shared_ptr<RasterShape>> out;
+  std::vector<Vector3> vertices;
 
   IMeshTools_Parameters params;
   params.Deflection = 0.01;
@@ -233,17 +265,32 @@ std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const siz
     TopLoc_Location loc = face.Location();
     Handle(Poly_Triangulation) triangulation = BRep_Tool::Triangulation(face, loc);
 
-    // TODO: Continue here once we can serialize scenes
+    for (int i = 0; i < triangulation->NbTriangles(); ++i) {
+      Poly_Triangle tri = triangulation->Triangle(i+1);
+
+      for (int j = 1; j < 4; j++) {
+        int cornerIndex = tri.Value(j);
+        gp_Pnt p = triangulation->Node(cornerIndex);
+        vertices.push_back(Vector3 {
+          static_cast<float>(p.X()),
+          static_cast<float>(p.Y()),
+          static_cast<float>(p.Z())
+        });
+      }
+    }
   }
 
-  std::shared_ptr<RasterSolid> solid(new RasterSolid());
+  std::shared_ptr<RasterSolid> solid(new RasterSolid(vertices));
   solid->id = id;
   out.push_back(solid);
 
   return out;
 }
 
-std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(const size_t& id, const TopoDS_Shape &shape) {
+std::vector<std::shared_ptr<RasterShape>> OcctScene::createRasterShape(
+  const size_t& id,
+  const TopoDS_Shape &shape
+) {
   std::shared_ptr<RasterTodo> todoShape = std::make_shared<RasterTodo>();
   todoShape->id = id;
   std::vector<std::shared_ptr<RasterShape>> out;
