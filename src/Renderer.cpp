@@ -535,8 +535,8 @@ void Renderer::init(int screenW, int screenH, std::shared_ptr<ShaderStore> shade
   this->screenW = screenW;
   this->screenH = screenH;
 
-  font = LoadFontEx("../assets/Geist/Geist-Regular.otf", 72, 0, 250);
-  SetTextureFilter(font.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
+  font = LoadFontEx("../assets/Geist/Geist-Regular.otf", 40, 0, 250);
+  SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
   colorscheme = std::shared_ptr<Colorscheme>(new Colorscheme(&font));
 
   Ui::colorscheme = colorscheme;

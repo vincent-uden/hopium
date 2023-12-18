@@ -3,6 +3,18 @@
 
 std::shared_ptr<Colorscheme> Ui::colorscheme = nullptr;
 
+void Ui::setOnClick(std::function<void (Ui *)> f) {
+  onClick = f;
+}
+
+void Ui::setOnMouseEnter(std::function<void (Ui *)> f) {
+  onMouseEnter = f;
+}
+
+void Ui::setOnMouseExit(std::function<void (Ui *)> f) {
+  onMouseExit = f;
+}
+
 UiText::UiText() {
     pos.x = 0;
     pos.y = 0;
@@ -73,18 +85,6 @@ void UiText::receiveMouseUp(Vector2 mousePos) {
 
 Vector2 UiText::getSize() {
   return size;
-}
-
-void Ui::setOnClick(std::function<void (Ui *)> f) {
-  onClick = f;
-}
-
-void Ui::setOnMouseEnter(std::function<void (Ui *)> f) {
-  onMouseEnter = f;
-}
-
-void Ui::setOnMouseExit(std::function<void (Ui *)> f) {
-  onMouseExit = f;
 }
 
 void UiText::setColor(Color c) {
@@ -660,7 +660,7 @@ UiIcon::UiIcon() {
 
     hoverTooltip = std::make_shared<UiText>();
     hoverTooltip->setColor(WHITE);
-    hoverTooltip->move(Vector2 { 0, 32 });
+    hoverTooltip->move(Vector2 { 4, 32 });
     hoverTooltipBg = std::make_shared<UiRect>();
     hoverTooltipBg->setColor(colorscheme->secondaryVariant);
     hoverTooltipBg->move(Vector2 { 0, 32 });
@@ -761,7 +761,7 @@ void UiIcon::setImgPath(std::string path) {
 
 void UiIcon::setHoverTooltip(std::string tooltip) {
   hoverTooltip->setText(tooltip);
-  hoverTooltipBg->setSize(hoverTooltip->getSize());
+  hoverTooltipBg->setSize(Vector2Add(hoverTooltip->getSize(), {12, 0}));
 }
 
 UiRow::UiRow() {
