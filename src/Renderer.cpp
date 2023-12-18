@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include <algorithm>
 
 Boundary::Boundary(std::shared_ptr<Colorscheme> colorscheme) {
   this->colorscheme = colorscheme;
@@ -243,6 +244,9 @@ Area::Area(
   case AreaType::TOOL_SELECTION:
     buildToolSelection();
     break;
+  case AreaType::CONSTRAINT_SELECTION:
+    buildConstraintSelection();
+    break;
   case AreaType::EMPTY:
     buildEmpty();
     break;
@@ -442,9 +446,44 @@ void Area::buildViewport3D() {
 
 void Area::buildToolSelection() {
   std::shared_ptr<Ui> toolList(new UiToolList());
-  minimumExtent = std::static_pointer_cast<UiToolList>(toolList)->btnSize.y;
+  toolList->move(Vector2 {0, 32});
+  minimumExtent = std::static_pointer_cast<UiToolList>(toolList)->btnSize.y + 32;
   addUi(toolList);
 
+  buildTypeDropDown();
+}
+
+void Area::buildConstraintSelection() {
+  std::shared_ptr<UiIcon> coincident = std::make_shared<UiIcon>();
+  coincident->setImgPath("../assets/icons/Coincident.png");
+  coincident->setHoverTooltip("Coincident");
+  std::shared_ptr<UiIcon> colinear = std::make_shared<UiIcon>();
+  colinear->setImgPath("../assets/icons/Colinear.png");
+  colinear->setHoverTooltip("Colinear");
+  std::shared_ptr<UiIcon> equal = std::make_shared<UiIcon>();
+  equal->setImgPath("../assets/icons/Equal.png");
+  equal->setHoverTooltip("Equal");
+  std::shared_ptr<UiIcon> midpoint = std::make_shared<UiIcon>();
+  midpoint->setImgPath("../assets/icons/Midpoint.png");
+  midpoint->setHoverTooltip("Midpoint");
+  std::shared_ptr<UiIcon> parallel = std::make_shared<UiIcon>();
+  parallel->setImgPath("../assets/icons/Parallel.png");
+  parallel->setHoverTooltip("Parallel");
+  std::shared_ptr<UiIcon> perpendicular = std::make_shared<UiIcon>();
+  perpendicular->setImgPath("../assets/icons/Perpendicular.png");
+  perpendicular->setHoverTooltip("Perpendicular");
+
+  std::shared_ptr<UiRow> constraintRow = std::make_shared<UiRow>();
+  constraintRow->addChild(coincident);
+  constraintRow->addChild(colinear);
+  constraintRow->addChild(equal);
+  constraintRow->addChild(midpoint);
+  constraintRow->addChild(parallel);
+  constraintRow->addChild(perpendicular);
+
+  std::shared_ptr<Ui> ptr = std::static_pointer_cast<Ui>(constraintRow);
+  ptr->move(Vector2 {4, 32});
+  addUi(ptr);
   buildTypeDropDown();
 }
 
@@ -456,6 +495,7 @@ void Area::buildTypeDropDown() {
   std::vector<std::string> areaTypes;
   areaTypes.push_back("3D Viewport");
   areaTypes.push_back("Tool Selection");
+  areaTypes.push_back("Constraints");
   areaTypes.push_back("Empty");
 
   std::shared_ptr<UiDropDown> typePicker(new UiDropDown("Area Type", areaTypes));
@@ -469,6 +509,9 @@ void Area::buildTypeDropDown() {
       } else if (selected == "Tool Selection") {
         this->type = AreaType::TOOL_SELECTION;
         buildToolSelection();
+      } else if (selected == "Constraints") {
+        this->type = AreaType::CONSTRAINT_SELECTION;
+        buildConstraintSelection();
       } else if (selected == "Empty") {
         this->type = AreaType::EMPTY;
         buildEmpty();

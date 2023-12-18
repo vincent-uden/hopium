@@ -1,4 +1,5 @@
 #include "Ui.h"
+#include "raylib.h"
 
 std::shared_ptr<Colorscheme> Ui::colorscheme = nullptr;
 
@@ -68,6 +69,10 @@ void UiText::receiveMouseUp(Vector2 mousePos) {
       }
     }
   }
+}
+
+Vector2 UiText::getSize() {
+  return size;
 }
 
 void Ui::setOnClick(std::function<void (Ui *)> f) {
@@ -140,6 +145,10 @@ void UiRect::receiveMouseUp(Vector2 mousePos) {
       onClick(this);
     }
   }
+}
+
+Vector2 UiRect::getSize() {
+  return Vector2 { bounds.width, bounds.height };
 }
 
 void UiRect::setColor(Color c) {
@@ -313,6 +322,14 @@ void UiDropDown::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
+Vector2 UiDropDown::getSize() {
+  if (open) {
+    return listSize;
+  } else {
+    return btnSize;
+  }
+}
+
 void UiDropDown::setOnSelected(std::function<void(std::string)> f) {
   onSelected = f;
 }
@@ -445,6 +462,10 @@ void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
 }
 
 void Ui3DViewport::receiveMouseUp(Vector2 mousePos) {
+}
+
+Vector2 Ui3DViewport::getSize() {
+  return Vector2 { areaSreenRect->width, areaSreenRect->height };
 }
 
 void Ui3DViewport::setScene(std::shared_ptr<Scene> scene) {
@@ -628,3 +649,209 @@ void UiToolList::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
+Vector2 UiToolList::getSize() {
+  return Vector2 { (btnSize.x + margin) * btnNames.size() - margin, btnSize.y };
+}
+
+UiIcon::UiIcon() {
+    pos.x = 0;
+    pos.y = 0;
+    loadedTexture = false;
+
+    hoverTooltip = std::make_shared<UiText>();
+    hoverTooltip->setColor(WHITE);
+    hoverTooltip->move(Vector2 { 0, 32 });
+    hoverTooltipBg = std::make_shared<UiRect>();
+    hoverTooltipBg->setColor(colorscheme->secondaryVariant);
+    hoverTooltipBg->move(Vector2 { 0, 32 });
+    bg = std::make_shared<UiRect>();
+    bg->setColor(colorscheme->secondaryVariant);
+
+    tooltipDelay = std::chrono::milliseconds(1000);
+}
+
+UiIcon::~UiIcon() {
+  if (loadedTexture) {
+    UnloadTexture(texture);
+  }
+}
+
+void UiIcon::move(Vector2 distance) {
+    pos.x += distance.x;
+    pos.y += distance.y;
+
+    hoverTooltip->move(distance);
+    hoverTooltipBg->move(distance);
+    bg->move(distance);
+}
+
+void UiIcon::setPos(Vector2 pos) {
+    Vector2 diff;
+    diff.x = pos.x - this->pos.x;
+    diff.y = pos.y - this->pos.y;
+    move(diff);
+}
+
+void UiIcon::draw() {
+  if (hovered) {
+    bg->draw();
+
+  }
+  DrawTexture(texture, static_cast<int>(pos.x), static_cast<int>(pos.y), WHITE);
+
+  if (hovered && hoverBegin + tooltipDelay > ApplicationState::getInstance()->currentTime) {
+    hoverTooltipBg->draw();
+    hoverTooltip->draw();
+  }
+}
+
+void UiIcon::receiveMousePos(Vector2 mousePos) {
+  if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
+    if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
+      // Mouse inside of bounds
+      if (!hovered) {
+        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        hoverBegin = ApplicationState::getInstance()->currentTime;
+        if (onMouseEnter) {
+          onMouseEnter(this);
+        }
+      }
+      hovered = true;
+      return;
+    }
+  }
+
+  if (hovered) {
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    if (onMouseExit) {
+      onMouseExit(this);
+    }
+  }
+
+  hovered = false;
+}
+
+void UiIcon::receiveMouseDown(Vector2 mousePos) {
+}
+
+void UiIcon::receiveMouseUp(Vector2 mousePos) {
+  if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
+    if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
+      if (onClick) {
+        onClick(this);
+      }
+    }
+  }
+}
+
+Vector2 UiIcon::getSize() {
+  return size;
+}
+
+void UiIcon::setImgPath(std::string path) {
+  if (loadedTexture) {
+    UnloadTexture(texture);
+  }
+  texture = LoadTexture(path.c_str());
+  loadedTexture = true;
+  size.x = texture.width;
+  size.y = texture.height;
+  bg->setSize(size);
+}
+
+void UiIcon::setHoverTooltip(std::string tooltip) {
+  hoverTooltip->setText(tooltip);
+  hoverTooltipBg->setSize(hoverTooltip->getSize());
+}
+
+UiRow::UiRow() {
+    pos.x = 0;
+    pos.y = 0;
+}
+
+UiRow::~UiRow() {
+  children.clear();
+}
+
+void UiRow::move(Vector2 distance) {
+    pos.x += distance.x;
+    pos.y += distance.y;
+
+    for (const std::shared_ptr<Ui>& child: children) {
+      child->move(distance);
+    }
+}
+
+void UiRow::setPos(Vector2 pos) {
+    Vector2 diff;
+    diff.x = pos.x - this->pos.x;
+    diff.y = pos.y - this->pos.y;
+    move(diff);
+}
+
+void UiRow::draw() {
+  for (const std::shared_ptr<Ui>& child: children) {
+    child->draw();
+  }
+}
+
+void UiRow::receiveMousePos(Vector2 mousePos) {
+  for (const auto& child: children) {
+    child->receiveMousePos(mousePos);
+  }
+  if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
+    if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
+      if (!hovered) {
+        if (onMouseEnter) { onMouseEnter(this);
+        }
+      }
+      hovered = true;
+      return;
+    }
+  }
+
+  if (hovered) {
+    if (onMouseExit) {
+      onMouseExit(this);
+    }
+  }
+
+  hovered = false;
+}
+
+void UiRow::receiveMouseDown(Vector2 mousePos) {
+    for (const auto& child: children) {
+      child->receiveMouseDown(mousePos);
+    }
+}
+
+void UiRow::receiveMouseUp(Vector2 mousePos) {
+  if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
+    if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
+      if (onClick) {
+        onClick(this);
+      }
+
+      for (const auto& child: children) {
+        child->receiveMouseUp(mousePos);
+      }
+    }
+  }
+}
+
+Vector2 UiRow::getSize() {
+  return Vector2 { size.x, size.y };
+}
+
+void UiRow::addChild(std::shared_ptr<Ui> child) {
+  if (children.size() == 0) {
+    child->move(Vector2 { size.x, 0 });
+    size = child->getSize();
+  } else {
+    child->move(Vector2 { size.x + margin, 0 });
+    size.x += child->getSize().x + margin;
+    size.y = std::max(size.y, child->getSize().y);
+  }
+
+  children.push_back(child);
+}

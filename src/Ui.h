@@ -2,8 +2,6 @@
 #define UDEN_UI
 
 #include <memory>
-#include <raylib.h>
-#include <raymath.h>
 #include <string>
 #include <vector>
 #include <functional>
@@ -16,6 +14,9 @@
 #include "Event.h"
 #include "Scene.h"
 
+#include <raylib.h>
+#include <raymath.h>
+
 class Ui {
 public:
   virtual void move(Vector2 distance)=0;
@@ -24,6 +25,7 @@ public:
   virtual void receiveMousePos(Vector2 mousePos)=0;
   virtual void receiveMouseDown(Vector2 mousePos)=0;
   virtual void receiveMouseUp(Vector2 mousePos)=0;
+  virtual Vector2 getSize()=0;
 
   void setOnClick(std::function<void(Ui*)>);
   void setOnMouseEnter(std::function<void(Ui*)>);
@@ -48,6 +50,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
 
   void setColor(Color c);
   void setText(std::string text);
@@ -73,6 +76,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
 
   void setColor(Color c);
   void setSize(Vector2 size);
@@ -96,6 +100,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
 
   void setOnSelected(std::function<void(std::string)> f);
 
@@ -134,6 +139,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
 
   void setScene(std::shared_ptr<Scene> scene);
   void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
@@ -175,6 +181,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
 
   Vector2 btnSize;
 
@@ -185,6 +192,61 @@ private:
   std::vector<std::string> btnNames;
   std::vector<std::shared_ptr<UiText>> btnLbls;
   std::vector<std::shared_ptr<UiRect>> btnBgs;
+};
+
+class UiIcon: public Ui {
+public:
+  UiIcon();
+  ~UiIcon();
+
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
+
+  void setImgPath(std::string path);
+  void setHoverTooltip(std::string tooltip);
+
+private:
+  Texture2D texture;
+  bool loadedTexture;
+  bool hovered;
+  std::chrono::time_point<std::chrono::system_clock> hoverBegin;
+  std::chrono::duration<double> tooltipDelay;
+
+  std::shared_ptr<UiText> hoverTooltip;
+  std::shared_ptr<UiRect> hoverTooltipBg;
+  std::shared_ptr<UiRect> bg;
+
+  Vector2 pos;
+  Vector2 size;
+};
+
+class UiRow: public Ui {
+public:
+  UiRow();
+  ~UiRow();
+
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
+
+  void addChild(std::shared_ptr<Ui> child);
+
+private:
+  std::vector<std::shared_ptr<Ui>> children;
+  int margin = 4;
+
+  Vector2 pos;
+  Vector2 size;
+  bool hovered;
 };
 
 #endif

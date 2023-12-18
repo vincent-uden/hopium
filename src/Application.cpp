@@ -12,6 +12,7 @@ Application* Application::getInstance() {
 
 void Application::update() {
   state->modeStack.update();
+  state->currentTime = std::chrono::system_clock::now();
 
   Vector2 mousePos = GetMousePosition();
   renderer.receiveMousePos(mousePos);

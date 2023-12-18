@@ -35,6 +35,8 @@ public:
 
   double selectionThreshold = 0.6;
 
+  std::chrono::time_point<std::chrono::system_clock> currentTime;
+
 private:
   ApplicationState();
   static ApplicationState* instance;

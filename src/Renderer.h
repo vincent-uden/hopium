@@ -70,6 +70,7 @@ enum AreaType {
   EMPTY,
   VIEWPORT3D,
   TOOL_SELECTION,
+  CONSTRAINT_SELECTION,
 };
 
 class Area {
@@ -130,6 +131,7 @@ private:
   // Internal constructors for different types of areas
   void buildViewport3D();
   void buildToolSelection();
+  void buildConstraintSelection();
   void buildEmpty();
   void buildTypeDropDown();
   void resetType();
