@@ -17,15 +17,23 @@
 #include "../src/Ui.h"
 #include "../src/OcctScene.h"
 
-#define ADD_TEST(func) \
-  tests.push_back({ func, #func});
+#define ADD_TEST(func, group) \
+  tests.push_back({ func, #func, group });
 
 #define ASSERT(expr, msg) \
   if (expr) { } else { std::cout << msg << std::endl; return(1); }
 
+enum TestGroup {
+  AREA_SPLITTING,
+  MODES,
+  GEOMETRY,
+  HISTORY
+};
+
 typedef struct {
   std::function<int()> f;
   std::string name;
+  TestGroup group;
 } Test;
 
 std::string prettifyFunctionName(std::string name) {
@@ -466,41 +474,76 @@ int serializeAndDeserializeEventHistoryProducesUnity() {
   return 0;
 }
 
+typedef struct {
+  std::optional<TestGroup> group;
+} CliArgs ;
+
+std::optional<TestGroup> group(std::string name) {
+  if (name == "AREA_SPLITTING") {
+    return std::optional(TestGroup::AREA_SPLITTING);
+  } else if (name == "MODES") {
+    return std::optional(TestGroup::MODES);
+  } else if (name == "GEOMETRY") {
+    return std::optional(TestGroup::GEOMETRY);
+  } else if (name== "HISTORY") {
+    return std::optional(TestGroup::HISTORY);
+  }
+
+  return std::nullopt;
+}
+
+CliArgs parseCliArgs(int argc, char** argv) {
+  CliArgs args;
+
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "--group") == 0 || strcmp(argv[i], "-g") == 0) {
+      args.group = group(std::string(argv[++i]));
+    }
+  }
+
+  return args;
+}
+
 int main(int argc, char** argv) {
   std::vector<Test> tests;
 
-  ADD_TEST(windowCanBeSplitIntoArea);
-  ADD_TEST(windowCanBeSplitVerticallyRepeatedly);
-  ADD_TEST(windowCanBeSplitHorizontallyRepeatedly);
-  ADD_TEST(deepRecursiveSplittingProducesCorrectSizes);
-  ADD_TEST(serializeAndDeserializeRenderer);
-  ADD_TEST(canSplitAndCollapseBoundary);
-  ADD_TEST(collapsingBoundaryReconnectsNowAdjacentAreas);
-  ADD_TEST(nestedSplitAndCollapseDoesntBreakGraph);
-  ADD_TEST(modeStackManipulatesCorrectly);
-  ADD_TEST(wireFixProducesWorkingWire);
-  ADD_TEST(serializeAndDeserializeEventHistoryProducesUnity);
+  ADD_TEST(windowCanBeSplitIntoArea, AREA_SPLITTING);
+  ADD_TEST(windowCanBeSplitVerticallyRepeatedly, AREA_SPLITTING);
+  ADD_TEST(windowCanBeSplitHorizontallyRepeatedly, AREA_SPLITTING);
+  ADD_TEST(deepRecursiveSplittingProducesCorrectSizes, AREA_SPLITTING);
+  ADD_TEST(serializeAndDeserializeRenderer, AREA_SPLITTING);
+  ADD_TEST(canSplitAndCollapseBoundary, AREA_SPLITTING);
+  ADD_TEST(collapsingBoundaryReconnectsNowAdjacentAreas, AREA_SPLITTING);
+  ADD_TEST(nestedSplitAndCollapseDoesntBreakGraph, AREA_SPLITTING);
+  ADD_TEST(modeStackManipulatesCorrectly, MODES);
+  ADD_TEST(wireFixProducesWorkingWire, GEOMETRY);
+  ADD_TEST(serializeAndDeserializeEventHistoryProducesUnity, HISTORY);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
   }
   padToWidest(tests);
 
+  CliArgs args = parseCliArgs(argc, argv);
   std::cout << "Running Tests" << std::endl;
   std::cout << "=========================" << std::endl;
   int passed = 0;
+  int total = 0;
   for (auto test : tests) {
-    std::cout << test.name << " | ";
-    int result = test.f();
-    printf("%c[%dm", 0x1B, result == 0 ? 32 : 31);
-    std::cout  << (result == 0 ? "PASSED" : "FAILED") << std::endl;
-    printf("%c[%dm", 0x1B, 0);
-    if (result == 0) {
-      ++passed;
+    if (!args.group.has_value() || args.group.value() == test.group) {
+      std::cout << test.name << " | ";
+      int result = test.f();
+      printf("%c[%dm", 0x1B, result == 0 ? 32 : 31);
+      std::cout  << (result == 0 ? "PASSED" : "FAILED") << std::endl;
+      printf("%c[%dm", 0x1B, 0);
+      if (result == 0) {
+        ++passed;
+      }
+      ++total;
     }
   }
-  std::cout << passed << "/" << tests.size() << " tests passed" << std::endl;;
+  std::cout << passed << "/" << total << " tests passed" << std::endl;;
   if (tests.size() - passed > 0) {
-    std::cout << tests.size() - passed << " tests failed" << std::endl;
+    std::cout << total - passed << " tests failed" << std::endl;
   }
 }
