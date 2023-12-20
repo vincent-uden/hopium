@@ -70,6 +70,7 @@ public:
   ConstraintGraph();
   ~ConstraintGraph();
 
+  bool triconnected();
   STree analyze();
   int deficit();
   int maxFlow(std::shared_ptr<GeometricElement> source, std::shared_ptr<GeometricElement> sink);
@@ -82,7 +83,6 @@ protected:
   std::vector<std::shared_ptr<GeometricElement>> vertices;
   std::vector<std::shared_ptr<Constraint>> edges;
 
-  bool triconnected();
   std::pair<ConstraintGraph,ConstraintGraph> separatingGraphs();
 };
 

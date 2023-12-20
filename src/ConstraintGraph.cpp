@@ -118,7 +118,17 @@ void ConstraintGraph::connect(std::shared_ptr<GeometricElement> a, std::shared_p
 }
 
 bool ConstraintGraph::triconnected() {
-  return false;
+  for (size_t i = 0; i < vertices.size(); ++i) {
+    for (size_t j = i + 1; j < vertices.size(); ++j) {
+      std::shared_ptr<GeometricElement> s = vertices[i];
+      std::shared_ptr<GeometricElement> t = vertices[j];
+
+      if (maxFlow(s,t) < 3) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 

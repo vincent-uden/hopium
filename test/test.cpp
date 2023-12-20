@@ -568,6 +568,45 @@ int maxFlowAlgorithmProducesCorrectSolution() {
   return 0;
 }
 
+int canCorrectlyClassifyTriconnectedGraph() {
+  std::shared_ptr<GeometricElement> e0 = std::make_shared<GeometricElement>(GeometricType::POINT, "e0");
+  std::shared_ptr<GeometricElement> e1 = std::make_shared<GeometricElement>(GeometricType::POINT, "e1");
+  std::shared_ptr<GeometricElement> e2 = std::make_shared<GeometricElement>(GeometricType::POINT, "e2");
+  std::shared_ptr<GeometricElement> e3 = std::make_shared<GeometricElement>(GeometricType::POINT, "e3");
+
+  std::shared_ptr<Constraint> c01 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c01");
+  std::shared_ptr<Constraint> c12 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c12");
+  std::shared_ptr<Constraint> c23 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c23");
+  std::shared_ptr<Constraint> c30 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c30");
+  std::shared_ptr<Constraint> c02 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c02");
+  std::shared_ptr<Constraint> c13 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c13");
+
+  ConstraintGraph G;
+  G.addVertex(e0);
+  G.addVertex(e1);
+  G.addVertex(e2);
+  G.addVertex(e3);
+
+  G.connect(e0, e1, c01);
+  G.connect(e1, e2, c12);
+  G.connect(e2, e3, c23);
+  G.connect(e3, e0, c30);
+  G.connect(e0, e2, c02);
+
+  ASSERT(!G.triconnected(), "Graph shouldn't be triconnected yet");
+
+  G.connect(e1, e3, c13);
+  ASSERT(G.triconnected(), "Graph should be triconnected");
+
+  std::shared_ptr<GeometricElement> e4 = std::make_shared<GeometricElement>(GeometricType::POINT, "e4");
+  std::shared_ptr<Constraint> c14 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c14");
+  G.addVertex(e4);
+  G.connect(e1, e4, c14);
+  ASSERT(!G.triconnected(), "Graph shouldn't be triconnected now");
+
+  return 0;
+}
+
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -616,6 +655,7 @@ int main(int argc, char** argv) {
   ADD_TEST(serializeAndDeserializeEventHistoryProducesUnity, HISTORY);
   ADD_TEST(breadthFirstSearchProducesShortestPath, CONSTRAINT_GRAPH);
   ADD_TEST(maxFlowAlgorithmProducesCorrectSolution, CONSTRAINT_GRAPH);
+  ADD_TEST(canCorrectlyClassifyTriconnectedGraph, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
