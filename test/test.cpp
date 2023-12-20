@@ -16,6 +16,7 @@
 #include "../src/Renderer.h"
 #include "../src/Ui.h"
 #include "../src/OcctScene.h"
+#include "../src/ConstraintGraph.h"
 
 #define ADD_TEST(func, group) \
   tests.push_back({ func, #func, group });
@@ -27,7 +28,8 @@ enum TestGroup {
   AREA_SPLITTING,
   MODES,
   GEOMETRY,
-  HISTORY
+  HISTORY,
+  CONSTRAINT_GRAPH,
 };
 
 typedef struct {
@@ -474,6 +476,51 @@ int serializeAndDeserializeEventHistoryProducesUnity() {
   return 0;
 }
 
+int breadthFirstSearchProducesShortestPath() {
+  ConstraintGraph G;
+
+  std::shared_ptr<GeometricElement> e0 = std::make_shared<GeometricElement>(GeometricType::POINT);
+  std::shared_ptr<GeometricElement> e1 = std::make_shared<GeometricElement>(GeometricType::POINT);
+  std::shared_ptr<GeometricElement> e2 = std::make_shared<GeometricElement>(GeometricType::POINT);
+  std::shared_ptr<GeometricElement> e3 = std::make_shared<GeometricElement>(GeometricType::POINT);
+  std::shared_ptr<GeometricElement> e4 = std::make_shared<GeometricElement>(GeometricType::POINT);
+  std::shared_ptr<GeometricElement> e5 = std::make_shared<GeometricElement>(GeometricType::POINT);
+
+  std::shared_ptr<Constraint> c12 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+  std::shared_ptr<Constraint> c01 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+  std::shared_ptr<Constraint> c03 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+  std::shared_ptr<Constraint> c04 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+  std::shared_ptr<Constraint> c35 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+  std::shared_ptr<Constraint> c45 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+
+  G.addVertex(e0);
+  G.addVertex(e1);
+  G.addVertex(e2);
+  G.addVertex(e3);
+  G.addVertex(e4);
+  G.addVertex(e5);
+
+  G.connect(e2, e1, c12);
+  G.connect(e0, e1, c01);
+  G.connect(e0, e3, c03);
+  G.connect(e0, e4, c04);
+  G.connect(e3, e5, c35);
+  G.connect(e4, e5, c45);
+
+  std::optional<std::vector<std::shared_ptr<Constraint>>> shortestPath = G.breadthFirstSearch(e2, e5);
+  ASSERT(shortestPath.has_value(), "There should be a path");
+
+  std::vector<std::shared_ptr<Constraint>> path = shortestPath.value();
+  ASSERT(path.size() == 4, "There should be 4 constraints in the path");
+
+  std::vector<std::shared_ptr<Constraint>> expectedPath = { c12, c01, c03, c35 };
+  for (size_t i = 0; i < path.size() - 1; ++i) {
+    ASSERT(expectedPath[i] == path[i], "The constraints should be the same");
+  }
+
+  return 0;
+}
+
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -487,6 +534,8 @@ std::optional<TestGroup> group(std::string name) {
     return std::optional(TestGroup::GEOMETRY);
   } else if (name== "HISTORY") {
     return std::optional(TestGroup::HISTORY);
+  } else if (name == "CONSTRAINT_GRAPH") {
+    return std::optional(TestGroup::CONSTRAINT_GRAPH);
   }
 
   return std::nullopt;
@@ -518,6 +567,7 @@ int main(int argc, char** argv) {
   ADD_TEST(modeStackManipulatesCorrectly, MODES);
   ADD_TEST(wireFixProducesWorkingWire, GEOMETRY);
   ADD_TEST(serializeAndDeserializeEventHistoryProducesUnity, HISTORY);
+  ADD_TEST(breadthFirstSearchProducesShortestPath, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
