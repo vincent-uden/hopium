@@ -3,6 +3,12 @@
 
 Constraint::Constraint(ConstraintType type) {
   this->type = type;
+  label = "";
+}
+
+Constraint::Constraint(ConstraintType type, std::string label) {
+  this->type = type;
+  this->label = label;
 }
 
 Constraint::~Constraint() {
@@ -45,6 +51,12 @@ int Constraint::weight() {
 
 GeometricElement::GeometricElement(GeometricType type) {
   this->type = type;
+  label = "";
+}
+
+GeometricElement::GeometricElement(GeometricType type, std::string label) {
+  this->type = type;
+  this->label = label;
 }
 
 GeometricElement::~GeometricElement() {
@@ -150,6 +162,10 @@ std::optional<std::vector<std::shared_ptr<Constraint>>> ConstraintGraph::breadth
         other->parentEdge = edge;
       }
     }
+  }
+
+  for (const auto& v: vertices) {
+    v->explored = false;
   }
 
   if (v.get() == end.get()) {

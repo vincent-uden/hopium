@@ -479,19 +479,19 @@ int serializeAndDeserializeEventHistoryProducesUnity() {
 int breadthFirstSearchProducesShortestPath() {
   ConstraintGraph G;
 
-  std::shared_ptr<GeometricElement> e0 = std::make_shared<GeometricElement>(GeometricType::POINT);
-  std::shared_ptr<GeometricElement> e1 = std::make_shared<GeometricElement>(GeometricType::POINT);
-  std::shared_ptr<GeometricElement> e2 = std::make_shared<GeometricElement>(GeometricType::POINT);
-  std::shared_ptr<GeometricElement> e3 = std::make_shared<GeometricElement>(GeometricType::POINT);
-  std::shared_ptr<GeometricElement> e4 = std::make_shared<GeometricElement>(GeometricType::POINT);
-  std::shared_ptr<GeometricElement> e5 = std::make_shared<GeometricElement>(GeometricType::POINT);
+  std::shared_ptr<GeometricElement> e0 = std::make_shared<GeometricElement>(GeometricType::POINT, "e0");
+  std::shared_ptr<GeometricElement> e1 = std::make_shared<GeometricElement>(GeometricType::POINT, "e1");
+  std::shared_ptr<GeometricElement> e2 = std::make_shared<GeometricElement>(GeometricType::POINT, "e2");
+  std::shared_ptr<GeometricElement> e3 = std::make_shared<GeometricElement>(GeometricType::POINT, "e3");
+  std::shared_ptr<GeometricElement> e4 = std::make_shared<GeometricElement>(GeometricType::POINT, "e4");
+  std::shared_ptr<GeometricElement> e5 = std::make_shared<GeometricElement>(GeometricType::POINT, "e5");
 
-  std::shared_ptr<Constraint> c12 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
-  std::shared_ptr<Constraint> c01 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
-  std::shared_ptr<Constraint> c03 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
-  std::shared_ptr<Constraint> c04 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
-  std::shared_ptr<Constraint> c35 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
-  std::shared_ptr<Constraint> c45 = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+  std::shared_ptr<Constraint> c12 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c12");
+  std::shared_ptr<Constraint> c01 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c01");
+  std::shared_ptr<Constraint> c03 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c03");
+  std::shared_ptr<Constraint> c04 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c04");
+  std::shared_ptr<Constraint> c35 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c35");
+  std::shared_ptr<Constraint> c45 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c45");
 
   G.addVertex(e0);
   G.addVertex(e1);
@@ -514,6 +514,14 @@ int breadthFirstSearchProducesShortestPath() {
   ASSERT(path.size() == 4, "There should be 4 constraints in the path");
 
   std::vector<std::shared_ptr<Constraint>> expectedPath = { c12, c01, c03, c35 };
+  for (size_t i = 0; i < path.size() - 1; ++i) {
+    ASSERT(expectedPath[i] == path[i], "The constraints should be the same");
+  }
+
+  shortestPath = G.breadthFirstSearch(e4, e1);
+  ASSERT(shortestPath.has_value(), "There should be a path");
+  path = shortestPath.value();
+  expectedPath = { c04, c01 };
   for (size_t i = 0; i < path.size() - 1; ++i) {
     ASSERT(expectedPath[i] == path[i], "The constraints should be the same");
   }

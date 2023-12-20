@@ -21,9 +21,11 @@ enum ConstraintType {
 class Constraint {
 public:
   Constraint(ConstraintType type);
+  Constraint(ConstraintType type, std::string label);
   ~Constraint();
 
   int weight();
+  std::string label;
 
 private:
   ConstraintType type;
@@ -37,6 +39,7 @@ enum GeometricType {
 class GeometricElement {
 public:
   GeometricElement(GeometricType type);
+  GeometricElement(GeometricType type, std::string label);
   ~GeometricElement();
 
   int weight();
@@ -46,6 +49,7 @@ public:
   std::shared_ptr<GeometricElement> parent;
   std::shared_ptr<Constraint> parentEdge;
   bool explored = false;
+  std::string label;
 
 private:
   GeometricType type;
