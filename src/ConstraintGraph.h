@@ -26,6 +26,7 @@ public:
 
   int weight();
   std::string label;
+  int flow = 0;
 
 private:
   ConstraintType type;
@@ -71,6 +72,7 @@ public:
 
   STree analyze();
   int deficit();
+  int maxFlow(std::shared_ptr<GeometricElement> source, std::shared_ptr<GeometricElement> sink);
   std::optional<std::vector<std::shared_ptr<Constraint>>> breadthFirstSearch(std::shared_ptr<GeometricElement> start, std::shared_ptr<GeometricElement> end);
   void addVertex(std::shared_ptr<GeometricElement> element);
   void addVirtualEdge(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b);
@@ -82,7 +84,6 @@ protected:
 
   bool triconnected();
   std::pair<ConstraintGraph,ConstraintGraph> separatingGraphs();
-  int maxFlow(std::shared_ptr<GeometricElement> source, std::shared_ptr<GeometricElement> sink);
 };
 
 

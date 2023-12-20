@@ -1,5 +1,6 @@
 #include "ConstraintGraph.h"
 #include <algorithm>
+#include <iostream>
 
 Constraint::Constraint(ConstraintType type) {
   this->type = type;
@@ -113,6 +114,7 @@ void ConstraintGraph::addVertex(std::shared_ptr<GeometricElement> element) {
 void ConstraintGraph::connect(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b, std::shared_ptr<Constraint> c) {
   a->edges.push_back(std::make_pair(c, b));
   b->edges.push_back(std::make_pair(c, a));
+  edges.push_back(c);
 }
 
 bool ConstraintGraph::triconnected() {
@@ -130,12 +132,20 @@ int ConstraintGraph::maxFlow(
   std::shared_ptr<GeometricElement> sink
 ) {
   // Ford-Fulkerson algorithm
-  std::vector<int> flow;
-  for (const auto& e: edges) {
-    flow.push_back(0);
+  int flow = 0;
+  std::optional<std::vector<std::shared_ptr<Constraint>>> path;
+  while ( (path = breadthFirstSearch(source, sink)).has_value() ) {
+    for (const auto& e: path.value()) {
+      e->flow++;
+    }
+    flow++;
   }
 
-  return -1;
+  for (const auto& e: edges) {
+    e->flow = 0;
+  }
+
+  return flow;
 }
 
 std::optional<std::vector<std::shared_ptr<Constraint>>> ConstraintGraph::breadthFirstSearch(
@@ -155,7 +165,7 @@ std::optional<std::vector<std::shared_ptr<Constraint>>> ConstraintGraph::breadth
     }
 
     for (const auto& [edge, other] : v->edges) {
-      if (!other->explored) {
+      if (!other->explored && edge->flow == 0) {
         Q.push(other);
         other->explored = true;
         other->parent = v;

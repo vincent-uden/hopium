@@ -529,6 +529,45 @@ int breadthFirstSearchProducesShortestPath() {
   return 0;
 }
 
+int maxFlowAlgorithmProducesCorrectSolution() {
+  ConstraintGraph G;
+
+  std::shared_ptr<GeometricElement> e0 = std::make_shared<GeometricElement>(GeometricType::POINT, "e0");
+  std::shared_ptr<GeometricElement> e1 = std::make_shared<GeometricElement>(GeometricType::POINT, "e1");
+  std::shared_ptr<GeometricElement> e2 = std::make_shared<GeometricElement>(GeometricType::POINT, "e2");
+  std::shared_ptr<GeometricElement> e3 = std::make_shared<GeometricElement>(GeometricType::POINT, "e3");
+  std::shared_ptr<GeometricElement> e4 = std::make_shared<GeometricElement>(GeometricType::POINT, "e4");
+  std::shared_ptr<GeometricElement> e5 = std::make_shared<GeometricElement>(GeometricType::POINT, "e5");
+
+  std::shared_ptr<Constraint> c12 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c12");
+  std::shared_ptr<Constraint> c01 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c01");
+  std::shared_ptr<Constraint> c03 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c03");
+  std::shared_ptr<Constraint> c04 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c04");
+  std::shared_ptr<Constraint> c35 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c35");
+  std::shared_ptr<Constraint> c45 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "c45");
+
+  G.addVertex(e0);
+  G.addVertex(e1);
+  G.addVertex(e2);
+  G.addVertex(e3);
+  G.addVertex(e4);
+  G.addVertex(e5);
+
+  G.connect(e2, e1, c12);
+  G.connect(e0, e1, c01);
+  G.connect(e0, e3, c03);
+  G.connect(e0, e4, c04);
+  G.connect(e3, e5, c35);
+  G.connect(e4, e5, c45);
+
+  ASSERT(1 == G.maxFlow(e2, e0), "Flow should be 1 from 2 -> 0");
+  ASSERT(2 == G.maxFlow(e0, e5), "Flow should be 2 from 0 -> 5");
+  ASSERT(2 == G.maxFlow(e5, e0), "Flow should be 2 from 5 -> 0");
+  ASSERT(1 == G.maxFlow(e2, e5), "Flow should be 1 from 2 -> 5");
+
+  return 0;
+}
+
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -576,6 +615,7 @@ int main(int argc, char** argv) {
   ADD_TEST(wireFixProducesWorkingWire, GEOMETRY);
   ADD_TEST(serializeAndDeserializeEventHistoryProducesUnity, HISTORY);
   ADD_TEST(breadthFirstSearchProducesShortestPath, CONSTRAINT_GRAPH);
+  ADD_TEST(maxFlowAlgorithmProducesCorrectSolution, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
