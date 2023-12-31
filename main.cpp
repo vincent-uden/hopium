@@ -16,9 +16,6 @@ int main(int argc, char** argv) {
   ApplicationState* state = ApplicationState::getInstance();
   Application* app = Application::getInstance();
 
-  // We need to dealloc the renderer and all it's textures before closing the
-  // window
-
   SetExitKey(-1);
   while ( !WindowShouldClose() && !app->shouldExit ) {
     app->update();

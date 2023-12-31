@@ -47,6 +47,7 @@ public:
   int size();
 
   bool isActive(std::shared_ptr<Mode> mode);
+  bool isInnerMostMode(std::shared_ptr<Mode> mode);
 
 private:
   std::vector<std::shared_ptr<Mode>> modes;

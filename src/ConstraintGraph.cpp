@@ -89,10 +89,6 @@ ConstraintGraph::ConstraintGraph() {
 ConstraintGraph::~ConstraintGraph() {
 }
 
-STree ConstraintGraph::analyze() {
-  STree out;
-  return out;
-}
 
 void ConstraintGraph::addVirtualEdge(
   std::shared_ptr<GeometricElement> a,
@@ -131,9 +127,12 @@ bool ConstraintGraph::triconnected() {
   return true;
 }
 
-
-std::pair<ConstraintGraph,ConstraintGraph> ConstraintGraph::separatingGraphs() {
-  std::pair<ConstraintGraph,ConstraintGraph> out;
+std::pair<std::shared_ptr<ConstraintGraph>,std::shared_ptr<ConstraintGraph>> ConstraintGraph::separatingGraphs(
+  std::shared_ptr<GeometricElement> a,
+  std::shared_ptr<GeometricElement> b
+) {
+  // TODO: Implement, create objects with new
+  std::pair<std::shared_ptr<ConstraintGraph>,std::shared_ptr<ConstraintGraph>> out;
   return out;
 }
 
@@ -156,6 +155,10 @@ int ConstraintGraph::maxFlow(
   }
 
   return flow;
+}
+
+std::pair<std::shared_ptr<GeometricElement>,std::shared_ptr<GeometricElement>> ConstraintGraph::separatingVertices() {
+  return std::make_pair(nullptr, nullptr);
 }
 
 std::optional<std::vector<std::shared_ptr<Constraint>>> ConstraintGraph::breadthFirstSearch(
@@ -200,4 +203,33 @@ std::optional<std::vector<std::shared_ptr<Constraint>>> ConstraintGraph::breadth
   }
 
   return std::nullopt;
+}
+
+std::shared_ptr<STree> analyze(std::shared_ptr<ConstraintGraph> G) {
+  // Decomposition algorithm: Joan-Arinyo, Soto-Riera, Vila-Marta & Vilaplana-Pastó
+  std::shared_ptr<STree> out = std::make_shared<STree>();
+
+  if (G->triconnected()) {
+    out->node = G;
+  } else {
+    std::pair<std::shared_ptr<GeometricElement>, std::shared_ptr<GeometricElement>> sepVertices = G->separatingVertices();
+    std::shared_ptr<GeometricElement> a = sepVertices.first;
+    std::shared_ptr<GeometricElement> b = sepVertices.second;
+
+    std::pair<std::shared_ptr<ConstraintGraph>, std::shared_ptr<ConstraintGraph>> Gs = G->separatingGraphs(a, b);
+    std::shared_ptr<ConstraintGraph> G1 = Gs.first;
+    std::shared_ptr<ConstraintGraph> G2 = Gs.second;
+
+    if (G1->deficit() > G2->deficit()) {
+      G1->addVirtualEdge(a, b);
+    } else {
+      G2->addVirtualEdge(a, b);
+    }
+
+    out->node = G;
+    out->left = analyze(G1);
+    out->right = analyze(G2);
+  }
+
+  return out;
 }

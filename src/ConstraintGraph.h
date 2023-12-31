@@ -56,6 +56,8 @@ private:
   GeometricType type;
 };
 
+class ConstraintGraph;
+
 class STree {
 public:
   STree();
@@ -63,6 +65,7 @@ public:
 
   std::shared_ptr<STree> left = nullptr;
   std::shared_ptr<STree> right = nullptr;
+  std::shared_ptr<ConstraintGraph> node = nullptr;
 };
 
 class ConstraintGraph {
@@ -71,10 +74,11 @@ public:
   ~ConstraintGraph();
 
   bool triconnected();
-  STree analyze();
   int deficit();
   int maxFlow(std::shared_ptr<GeometricElement> source, std::shared_ptr<GeometricElement> sink);
   std::optional<std::vector<std::shared_ptr<Constraint>>> breadthFirstSearch(std::shared_ptr<GeometricElement> start, std::shared_ptr<GeometricElement> end);
+  std::pair<std::shared_ptr<ConstraintGraph>,std::shared_ptr<ConstraintGraph>> separatingGraphs(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b);
+  std::pair<std::shared_ptr<GeometricElement>,std::shared_ptr<GeometricElement>> separatingVertices();
   void addVertex(std::shared_ptr<GeometricElement> element);
   void addVirtualEdge(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b);
   void connect(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b, std::shared_ptr<Constraint> c);
@@ -82,9 +86,8 @@ public:
 protected:
   std::vector<std::shared_ptr<GeometricElement>> vertices;
   std::vector<std::shared_ptr<Constraint>> edges;
-
-  std::pair<ConstraintGraph,ConstraintGraph> separatingGraphs();
 };
 
 
+std::shared_ptr<STree> analyze(std::shared_ptr<ConstraintGraph> G);
 #endif

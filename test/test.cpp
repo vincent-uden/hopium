@@ -607,6 +607,63 @@ int canCorrectlyClassifyTriconnectedGraph() {
   return 0;
 }
 
+int canIdentifySeparatingVertices() {
+  // Create points up from a,b ... to h
+  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
+  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
+  std::shared_ptr<GeometricElement> d = std::make_shared<GeometricElement>(GeometricType::POINT, "d");
+  std::shared_ptr<GeometricElement> e = std::make_shared<GeometricElement>(GeometricType::POINT, "e");
+  std::shared_ptr<GeometricElement> f = std::make_shared<GeometricElement>(GeometricType::POINT, "f");
+  std::shared_ptr<GeometricElement> g = std::make_shared<GeometricElement>(GeometricType::POINT, "g");
+  std::shared_ptr<GeometricElement> h = std::make_shared<GeometricElement>(GeometricType::POINT, "h");
+
+  std::shared_ptr<Constraint> ab = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab");
+  std::shared_ptr<Constraint> bc = std::make_shared<Constraint>(ConstraintType::DISTANCE, "bc");
+  std::shared_ptr<Constraint> ce = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ce");
+  std::shared_ptr<Constraint> ea = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ea");
+  std::shared_ptr<Constraint> cd = std::make_shared<Constraint>(ConstraintType::DISTANCE, "cd");
+  std::shared_ptr<Constraint> ed = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ed");
+  std::shared_ptr<Constraint> ag = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ag");
+  std::shared_ptr<Constraint> af = std::make_shared<Constraint>(ConstraintType::DISTANCE, "af");
+  std::shared_ptr<Constraint> fg = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fg");
+  std::shared_ptr<Constraint> fh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fh");
+  std::shared_ptr<Constraint> gh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "gh");
+  std::shared_ptr<Constraint> df = std::make_shared<Constraint>(ConstraintType::DISTANCE, "df");
+  std::shared_ptr<Constraint> dh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "dh");
+
+  ConstraintGraph G;
+  G.addVertex(a);
+  G.addVertex(b);
+  G.addVertex(c);
+  G.addVertex(d);
+  G.addVertex(e);
+  G.addVertex(f);
+  G.addVertex(g);
+  G.addVertex(h);
+
+  G.connect(a, b, ab);
+  G.connect(b, c, bc);
+  G.connect(c, e, ce);
+  G.connect(e, a, ea);
+  G.connect(c, d, cd);
+  G.connect(e, d, ed);
+  G.connect(a, g, ag);
+  G.connect(a, f, af);
+  G.connect(f, g, fg);
+  G.connect(f, h, fh);
+  G.connect(g, h, gh);
+  G.connect(d, f, df);
+  G.connect(d, h, dh);
+
+  ASSERT(!G.triconnected(), "This graph shouldn't be triconnected");
+
+  auto pair = G.separatingVertices();
+  ASSERT(pair.first && pair.second, "The separation should succeed");
+
+  return 0;
+}
+
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -656,6 +713,7 @@ int main(int argc, char** argv) {
   ADD_TEST(breadthFirstSearchProducesShortestPath, CONSTRAINT_GRAPH);
   ADD_TEST(maxFlowAlgorithmProducesCorrectSolution, CONSTRAINT_GRAPH);
   ADD_TEST(canCorrectlyClassifyTriconnectedGraph, CONSTRAINT_GRAPH);
+  ADD_TEST(canIdentifySeparatingVertices, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

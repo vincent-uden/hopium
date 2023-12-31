@@ -218,3 +218,7 @@ bool ModeStack::isActive(std::shared_ptr<Mode> mode) {
 
   return foundMode;
 }
+
+bool ModeStack::isInnerMostMode(std::shared_ptr<Mode> mode) {
+  return modes.back().get() == mode.get();
+}

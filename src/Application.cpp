@@ -104,7 +104,9 @@ void Application::processEvent(togglePointMode event) {
   if (state->modeStack.isActive(state->point)) {
     state->modeStack.exit(state->point);
   } else {
-    state->modeStack.push(state->point);
+    if (state->modeStack.isInnerMostMode(state->sketch)) {
+      state->modeStack.push(state->point);
+    }
   }
 }
 
@@ -112,7 +114,9 @@ void Application::processEvent(toggleLineMode event) {
   if (state->modeStack.isActive(state->line)) {
     state->modeStack.exit(state->line);
   } else {
-    state->modeStack.push(state->line);
+    if (state->modeStack.isInnerMostMode(state->sketch)) {
+      state->modeStack.push(state->line);
+    }
   }
 }
 
@@ -120,7 +124,9 @@ void Application::processEvent(toggleExtrudeMode event) {
   if (state->modeStack.isActive(state->extrude)) {
     state->modeStack.exit(state->extrude);
   } else {
-    state->modeStack.push(state->extrude);
+    if (state->modeStack.isInnerMostMode(state->sketch)) {
+      state->modeStack.push(state->extrude);
+    }
   }
 }
 
