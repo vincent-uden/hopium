@@ -72,6 +72,54 @@ void padToWidest(std::vector<Test>& tests) {
   }
 }
 
+void setupDecomposableTestGraph(ConstraintGraph& G) {
+  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
+  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
+  std::shared_ptr<GeometricElement> d = std::make_shared<GeometricElement>(GeometricType::POINT, "d");
+  std::shared_ptr<GeometricElement> e = std::make_shared<GeometricElement>(GeometricType::POINT, "e");
+  std::shared_ptr<GeometricElement> f = std::make_shared<GeometricElement>(GeometricType::POINT, "f");
+  std::shared_ptr<GeometricElement> g = std::make_shared<GeometricElement>(GeometricType::POINT, "g");
+  std::shared_ptr<GeometricElement> h = std::make_shared<GeometricElement>(GeometricType::POINT, "h");
+
+  std::shared_ptr<Constraint> ab = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab");
+  std::shared_ptr<Constraint> bc = std::make_shared<Constraint>(ConstraintType::DISTANCE, "bc");
+  std::shared_ptr<Constraint> ce = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ce");
+  std::shared_ptr<Constraint> ea = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ea");
+  std::shared_ptr<Constraint> cd = std::make_shared<Constraint>(ConstraintType::DISTANCE, "cd");
+  std::shared_ptr<Constraint> ed = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ed");
+  std::shared_ptr<Constraint> ag = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ag");
+  std::shared_ptr<Constraint> af = std::make_shared<Constraint>(ConstraintType::DISTANCE, "af");
+  std::shared_ptr<Constraint> fg = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fg");
+  std::shared_ptr<Constraint> fh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fh");
+  std::shared_ptr<Constraint> gh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "gh");
+  std::shared_ptr<Constraint> df = std::make_shared<Constraint>(ConstraintType::DISTANCE, "df");
+  std::shared_ptr<Constraint> dh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "dh");
+
+  G.addVertex(a);
+  G.addVertex(b);
+  G.addVertex(c);
+  G.addVertex(d);
+  G.addVertex(e);
+  G.addVertex(f);
+  G.addVertex(g);
+  G.addVertex(h);
+
+  G.connect(a, b, ab);
+  G.connect(b, c, bc);
+  G.connect(c, e, ce);
+  G.connect(e, a, ea);
+  G.connect(c, d, cd);
+  G.connect(e, d, ed);
+  G.connect(a, g, ag);
+  G.connect(a, f, af);
+  G.connect(f, g, fg);
+  G.connect(f, h, fh);
+  G.connect(g, h, gh);
+  G.connect(d, f, df);
+  G.connect(d, h, dh);
+}
+
 int windowCanBeSplitIntoArea() {
   const int screenWidth = 1600;
   const int screenHeight = 900;
@@ -589,9 +637,12 @@ int canCorrectlyClassifyTriconnectedGraph() {
 
   G.connect(e0, e1, c01);
   G.connect(e1, e2, c12);
+  ASSERT(!G.connected(), "Graph shouldn't be connected");
   G.connect(e2, e3, c23);
   G.connect(e3, e0, c30);
   G.connect(e0, e2, c02);
+
+  ASSERT(G.connected(), "Graph should be connected");
 
   ASSERT(!G.triconnected(), "Graph shouldn't be triconnected yet");
 
@@ -609,57 +660,46 @@ int canCorrectlyClassifyTriconnectedGraph() {
 
 int canIdentifySeparatingVertices() {
   // Create points up from a,b ... to h
-  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
-  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
-  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
-  std::shared_ptr<GeometricElement> d = std::make_shared<GeometricElement>(GeometricType::POINT, "d");
-  std::shared_ptr<GeometricElement> e = std::make_shared<GeometricElement>(GeometricType::POINT, "e");
-  std::shared_ptr<GeometricElement> f = std::make_shared<GeometricElement>(GeometricType::POINT, "f");
-  std::shared_ptr<GeometricElement> g = std::make_shared<GeometricElement>(GeometricType::POINT, "g");
-  std::shared_ptr<GeometricElement> h = std::make_shared<GeometricElement>(GeometricType::POINT, "h");
-
-  std::shared_ptr<Constraint> ab = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab");
-  std::shared_ptr<Constraint> bc = std::make_shared<Constraint>(ConstraintType::DISTANCE, "bc");
-  std::shared_ptr<Constraint> ce = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ce");
-  std::shared_ptr<Constraint> ea = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ea");
-  std::shared_ptr<Constraint> cd = std::make_shared<Constraint>(ConstraintType::DISTANCE, "cd");
-  std::shared_ptr<Constraint> ed = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ed");
-  std::shared_ptr<Constraint> ag = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ag");
-  std::shared_ptr<Constraint> af = std::make_shared<Constraint>(ConstraintType::DISTANCE, "af");
-  std::shared_ptr<Constraint> fg = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fg");
-  std::shared_ptr<Constraint> fh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fh");
-  std::shared_ptr<Constraint> gh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "gh");
-  std::shared_ptr<Constraint> df = std::make_shared<Constraint>(ConstraintType::DISTANCE, "df");
-  std::shared_ptr<Constraint> dh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "dh");
-
   ConstraintGraph G;
-  G.addVertex(a);
-  G.addVertex(b);
-  G.addVertex(c);
-  G.addVertex(d);
-  G.addVertex(e);
-  G.addVertex(f);
-  G.addVertex(g);
-  G.addVertex(h);
-
-  G.connect(a, b, ab);
-  G.connect(b, c, bc);
-  G.connect(c, e, ce);
-  G.connect(e, a, ea);
-  G.connect(c, d, cd);
-  G.connect(e, d, ed);
-  G.connect(a, g, ag);
-  G.connect(a, f, af);
-  G.connect(f, g, fg);
-  G.connect(f, h, fh);
-  G.connect(g, h, gh);
-  G.connect(d, f, df);
-  G.connect(d, h, dh);
+  setupDecomposableTestGraph(G);
 
   ASSERT(!G.triconnected(), "This graph shouldn't be triconnected");
 
   auto pair = G.separatingVertices();
   ASSERT(pair.first && pair.second, "The separation should succeed");
+
+  G.deleteVertex(pair.first);
+  G.deleteVertex(pair.second);
+
+  ASSERT(!G.connected(), "G shouldn't be connected");
+
+  return 0;
+}
+
+int graphDeepCopyProducesIdenticalGraph() {
+  ConstraintGraph G;
+  setupDecomposableTestGraph(G);
+
+  std::shared_ptr<ConstraintGraph> G2 = G.deepCopy();
+
+  ASSERT(G.vertices.size() == G2->vertices.size(), "The number of vertices should be the same");
+  for (size_t i = 0; i < G.vertices.size(); ++i) {
+    ASSERT(G.vertices[i]->label == G2->vertices[i]->label && G.vertices[i].get() != G2->vertices[i].get(), "The vertices should be the same");
+    ASSERT(G.vertices[i]->edges.size() == G2->vertices[i]->edges.size(), "There should be the same number of edges");
+  }
+  ASSERT(G.edges.size() == G2->edges.size(), "There should be the same number of edges");
+
+  return 0;
+}
+
+int canSeparateGraphIntoConnectedComponents() {
+  ConstraintGraph G;
+  setupDecomposableTestGraph(G);
+
+  std::pair<std::shared_ptr<GeometricElement>, std::shared_ptr<GeometricElement>> p = G.separatingVertices();
+  std::pair<std::shared_ptr<ConstraintGraph>, std::shared_ptr<ConstraintGraph>> GPrimes = G.separatingGraphs(p.first, p.second);
+  ASSERT(GPrimes.first->connected() && GPrimes.second->connected(), "The graphs should be connected");
+  ASSERT(GPrimes.first->vertices.size() == 7 && GPrimes.second->vertices.size() == 3, "The number of vertices should be 7 and 3");
 
   return 0;
 }
@@ -714,6 +754,8 @@ int main(int argc, char** argv) {
   ADD_TEST(maxFlowAlgorithmProducesCorrectSolution, CONSTRAINT_GRAPH);
   ADD_TEST(canCorrectlyClassifyTriconnectedGraph, CONSTRAINT_GRAPH);
   ADD_TEST(canIdentifySeparatingVertices, CONSTRAINT_GRAPH);
+  ADD_TEST(graphDeepCopyProducesIdenticalGraph, CONSTRAINT_GRAPH);
+  ADD_TEST(canSeparateGraphIntoConnectedComponents, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
