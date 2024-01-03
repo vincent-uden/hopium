@@ -876,14 +876,10 @@ void GraphViewer::setPos(Vector2 pos) {
 }
 
 void GraphViewer::draw() {
-  avgPos.x = 0;
-  avgPos.y = 0;
   // Update positions, forces and velocities (Using verlet integration)
   for (size_t i = 0; i < graph->vertices.size(); ++i) {
     nodePos[i].x += nodeVel[i].x * dt + nodeAcc[i].x * dt * dt * 0.5;
     nodePos[i].y += nodeVel[i].y * dt + nodeAcc[i].y * dt * dt * 0.5;
-    avgPos.x += nodePos[i].x;
-    avgPos.y += nodePos[i].y;
 
     Vector2 a = Vector2Scale(nodeAcc[i], 0.5 * dt);
     nodeVel[i].x += a.x;
@@ -893,6 +889,11 @@ void GraphViewer::draw() {
     nodeAcc[i].y = 0;
   }
   for (size_t i = 0; i < graph->vertices.size(); ++i) {
+    Vector2 direction = Vector2Normalize(nodePos[i]);
+    float mag = std::max(Vector2LengthSqr(nodePos[i]), 0.1f);
+    nodeAcc[i].x -= direction.x / mag * centralAttraction;
+    nodeAcc[i].y -= direction.y / mag * centralAttraction;
+
     for (size_t j = i + 1; j < graph->vertices.size(); ++j) {
       Vector2 diff = Vector2Subtract(nodePos[i], nodePos[j]);
       Vector2 f = Vector2Scale(Vector2Normalize(diff), 1.0f / Vector2LengthSqr(diff));
@@ -908,45 +909,45 @@ void GraphViewer::draw() {
         nodeAcc[j].x += diff.x * std::pow(springLength - springL, 2) * pullForce;
         nodeAcc[j].y += diff.y * std::pow(springLength - springL, 2) * pullForce;
       }
-      // TODO: Drag
     }
     Vector2 a = Vector2Scale(nodeAcc[i], 0.5 * dt);
     nodeVel[i].x += a.x;
     nodeVel[i].y += a.y;
-    nodeVel[i].x *= 0.99;
-    nodeVel[i].y += 0.99;
+    nodeVel[i].x *= velocityDamping;
+    nodeVel[i].y *= velocityDamping;
   }
-  avgPos.x /= graph->vertices.size();
-  avgPos.y /= graph->vertices.size();
+  if (grabbedId != -1) {
+    Vector2 mousePosInWorldSpace = toGraphSpace(lastMousePos);
+    nodePos[grabbedId].x = mousePosInWorldSpace.x;
+    nodePos[grabbedId].y = mousePosInWorldSpace.y;
+    nodeVel[grabbedId].x = 0;
+    nodeVel[grabbedId].y = 0;
+    nodeAcc[grabbedId].x = 0;
+    nodeAcc[grabbedId].y = 0;
+  }
 
   // Drawing
-  Vector2 textPos = pos;
   size_t i = 0;
   for (const std::shared_ptr<GeometricElement>& v: graph->vertices) {
-    nodePos[i].x -= avgPos.x;
-    nodePos[i].y -= avgPos.y;
+    Vector2 renderPos = toScreenSpace(nodePos[i]);
     DrawTextEx(
       colorscheme->font,
       v->label.c_str(),
-      Vector2Add(
-        Vector2Scale(getSize(), 0.5f),
-        Vector2Add(Vector2Scale(nodePos[i], scale), { -5, -30 })
-      ),
+      Vector2Add(renderPos, { -5, -30 }),
       20,
       1,
       colorscheme->onBackground
     );
-    textPos.y += 20;
     ++i;
 
     size_t j = 0;
     for (const std::shared_ptr<GeometricElement>& u: graph->vertices) {
-      if (v->isConnected(u) && false) {
+      if (v->isConnected(u)) {
         DrawLineEx(
-          Vector2Add(Vector2Scale(nodePos[i], scale), Vector2Scale(getSize(), 0.5f)),
-          Vector2Add(Vector2Scale(nodePos[j], scale), Vector2Scale(getSize(), 0.5f)),
+          renderPos,
+          toScreenSpace(nodePos[j]),
           edgeThickness,
-          WHITE
+          {255, 255, 255, 50}
         );
       }
       ++j;
@@ -956,9 +957,9 @@ void GraphViewer::draw() {
   i = 0;
   for (const std::shared_ptr<GeometricElement>& v: graph->vertices) {
     DrawCircleV(
-      Vector2Add(Vector2Scale(nodePos[i], scale), Vector2Scale(getSize(), 0.5f)),
-      5,
-      GREEN
+      toScreenSpace(nodePos[i]),
+      10,
+      i == grabbedId ? Color {0, 255, 0, 255} : (i == hoveredId ? Color {0, 255, 0, 150} : Color {255, 255, 0, 150})
     );
     ++i;
   }
@@ -966,12 +967,24 @@ void GraphViewer::draw() {
 
 void GraphViewer::receiveMousePos(Vector2 mousePos) {
   lastMousePos = mousePos;
+
+  hoveredId = -1;
+  for (size_t i = 0; i < nodePos.size(); ++i) {
+    if (Vector2Distance(toScreenSpace(nodePos[i]), mousePos) < selectThreshold) {
+      hoveredId = i;
+      break;
+    }
+  }
 }
 
 void GraphViewer::receiveMouseDown(Vector2 mousePos) {
+  if (hoveredId != -1) {
+    grabbedId = hoveredId;
+  }
 }
 
 void GraphViewer::receiveMouseUp(Vector2 mousePos) {
+  grabbedId = -1;
 }
 
 Vector2 GraphViewer::getSize() {
@@ -992,16 +1005,25 @@ void GraphViewer::setGraph(std::shared_ptr<ConstraintGraph> graph) {
   this->graph = graph;
   nodePos.clear();
   for (const std::shared_ptr<GeometricElement>& e: this->graph->vertices) {
-    nodePos.push_back({ (std::rand() % 1000) / 1000.0f, (std::rand() % 1000) / 1000.0f });
-    nodeVel.push_back({ 0, 0 });
-    nodeAcc.push_back({ 0, 0 });
+    nodePos.push_back({ (std::rand() % 1000) / 1000.0f - 0.5f, (std::rand() % 1000) / 1000.0f - 0.5f });
+    nodeVel.push_back({ 0.0, 0.0 });
+    nodeAcc.push_back({ 0.0, 0.0 });
   }
 }
 
 Vector2 GraphViewer::toScreenSpace(const Vector2 p) {
   Vector2 out = p;
-  // TODO: Create transformation
+  out = Vector2Scale(out, scale);
+  out = Vector2Add(out, Vector2Scale(getSize(), 0.5f));
+  out = Vector2Add(pos, out);
+  return out;
+}
 
+Vector2 GraphViewer::toGraphSpace(const Vector2 p) {
+  Vector2 out = p;
+  out = Vector2Subtract(out, Vector2Scale(getSize(), 0.5f));
+  out = Vector2Subtract(out, pos);
+  out = Vector2Scale(out, 1/scale);
   return out;
 }
 

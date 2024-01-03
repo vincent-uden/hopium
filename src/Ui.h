@@ -270,22 +270,26 @@ public:
 
 private:
   Vector2 toScreenSpace(const Vector2 p);
+  Vector2 toGraphSpace(const Vector2 p);
 
-  Vector2 pos;
-  Vector2 panOffset;
   Vector2 lastMousePos;
-  Vector2 avgPos;
+  Vector2 panOffset;
+  Vector2 pos;
+  float centralAttraction = 0.4f;
+  float dt = 0.01;
+  float edgeThickness = 2.f;
+  float pullForce = 20.f;
+  float pushForce = 0.3f;
+  float scale = 200.f;
+  float springLength = 0.2f;
+  float selectThreshold = 15.0f;
+  float velocityDamping = 0.98;
+  int grabbedId = -1;
+  int hoveredId = -1;
   std::shared_ptr<ConstraintGraph> graph;
+  std::vector<Vector2> nodeAcc;
   std::vector<Vector2> nodePos;
   std::vector<Vector2> nodeVel;
-  std::vector<Vector2> nodeAcc;
-  float scale = 200.f;
-  float edgeThickness = 1.f;
-  float pushForce = 0.f;
-  float pullForce = 10.f;
-  float springLength = 0.2f;
-  float dt = 0.01;
-
 
   Rectangle* areaScreenRect = nullptr;
   Vector2* areaScreenPos = nullptr;
