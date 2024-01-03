@@ -261,7 +261,7 @@ void Area::draw() {
   BeginTextureMode(paneTexture);
   ClearBackground(colorscheme->background);
   int i = 0;
-  for (std::shared_ptr<Ui>& ui : contents) {
+  for (std::shared_ptr<Ui::Ui>& ui : contents) {
     if (i != 0 && type == AreaType::VIEWPORT3D) {
       ui->move({
         (paneTexture.texture.width - screenRect.width) / 2.0f,
@@ -353,7 +353,7 @@ void Area::receiveMouseUp(Vector2 mousePos) {
 
 void Area::updateShaders() {
   for (auto& ui : contents) {
-    std::shared_ptr<Ui3DViewport> ui3d = std::dynamic_pointer_cast<Ui3DViewport>(ui);
+    std::shared_ptr<Ui::Viewport> ui3d = std::dynamic_pointer_cast<Ui::Viewport>(ui);
     if (ui3d) {
       float cameraPos[3] = { ui3d->camera.position.x, ui3d->camera.position.y, ui3d->camera.position.z };
       SetShaderValue(shaderStore->standardModelShader, shaderStore->standardModelShader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
@@ -361,7 +361,7 @@ void Area::updateShaders() {
   }
 }
 
-void Area::addUi(std::shared_ptr<Ui>& ui) {
+void Area::addUi(std::shared_ptr<Ui::Ui>& ui) {
   contents.push_back(std::move(ui));
 }
 
@@ -431,9 +431,9 @@ json Area::serialize() {
 }
 
 void Area::buildViewport3D() {
-  std::shared_ptr<Ui> viewport(new Ui3DViewport());
+  std::shared_ptr<Ui::Ui> viewport(new Ui::Viewport());
 
-  std::shared_ptr<Ui3DViewport> port = std::dynamic_pointer_cast<Ui3DViewport>(viewport);
+  std::shared_ptr<Ui::Viewport> port = std::dynamic_pointer_cast<Ui::Viewport>(viewport);
   port->setScene(ApplicationState::getInstance()->scene);
   port->setAreaPointers(&screenRect, &screenPos, &paneTexture);
 
@@ -445,35 +445,35 @@ void Area::buildViewport3D() {
 }
 
 void Area::buildToolSelection() {
-  std::shared_ptr<Ui> toolList(new UiToolList());
+  std::shared_ptr<Ui::Ui> toolList(new Ui::ToolList());
   toolList->move(Vector2 {0, 32});
-  minimumExtent = std::static_pointer_cast<UiToolList>(toolList)->btnSize.y + 32;
+  minimumExtent = std::static_pointer_cast<Ui::ToolList>(toolList)->btnSize.y + 32;
   addUi(toolList);
 
   buildTypeDropDown();
 }
 
 void Area::buildConstraintSelection() {
-  std::shared_ptr<UiIcon> coincident = std::make_shared<UiIcon>();
+  std::shared_ptr<Ui::Icon> coincident = std::make_shared<Ui::Icon>();
   coincident->setImgPath("../assets/icons/Coincident.png");
   coincident->setHoverTooltip("Coincident");
-  std::shared_ptr<UiIcon> colinear = std::make_shared<UiIcon>();
+  std::shared_ptr<Ui::Icon> colinear = std::make_shared<Ui::Icon>();
   colinear->setImgPath("../assets/icons/Colinear.png");
   colinear->setHoverTooltip("Colinear");
-  std::shared_ptr<UiIcon> equal = std::make_shared<UiIcon>();
+  std::shared_ptr<Ui::Icon> equal = std::make_shared<Ui::Icon>();
   equal->setImgPath("../assets/icons/Equal.png");
   equal->setHoverTooltip("Equal");
-  std::shared_ptr<UiIcon> midpoint = std::make_shared<UiIcon>();
+  std::shared_ptr<Ui::Icon> midpoint = std::make_shared<Ui::Icon>();
   midpoint->setImgPath("../assets/icons/Midpoint.png");
   midpoint->setHoverTooltip("Midpoint");
-  std::shared_ptr<UiIcon> parallel = std::make_shared<UiIcon>();
+  std::shared_ptr<Ui::Icon> parallel = std::make_shared<Ui::Icon>();
   parallel->setImgPath("../assets/icons/Parallel.png");
   parallel->setHoverTooltip("Parallel");
-  std::shared_ptr<UiIcon> perpendicular = std::make_shared<UiIcon>();
+  std::shared_ptr<Ui::Icon> perpendicular = std::make_shared<Ui::Icon>();
   perpendicular->setImgPath("../assets/icons/Perpendicular.png");
   perpendicular->setHoverTooltip("Perpendicular");
 
-  std::shared_ptr<UiRow> constraintRow = std::make_shared<UiRow>();
+  std::shared_ptr<Ui::Row> constraintRow = std::make_shared<Ui::Row>();
   constraintRow->addChild(coincident);
   constraintRow->addChild(colinear);
   constraintRow->addChild(equal);
@@ -481,7 +481,7 @@ void Area::buildConstraintSelection() {
   constraintRow->addChild(parallel);
   constraintRow->addChild(perpendicular);
 
-  std::shared_ptr<Ui> ptr = std::static_pointer_cast<Ui>(constraintRow);
+  std::shared_ptr<Ui::Ui> ptr = std::static_pointer_cast<Ui::Ui>(constraintRow);
   ptr->move(Vector2 {4, 32});
   addUi(ptr);
   buildTypeDropDown();
@@ -498,7 +498,7 @@ void Area::buildTypeDropDown() {
   areaTypes.push_back("Constraints");
   areaTypes.push_back("Empty");
 
-  std::shared_ptr<UiDropDown> typePicker(new UiDropDown("Area Type", areaTypes));
+  std::shared_ptr<Ui::DropDown> typePicker(new Ui::DropDown("Area Type", areaTypes));
 
   typePicker->setPos({0, 0});
   typePicker->setOnSelected([this](std::string selected) {
@@ -518,7 +518,7 @@ void Area::buildTypeDropDown() {
       }
   });
 
-  auto p = std::static_pointer_cast<Ui>(typePicker);
+  auto p = std::static_pointer_cast<Ui::Ui>(typePicker);
   addUi(p);
 }
 
@@ -539,7 +539,7 @@ void Renderer::init(int screenW, int screenH, std::shared_ptr<ShaderStore> shade
   SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
   colorscheme = std::shared_ptr<Colorscheme>(new Colorscheme(&font));
 
-  Ui::colorscheme = colorscheme;
+  Ui::Ui::colorscheme = colorscheme;
   this->shaderStore = shaderStore;
 
   areas.push_back(std::shared_ptr<Area>(new Area(

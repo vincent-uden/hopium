@@ -96,11 +96,11 @@ public:
   void updateShaders();
 
   // Event Listeners
-  void setOnMouseEnter(std::function<void(Ui*)>);
-  void setOnMouseExit(std::function<void(Ui*)>);
+  void setOnMouseEnter(std::function<void(Ui::Ui*)>);
+  void setOnMouseExit(std::function<void(Ui::Ui*)>);
 
   // Area/Boundary management
-  void addUi(std::shared_ptr<Ui>& ui);
+  void addUi(std::shared_ptr<Ui::Ui>& ui);
   void dumpInfo();
   void deleteBoundary(Boundary* toDelete);
   void deleteThisFromBoundaries();
@@ -139,7 +139,7 @@ private:
   std::shared_ptr<Colorscheme> colorscheme;
   std::shared_ptr<ShaderStore> shaderStore;
 
-  std::vector<std::shared_ptr<Ui>> contents;
+  std::vector<std::shared_ptr<Ui::Ui>> contents;
 
   bool hovered = false;
   std::function<void(Area*)> onMouseEnter = nullptr;

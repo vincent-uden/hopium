@@ -1,6 +1,8 @@
 #include "Ui.h"
 #include "raylib.h"
 
+namespace Ui {
+
 std::shared_ptr<Colorscheme> Ui::colorscheme = nullptr;
 
 void Ui::setOnClick(std::function<void (Ui *)> f) {
@@ -15,40 +17,40 @@ void Ui::setOnMouseExit(std::function<void (Ui *)> f) {
   onMouseExit = f;
 }
 
-UiText::UiText() {
+Text::Text() {
     pos.x = 0;
     pos.y = 0;
     setText("");
     color = { 0, 0, 0, 255 };
 }
 
-UiText::UiText(std::string text) {
+Text::Text(std::string text) {
     pos.x = 0;
     pos.y = 0;
     setText(text);
     color = { 0, 0, 0, 255 };
 }
 
-UiText::~UiText() {
+Text::~Text() {
 }
 
-void UiText::move(Vector2 distance) {
+void Text::move(Vector2 distance) {
     pos.x += distance.x;
     pos.y += distance.y;
 }
 
-void UiText::setPos(Vector2 pos) {
+void Text::setPos(Vector2 pos) {
     Vector2 diff;
     diff.x = pos.x - this->pos.x;
     diff.y = pos.y - this->pos.y;
     move(diff);
 }
 
-void UiText::draw() {
+void Text::draw() {
     DrawTextEx(colorscheme->font, text.c_str(), pos, 20, 1, color);
 }
 
-void UiText::receiveMousePos(Vector2 mousePos) {
+void Text::receiveMousePos(Vector2 mousePos) {
   if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
       // Mouse inside of bounds
@@ -70,10 +72,10 @@ void UiText::receiveMousePos(Vector2 mousePos) {
   hovered = false;
 }
 
-void UiText::receiveMouseDown(Vector2 mousePos) {
+void Text::receiveMouseDown(Vector2 mousePos) {
 }
 
-void UiText::receiveMouseUp(Vector2 mousePos) {
+void Text::receiveMouseUp(Vector2 mousePos) {
   if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
       if (onClick) {
@@ -83,42 +85,42 @@ void UiText::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
-Vector2 UiText::getSize() {
+Vector2 Text::getSize() {
   return size;
 }
 
-void UiText::setColor(Color c) {
+void Text::setColor(Color c) {
   color = c;
 }
 
-void UiText::setText(std::string text) {
+void Text::setText(std::string text) {
   this->text = text;
   size = MeasureTextEx(GetFontDefault(), text.c_str(), 20, 1);
 }
 
-UiRect::UiRect() {
+Rect::Rect() {
 }
 
-UiRect::~UiRect() {
+Rect::~Rect() {
 }
 
-void UiRect::move(Vector2 distance) {
+void Rect::move(Vector2 distance) {
     bounds.x += distance.x;
     bounds.y += distance.y;
 }
 
-void UiRect::setPos(Vector2 pos) {
+void Rect::setPos(Vector2 pos) {
     Vector2 diff;
     diff.x = pos.x - this->bounds.x;
     diff.y = pos.y - this->bounds.y;
     move(diff);
 }
 
-void UiRect::draw() {
+void Rect::draw() {
   DrawRectangleRec(bounds, bgColor);
 }
 
-void UiRect::receiveMousePos(Vector2 mousePos) {
+void Rect::receiveMousePos(Vector2 mousePos) {
   if (CheckCollisionPointRec(mousePos, bounds)) {
     if (!hovered) {
       if (onMouseEnter) {
@@ -136,10 +138,10 @@ void UiRect::receiveMousePos(Vector2 mousePos) {
   }
 }
 
-void UiRect::receiveMouseDown(Vector2 mousePos) {
+void Rect::receiveMouseDown(Vector2 mousePos) {
 }
 
-void UiRect::receiveMouseUp(Vector2 mousePos) {
+void Rect::receiveMouseUp(Vector2 mousePos) {
   if (contains(mousePos)) {
     if (onClick) {
       onClick(this);
@@ -147,24 +149,24 @@ void UiRect::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
-Vector2 UiRect::getSize() {
+Vector2 Rect::getSize() {
   return Vector2 { bounds.width, bounds.height };
 }
 
-void UiRect::setColor(Color c) {
+void Rect::setColor(Color c) {
   bgColor = c;
 }
 
-void UiRect::setSize(Vector2 size) {
+void Rect::setSize(Vector2 size) {
   bounds.width = size.x;
   bounds.height = size.y;
 }
 
-bool UiRect::contains(Vector2 mousePos) {
+bool Rect::contains(Vector2 mousePos) {
   return CheckCollisionPointRec(mousePos, bounds);
 }
 
-UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
+DropDown::DropDown(std::string label, std::vector<std::string> options) {
   this->options = options;
   btnSize = MeasureTextEx(GetFontDefault(), label.c_str(), 20, 1);
   btnSize.x += padding * 2;
@@ -183,20 +185,20 @@ UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
   listSize = { biggestSize.x + padding * 2, (biggestSize.y + padding * 2) * options.size() };
   size_t i = 0;
   for (auto& opt : options) {
-    std::shared_ptr<UiText> uiOpt(new UiText(opt));
+    std::shared_ptr<Text> uiOpt(new Text(opt));
     uiOpt->setPos({static_cast<float>(padding), (static_cast<float>(padding) * 2 + biggestSize.y) * (i+1) + padding});
     uiOpt->setColor({255, 255, 255, 255});
 
-    std::shared_ptr<UiRect> optBg(new UiRect());
+    std::shared_ptr<Rect> optBg(new Rect());
     optBg->setPos({0, (static_cast<float>(padding) * 2 + biggestSize.y) * (i+1)});
     optBg->setSize({ biggestSize.x + padding * 2, biggestSize.y + padding * 2 });
     optBg->setColor({30, 30, 30, 255});
     optBg->setOnMouseEnter([](Ui* p) {
-        UiRect* bg = static_cast<UiRect*>(p);
+        Rect* bg = static_cast<Rect*>(p);
         bg->setColor({155, 155, 155, 255});
     });
     optBg->setOnMouseExit([](Ui* p) {
-        UiRect* bg = static_cast<UiRect*>(p);
+        Rect* bg = static_cast<Rect*>(p);
         bg->setColor({30, 30, 30, 255});
     });
     optBg->setOnClick([this,i](Ui* p) {
@@ -213,11 +215,11 @@ UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
   this->label.setPos({ static_cast<float>(padding), static_cast<float>(padding)});
 
   this->label.setOnMouseEnter([](Ui* l) {
-      UiText* lbl = static_cast<UiText*>(l);
+      Text* lbl = static_cast<Text*>(l);
       lbl->setColor({0, 255, 0, 255});
   });
   this->label.setOnMouseExit([](Ui* l) {
-      UiText* lbl = static_cast<UiText*>(l);
+      Text* lbl = static_cast<Text*>(l);
       lbl->setColor({255, 255, 255, 255});
   });
 
@@ -227,10 +229,10 @@ UiDropDown::UiDropDown(std::string label, std::vector<std::string> options) {
   pos = {0, 0};
 }
 
-UiDropDown::~UiDropDown() {
+DropDown::~DropDown() {
 }
 
-void UiDropDown::move(Vector2 distance) {
+void DropDown::move(Vector2 distance) {
   label.move(distance);
   for (auto& uiOpt : uiOptions) {
     uiOpt->move(distance);
@@ -243,14 +245,14 @@ void UiDropDown::move(Vector2 distance) {
   pos.y += distance.y;
 }
 
-void UiDropDown::setPos(Vector2 pos) {
+void DropDown::setPos(Vector2 pos) {
     Vector2 diff;
     diff.x = pos.x - this->pos.x;
     diff.y = pos.y - this->pos.y;
     move(diff);
 }
 
-void UiDropDown::draw() {
+void DropDown::draw() {
   labelBg.draw();
   label.draw();
   if (open) {
@@ -263,7 +265,7 @@ void UiDropDown::draw() {
   }
 }
 
-void UiDropDown::receiveMousePos(Vector2 mousePos) {
+void DropDown::receiveMousePos(Vector2 mousePos) {
   if (open) {
     if (
       CheckCollisionPointRec(mousePos, {pos.x, pos.y + btnSize.y, listSize.x, listSize.y}) ||
@@ -288,7 +290,7 @@ void UiDropDown::receiveMousePos(Vector2 mousePos) {
   }
 }
 
-void UiDropDown::receiveMouseDown(Vector2 mousePos) {
+void DropDown::receiveMouseDown(Vector2 mousePos) {
   if (open) {
     if (
       CheckCollisionPointRec(mousePos, {pos.x, pos.y + btnSize.y, listSize.x, listSize.y})
@@ -305,7 +307,7 @@ void UiDropDown::receiveMouseDown(Vector2 mousePos) {
   }
 }
 
-void UiDropDown::receiveMouseUp(Vector2 mousePos) {
+void DropDown::receiveMouseUp(Vector2 mousePos) {
   if (open) {
     if (
       CheckCollisionPointRec(mousePos, {pos.x, pos.y + btnSize.y, listSize.x, listSize.y})
@@ -322,7 +324,7 @@ void UiDropDown::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
-Vector2 UiDropDown::getSize() {
+Vector2 DropDown::getSize() {
   if (open) {
     return listSize;
   } else {
@@ -330,17 +332,17 @@ Vector2 UiDropDown::getSize() {
   }
 }
 
-void UiDropDown::setOnSelected(std::function<void(std::string)> f) {
+void DropDown::setOnSelected(std::function<void(std::string)> f) {
   onSelected = f;
 }
 
-void UiDropDown::select(size_t i) {
+void DropDown::select(size_t i) {
   if (onSelected) {
     onSelected(options[i]);
   }
 }
 
-Ui3DViewport::Ui3DViewport() {
+Viewport::Viewport() {
   camera.position = { 20.0f, 20.0f, 20.0f };
   camera.target = { 0.0f, 0.0f, 0.0f };
   camera.up = { 0.0f, 1.0f, 0.0f };
@@ -348,16 +350,16 @@ Ui3DViewport::Ui3DViewport() {
   camera.projection = CAMERA_PERSPECTIVE;
 }
 
-Ui3DViewport::~Ui3DViewport() {
+Viewport::~Viewport() {
 }
 
-void Ui3DViewport::move(Vector2 distance) {
+void Viewport::move(Vector2 distance) {
 }
 
-void Ui3DViewport::setPos(Vector2 pos) {
+void Viewport::setPos(Vector2 pos) {
 }
 
-void Ui3DViewport::draw() {
+void Viewport::draw() {
   BeginMode3D(camera);
 
   DrawLine3D(g0, g1, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
@@ -395,7 +397,7 @@ void Ui3DViewport::draw() {
   EndMode3D();
 }
 
-void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
+void Viewport::receiveMousePos(Vector2 mousePos) {
   if (ApplicationState::getInstance()->holdingRotate) {
     Vector2 diff = Vector2Subtract(mousePos, lastMousePos);
 
@@ -439,7 +441,7 @@ void Ui3DViewport::receiveMousePos(Vector2 mousePos) {
   lastMousePos = mousePos;
 }
 
-void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
+void Viewport::receiveMouseDown(Vector2 mousePos) {
   RayCollision collision = { 0 };
   collision.distance = FLT_MAX;
   collision.hit = false;
@@ -461,18 +463,18 @@ void Ui3DViewport::receiveMouseDown(Vector2 mousePos) {
   }
 }
 
-void Ui3DViewport::receiveMouseUp(Vector2 mousePos) {
+void Viewport::receiveMouseUp(Vector2 mousePos) {
 }
 
-Vector2 Ui3DViewport::getSize() {
+Vector2 Viewport::getSize() {
   return Vector2 { areaSreenRect->width, areaSreenRect->height };
 }
 
-void Ui3DViewport::setScene(std::shared_ptr<Scene> scene) {
+void Viewport::setScene(std::shared_ptr<Scene> scene) {
   this->scene = scene;
 }
 
-void Ui3DViewport::setAreaPointers(
+void Viewport::setAreaPointers(
   Rectangle* screenRect,
   Vector2* screenPos,
   RenderTexture* texture
@@ -482,7 +484,7 @@ void Ui3DViewport::setAreaPointers(
   areaTexture = texture;
 }
 
-Ray Ui3DViewport::getNonOffsetMouseRay(Vector2 mousePos) {
+Ray Viewport::getNonOffsetMouseRay(Vector2 mousePos) {
   Vector2 offset = { 0.0, 0.0 };
   if (areaSreenRect != nullptr && areaScreenPos != nullptr && areaTexture != nullptr) {
     offset.x = (areaSreenRect->width - areaTexture->texture.width) / 2.0;
@@ -495,7 +497,7 @@ Ray Ui3DViewport::getNonOffsetMouseRay(Vector2 mousePos) {
   return ray;
 }
 
-UiToolList::UiToolList() {
+ToolList::ToolList() {
   btnNames.push_back("Sketch");
   btnNames.push_back("Point");
   btnNames.push_back("Line");
@@ -507,22 +509,22 @@ UiToolList::UiToolList() {
 
   int i = 0;
   for (std::string& btnName : btnNames) {
-    std::shared_ptr<UiText> btnLbl(new UiText(btnName));
+    std::shared_ptr<Text> btnLbl(new Text(btnName));
     Vector2 textSize = MeasureTextEx(colorscheme->font, btnName.c_str(), 20, 1);
     btnLbl->setPos({(btnSize.x + margin) * i + (btnSize.x - textSize.x) / 2.0f, (btnSize.y - textSize.y) / 2.0f});
     btnLbl->setColor({255, 255, 255, 255});
     btnLbls.push_back(btnLbl);
 
-    std::shared_ptr<UiRect> btnBg(new UiRect());
+    std::shared_ptr<Rect> btnBg(new Rect());
     btnBg->setSize(btnSize);
     btnBg->setColor(colorscheme->secondary);
     btnBg->setPos({(btnSize.x + margin) * i, 0});
     btnBg->setOnMouseEnter([](Ui* p) {
-        UiRect* bg = static_cast<UiRect*>(p);
+        Rect* bg = static_cast<Rect*>(p);
         bg->setColor(colorscheme->secondaryVariant);
     });
     btnBg->setOnMouseExit([](Ui* p) {
-        UiRect* bg = static_cast<UiRect*>(p);
+        Rect* bg = static_cast<Rect*>(p);
         bg->setColor(colorscheme->secondary);
     });
     btnBgs.push_back(btnBg);
@@ -550,10 +552,10 @@ UiToolList::UiToolList() {
   });
 }
 
-UiToolList::~UiToolList() {
+ToolList::~ToolList() {
 }
 
-void UiToolList::move(Vector2 distance) {
+void ToolList::move(Vector2 distance) {
   for (auto& lbl : btnLbls) {
     lbl->move(distance);
   }
@@ -562,14 +564,14 @@ void UiToolList::move(Vector2 distance) {
   }
 }
 
-void UiToolList::setPos(Vector2 pos) {
+void ToolList::setPos(Vector2 pos) {
     Vector2 diff;
     diff.x = pos.x - this->pos.x;
     diff.y = pos.y - this->pos.y;
     move(diff);
 }
 
-void UiToolList::draw() {
+void ToolList::draw() {
   int i = 0;
   for (auto& bg : btnBgs) {
     if (i == 0 || ApplicationState::getInstance()->sketchModeActive) {
@@ -614,7 +616,7 @@ void UiToolList::draw() {
   }
 }
 
-void UiToolList::receiveMousePos(Vector2 mousePos) {
+void ToolList::receiveMousePos(Vector2 mousePos) {
   int i = 0;
   for (auto& bg : btnBgs) {
     if (i == 0 || ApplicationState::getInstance()->sketchModeActive) {
@@ -631,7 +633,7 @@ void UiToolList::receiveMousePos(Vector2 mousePos) {
   }
 }
 
-void UiToolList::receiveMouseDown(Vector2 mousePos) {
+void ToolList::receiveMouseDown(Vector2 mousePos) {
   for (auto& bg : btnBgs) {
     bg->receiveMouseDown(mousePos);
   }
@@ -640,7 +642,7 @@ void UiToolList::receiveMouseDown(Vector2 mousePos) {
   }
 }
 
-void UiToolList::receiveMouseUp(Vector2 mousePos) {
+void ToolList::receiveMouseUp(Vector2 mousePos) {
   for (auto& bg : btnBgs) {
     bg->receiveMouseUp(mousePos);
   }
@@ -649,34 +651,34 @@ void UiToolList::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
-Vector2 UiToolList::getSize() {
+Vector2 ToolList::getSize() {
   return Vector2 { (btnSize.x + margin) * btnNames.size() - margin, btnSize.y };
 }
 
-UiIcon::UiIcon() {
+Icon::Icon() {
     pos.x = 0;
     pos.y = 0;
     loadedTexture = false;
 
-    hoverTooltip = std::make_shared<UiText>();
+    hoverTooltip = std::make_shared<Text>();
     hoverTooltip->setColor(WHITE);
     hoverTooltip->move(Vector2 { 4, 32 });
-    hoverTooltipBg = std::make_shared<UiRect>();
+    hoverTooltipBg = std::make_shared<Rect>();
     hoverTooltipBg->setColor(colorscheme->secondaryVariant);
     hoverTooltipBg->move(Vector2 { 0, 32 });
-    bg = std::make_shared<UiRect>();
+    bg = std::make_shared<Rect>();
     bg->setColor(colorscheme->secondaryVariant);
 
     tooltipDelay = std::chrono::milliseconds(1000);
 }
 
-UiIcon::~UiIcon() {
+Icon::~Icon() {
   if (loadedTexture) {
     UnloadTexture(texture);
   }
 }
 
-void UiIcon::move(Vector2 distance) {
+void Icon::move(Vector2 distance) {
     pos.x += distance.x;
     pos.y += distance.y;
 
@@ -685,14 +687,14 @@ void UiIcon::move(Vector2 distance) {
     bg->move(distance);
 }
 
-void UiIcon::setPos(Vector2 pos) {
+void Icon::setPos(Vector2 pos) {
     Vector2 diff;
     diff.x = pos.x - this->pos.x;
     diff.y = pos.y - this->pos.y;
     move(diff);
 }
 
-void UiIcon::draw() {
+void Icon::draw() {
   if (hovered) {
     bg->draw();
 
@@ -705,7 +707,7 @@ void UiIcon::draw() {
   }
 }
 
-void UiIcon::receiveMousePos(Vector2 mousePos) {
+void Icon::receiveMousePos(Vector2 mousePos) {
   if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
       // Mouse inside of bounds
@@ -731,10 +733,10 @@ void UiIcon::receiveMousePos(Vector2 mousePos) {
   hovered = false;
 }
 
-void UiIcon::receiveMouseDown(Vector2 mousePos) {
+void Icon::receiveMouseDown(Vector2 mousePos) {
 }
 
-void UiIcon::receiveMouseUp(Vector2 mousePos) {
+void Icon::receiveMouseUp(Vector2 mousePos) {
   if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
       if (onClick) {
@@ -744,11 +746,11 @@ void UiIcon::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
-Vector2 UiIcon::getSize() {
+Vector2 Icon::getSize() {
   return size;
 }
 
-void UiIcon::setImgPath(std::string path) {
+void Icon::setImgPath(std::string path) {
   if (loadedTexture) {
     UnloadTexture(texture);
   }
@@ -759,21 +761,21 @@ void UiIcon::setImgPath(std::string path) {
   bg->setSize(size);
 }
 
-void UiIcon::setHoverTooltip(std::string tooltip) {
+void Icon::setHoverTooltip(std::string tooltip) {
   hoverTooltip->setText(tooltip);
   hoverTooltipBg->setSize(Vector2Add(hoverTooltip->getSize(), {12, 0}));
 }
 
-UiRow::UiRow() {
+Row::Row() {
     pos.x = 0;
     pos.y = 0;
 }
 
-UiRow::~UiRow() {
+Row::~Row() {
   children.clear();
 }
 
-void UiRow::move(Vector2 distance) {
+void Row::move(Vector2 distance) {
     pos.x += distance.x;
     pos.y += distance.y;
 
@@ -782,20 +784,20 @@ void UiRow::move(Vector2 distance) {
     }
 }
 
-void UiRow::setPos(Vector2 pos) {
+void Row::setPos(Vector2 pos) {
     Vector2 diff;
     diff.x = pos.x - this->pos.x;
     diff.y = pos.y - this->pos.y;
     move(diff);
 }
 
-void UiRow::draw() {
+void Row::draw() {
   for (const std::shared_ptr<Ui>& child: children) {
     child->draw();
   }
 }
 
-void UiRow::receiveMousePos(Vector2 mousePos) {
+void Row::receiveMousePos(Vector2 mousePos) {
   for (const auto& child: children) {
     child->receiveMousePos(mousePos);
   }
@@ -819,13 +821,13 @@ void UiRow::receiveMousePos(Vector2 mousePos) {
   hovered = false;
 }
 
-void UiRow::receiveMouseDown(Vector2 mousePos) {
+void Row::receiveMouseDown(Vector2 mousePos) {
     for (const auto& child: children) {
       child->receiveMouseDown(mousePos);
     }
 }
 
-void UiRow::receiveMouseUp(Vector2 mousePos) {
+void Row::receiveMouseUp(Vector2 mousePos) {
   if ( mousePos.x > pos.x && mousePos.x < pos.x + size.x ) {
     if ( mousePos.y > pos.y && mousePos.y < pos.y + size.y ) {
       if (onClick) {
@@ -839,11 +841,11 @@ void UiRow::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
-Vector2 UiRow::getSize() {
+Vector2 Row::getSize() {
   return Vector2 { size.x, size.y };
 }
 
-void UiRow::addChild(std::shared_ptr<Ui> child) {
+void Row::addChild(std::shared_ptr<Ui> child) {
   if (children.size() == 0) {
     child->move(Vector2 { size.x, 0 });
     size = child->getSize();
@@ -854,4 +856,6 @@ void UiRow::addChild(std::shared_ptr<Ui> child) {
   }
 
   children.push_back(child);
+}
+
 }

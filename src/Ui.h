@@ -17,6 +17,8 @@
 #include <raylib.h>
 #include <raymath.h>
 
+namespace Ui {
+
 class Ui {
 public:
   virtual void move(Vector2 distance)=0;
@@ -38,11 +40,11 @@ protected:
   std::function<void(Ui*)> onMouseExit;
 };
 
-class UiText: public Ui {
+class Text: public Ui {
 public:
-  UiText();
-  UiText(std::string text);
-  ~UiText();
+  Text();
+  Text(std::string text);
+  ~Text();
 
   void move(Vector2 distance) override;
   void setPos(Vector2 pos) override;
@@ -65,10 +67,10 @@ private:
   Color color;
 };
 
-class UiRect: public Ui {
+class Rect: public Ui {
 public:
-  UiRect();
-  ~UiRect();
+  Rect();
+  ~Rect();
 
   void move(Vector2 distance) override;
   void setPos(Vector2 pos) override;
@@ -89,10 +91,10 @@ private:
   Color bgColor = { 0, 0, 0, 0 };
 };
 
-class UiDropDown: public Ui {
+class DropDown: public Ui {
 public:
-  UiDropDown(std::string label, std::vector<std::string> options);
-  ~UiDropDown();
+  DropDown(std::string label, std::vector<std::string> options);
+  ~DropDown();
 
   void move(Vector2 distance) override;
   void setPos(Vector2 pos) override;
@@ -115,10 +117,10 @@ private:
   // Ui components
   Color bgColor;
   Color fgColor;
-  UiText label;
-  UiRect labelBg;
-  std::vector<std::shared_ptr<UiText>> uiOptions;
-  std::vector<std::shared_ptr<UiRect>> uiOptionsBg;
+  Text label;
+  Rect labelBg;
+  std::vector<std::shared_ptr<Text>> uiOptions;
+  std::vector<std::shared_ptr<Rect>> uiOptionsBg;
   int padding = 4;
 
   // State
@@ -128,10 +130,10 @@ private:
   bool open = false;
 };
 
-class Ui3DViewport: public Ui {
+class Viewport: public Ui {
 public:
-  Ui3DViewport();
-  ~Ui3DViewport();
+  Viewport();
+  ~Viewport();
 
   void move(Vector2 distance) override;
   void setPos(Vector2 pos) override;
@@ -170,10 +172,10 @@ private:
   float lastDist = FLT_MAX;
 };
 
-class UiToolList: public Ui {
+class ToolList: public Ui {
 public:
-  UiToolList();
-  ~UiToolList();
+  ToolList();
+  ~ToolList();
 
   void move(Vector2 distance) override;
   void setPos(Vector2 pos) override;
@@ -190,14 +192,14 @@ private:
   int margin;
 
   std::vector<std::string> btnNames;
-  std::vector<std::shared_ptr<UiText>> btnLbls;
-  std::vector<std::shared_ptr<UiRect>> btnBgs;
+  std::vector<std::shared_ptr<Text>> btnLbls;
+  std::vector<std::shared_ptr<Rect>> btnBgs;
 };
 
-class UiIcon: public Ui {
+class Icon: public Ui {
 public:
-  UiIcon();
-  ~UiIcon();
+  Icon();
+  ~Icon();
 
   void move(Vector2 distance) override;
   void setPos(Vector2 pos) override;
@@ -217,18 +219,18 @@ private:
   std::chrono::time_point<std::chrono::system_clock> hoverBegin;
   std::chrono::duration<double> tooltipDelay;
 
-  std::shared_ptr<UiText> hoverTooltip;
-  std::shared_ptr<UiRect> hoverTooltipBg;
-  std::shared_ptr<UiRect> bg;
+  std::shared_ptr<Text> hoverTooltip;
+  std::shared_ptr<Rect> hoverTooltipBg;
+  std::shared_ptr<Rect> bg;
 
   Vector2 pos;
   Vector2 size;
 };
 
-class UiRow: public Ui {
+class Row: public Ui {
 public:
-  UiRow();
-  ~UiRow();
+  Row();
+  ~Row();
 
   void move(Vector2 distance) override;
   void setPos(Vector2 pos) override;
@@ -248,5 +250,6 @@ private:
   Vector2 size;
   bool hovered;
 };
+}
 
 #endif
