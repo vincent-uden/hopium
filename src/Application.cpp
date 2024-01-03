@@ -123,6 +123,8 @@ void Application::buildGraph() {
   state->graph->connect(g, h, gh);
   state->graph->connect(d, f, df);
   state->graph->connect(d, h, dh);
+
+  state->stree = analyze(state->graph);
 }
 
 void Application::processEvent(enableSketchMode event) {
@@ -192,15 +194,15 @@ void Application::processEvent(stopRotate event) {
 }
 
 void Application::processEvent(splitPaneHorizontally event) {
-    renderer.splitPaneHorizontal(event.mousePos);
+  renderer.splitPaneHorizontal(event.mousePos);
 }
 
 void Application::processEvent(splitPaneVertically event) {
-    renderer.splitPaneVertical(event.mousePos);
+  renderer.splitPaneVertical(event.mousePos);
 }
 
 void Application::processEvent(collapseBoundary event) {
-    renderer.collapseBoundary(event.mousePos);
+  renderer.collapseBoundary(event.mousePos);
 }
 
 void Application::processEvent(dumpShapes event) {
@@ -241,6 +243,14 @@ void Application::processEvent(groundPlaneHit event) {
       state->scene->setShapes(state->occtScene->rasterizeShapes());
     }
   }
+}
+
+void Application::processEvent(increaseZoom event) {
+  state->zoom *= 1.25;
+}
+
+void Application::processEvent(decreaseZoom event) {
+  state->zoom /= 1.25;
 }
 
 Application::~Application() {

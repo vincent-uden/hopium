@@ -44,6 +44,8 @@ private:
   void processEvent(collapseBoundary event);
   void processEvent(groundPlaneHit event);
   void processEvent(dumpShapes event);
+  void processEvent(increaseZoom event);
+  void processEvent(decreaseZoom event);
   void processEvent(exitProgram event);
 
   static Application* instance;

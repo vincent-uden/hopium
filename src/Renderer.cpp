@@ -491,9 +491,9 @@ void Area::buildConstraintSelection() {
 }
 
 void Area::buildGraphViewer() {
-  std::shared_ptr<Ui::GraphViewer> viewer = std::make_shared<Ui::GraphViewer>();
+  std::shared_ptr<Ui::STreeViewer> viewer = std::make_shared<Ui::STreeViewer>();
   std::shared_ptr<Ui::Ui> ptr = std::static_pointer_cast<Ui::Ui>(viewer);
-  viewer->setGraph(ApplicationState::getInstance()->graph);
+  viewer->setSTree(ApplicationState::getInstance()->stree);
   viewer->setAreaPointers(&screenRect, &screenPos, &paneTexture);
   addUi(ptr);
   buildTypeDropDown();

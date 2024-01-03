@@ -267,13 +267,13 @@ public:
 
   void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
   void setGraph(std::shared_ptr<ConstraintGraph> graph);
+  Vector2 getPos();
 
 private:
   Vector2 toScreenSpace(const Vector2 p);
   Vector2 toGraphSpace(const Vector2 p);
 
   Vector2 lastMousePos;
-  Vector2 panOffset;
   Vector2 pos;
   float centralAttraction = 0.4f;
   float dt = 0.01;
@@ -290,6 +290,41 @@ private:
   std::vector<Vector2> nodeAcc;
   std::vector<Vector2> nodePos;
   std::vector<Vector2> nodeVel;
+
+  Rectangle* areaScreenRect = nullptr;
+  Vector2* areaScreenPos = nullptr;
+  RenderTexture* areaTexture = nullptr;
+};
+
+class STreeViewer: public Ui {
+public:
+  STreeViewer();
+  ~STreeViewer();
+
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
+
+  void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
+  void setSTree(std::shared_ptr<STree> stree);
+
+private:
+  void traverse(std::shared_ptr<STree> stree, Vector2 offset);
+  void setZoom();
+
+  Vector2 pos;
+  Vector2 lastMousePos;
+  Vector2 panOffset;
+  float xOffset = 30.0f;
+  float yOffset = 250.0f;
+  // TODO: Don't it like this
+  float lastZoom = 1.0f;
+  std::shared_ptr<STree> stree;
+  std::vector<std::shared_ptr<GraphViewer>> nodes;
 
   Rectangle* areaScreenRect = nullptr;
   Vector2* areaScreenPos = nullptr;

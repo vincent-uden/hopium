@@ -704,6 +704,19 @@ int canSeparateGraphIntoConnectedComponents() {
   return 0;
 }
 
+int canDecomposeGraphIntoSTree() {
+  std::shared_ptr<ConstraintGraph> G(new ConstraintGraph());
+  setupDecomposableTestGraph(*G);
+
+  std::shared_ptr<STree> stree = analyze(G);
+  ASSERT(stree->node, "The STree should have a root node");
+  ASSERT(stree->depth() == 6, "The STree should be 6 layers deep. It is: " << stree->depth());
+  // TODO: Figure out what the actual size should be
+  //ASSERT(stree->size() == 11, "The STree should have 11 nodes. It is: " << stree->size());
+
+  return 0;
+}
+
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -756,6 +769,7 @@ int main(int argc, char** argv) {
   ADD_TEST(canIdentifySeparatingVertices, CONSTRAINT_GRAPH);
   ADD_TEST(graphDeepCopyProducesIdenticalGraph, CONSTRAINT_GRAPH);
   ADD_TEST(canSeparateGraphIntoConnectedComponents, CONSTRAINT_GRAPH);
+  ADD_TEST(canDecomposeGraphIntoSTree, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

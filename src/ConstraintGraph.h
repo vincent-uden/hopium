@@ -49,6 +49,7 @@ public:
   ~GeometricElement();
 
   bool isConnected(std::shared_ptr<GeometricElement> other);
+  bool isVirtuallyConnected(std::shared_ptr<GeometricElement> other);
   int weight();
   void deleteEdge(std::shared_ptr<GeometricElement> other);
 
@@ -72,6 +73,9 @@ public:
   STree();
   ~STree();
 
+  int depth();
+  int size();
+
   std::shared_ptr<STree> left = nullptr;
   std::shared_ptr<STree> right = nullptr;
   std::shared_ptr<ConstraintGraph> node = nullptr;
@@ -81,7 +85,6 @@ class ConstraintGraph {
 public:
   ConstraintGraph();
   ~ConstraintGraph();
-
 
   bool adjacent(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b);
   bool connected();

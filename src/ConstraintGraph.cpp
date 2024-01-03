@@ -96,6 +96,15 @@ bool GeometricElement::isConnected(std::shared_ptr<GeometricElement> other) {
   return false;
 }
 
+bool GeometricElement::isVirtuallyConnected(std::shared_ptr<GeometricElement> other) {
+  for (const auto& [edge, v] : edges) {
+    if (v == other && edge->type == ConstraintType::VIRTUAL) {
+      return true;
+    }
+  }
+  return false;
+}
+
 int GeometricElement::weight() {
   int out = 0;
   switch (type) {
@@ -125,6 +134,28 @@ STree::STree() {
 STree::~STree() {
 }
 
+int STree::depth() {
+  int depth = 0;
+  if (left) {
+    depth = std::max(left->depth(), depth);
+  }
+  if (right) {
+    depth = std::max(right->depth(), depth);
+  }
+  return depth + 1;
+}
+
+int STree::size() {
+  int size = 0;
+  if (left) {
+    size += left->size();
+  }
+  if (right) {
+    size += right->size();
+  }
+  return size + 1;
+}
+
 ConstraintGraph::ConstraintGraph() {
 }
 
@@ -138,8 +169,9 @@ void ConstraintGraph::addVirtualEdge(
   std::shared_ptr<GeometricElement> b
 ) {
   std::shared_ptr<Constraint> c(new Constraint(ConstraintType::VIRTUAL));
-  a->edges.push_back(std::make_pair(c, b));
-  b->edges.push_back(std::make_pair(c, a));
+  std::shared_ptr<GeometricElement> v = findVertexById(a->id);
+  std::shared_ptr<GeometricElement> u = findVertexById(b->id);
+  connect(v, u, c);
 }
 
 int ConstraintGraph::deficit() {
@@ -252,7 +284,6 @@ ConstraintGraph::separatingGraphs(
   std::shared_ptr<GeometricElement> a2 = std::make_shared<GeometricElement>(*a);
   std::shared_ptr<GeometricElement> b2 = std::make_shared<GeometricElement>(*b);
 
-
   // Reconnect the separation pair (a,b)
   G1->addVertex(a1);
   G1->addVertex(b1);
@@ -317,9 +348,11 @@ ConstraintGraph::separatingVertices() {
     for (size_t j = i + 1; j < vertices.size(); ++j) {
       std::shared_ptr<GeometricElement> a = vertices[i];
       std::shared_ptr<GeometricElement> b = vertices[j];
+      /*
       if (adjacent(a, b)) {
         continue;
       }
+      */
 
       a->explored = true;
       b->explored = true;
@@ -453,7 +486,7 @@ std::shared_ptr<STree> analyze(std::shared_ptr<ConstraintGraph> G) {
   // Decomposition algorithm: Joan-Arinyo, Soto-Riera, Vila-Marta & Vilaplana-Pastó
   std::shared_ptr<STree> out = std::make_shared<STree>();
 
-  if (G->triconnected()) {
+  if (G->triconnected() || G->vertices.size() == 3) {
     out->node = G;
   } else {
     std::pair<std::shared_ptr<GeometricElement>, std::shared_ptr<GeometricElement>> sepVertices = G->separatingVertices();
@@ -470,6 +503,7 @@ std::shared_ptr<STree> analyze(std::shared_ptr<ConstraintGraph> G) {
       G2->addVirtualEdge(a, b);
     }
 
+    // TODO: Something isn't working when adding in virtual edges
     out->node = G;
     out->left = analyze(G1);
     out->right = analyze(G2);

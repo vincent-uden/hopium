@@ -862,17 +862,21 @@ void Row::addChild(std::shared_ptr<Ui> child) {
 GraphViewer::GraphViewer() {
   pos.x = 0;
   pos.y = 0;
-  panOffset.x = 0;
-  panOffset.y = 0;
 }
 
 GraphViewer::~GraphViewer() {
 }
 
 void GraphViewer::move(Vector2 distance) {
+  pos.x += distance.x;
+  pos.y += distance.y;
 }
 
 void GraphViewer::setPos(Vector2 pos) {
+    Vector2 diff;
+    diff.x = pos.x - this->pos.x;
+    diff.y = pos.y - this->pos.y;
+    move(diff);
 }
 
 void GraphViewer::draw() {
@@ -942,12 +946,19 @@ void GraphViewer::draw() {
 
     size_t j = 0;
     for (const std::shared_ptr<GeometricElement>& u: graph->vertices) {
-      if (v->isConnected(u)) {
+      if (v->isVirtuallyConnected(u)) {
         DrawLineEx(
           renderPos,
           toScreenSpace(nodePos[j]),
           edgeThickness,
-          {255, 255, 255, 50}
+          {255, 0, 0, 100}
+        );
+      } else if (v->isConnected(u)) {
+        DrawLineEx(
+          renderPos,
+          toScreenSpace(nodePos[j]),
+          edgeThickness,
+          {255, 255, 255, 100}
         );
       }
       ++j;
@@ -1011,6 +1022,10 @@ void GraphViewer::setGraph(std::shared_ptr<ConstraintGraph> graph) {
   }
 }
 
+Vector2 GraphViewer::getPos() {
+  return pos;
+}
+
 Vector2 GraphViewer::toScreenSpace(const Vector2 p) {
   Vector2 out = p;
   out = Vector2Scale(out, scale);
@@ -1025,6 +1040,120 @@ Vector2 GraphViewer::toGraphSpace(const Vector2 p) {
   out = Vector2Subtract(out, pos);
   out = Vector2Scale(out, 1/scale);
   return out;
+}
+
+STreeViewer::STreeViewer() {
+  pos.x = 0;
+  pos.y = 0;
+}
+
+STreeViewer::~STreeViewer() {
+}
+
+void STreeViewer::move(Vector2 distance) {
+  pos.x += distance.x;
+  pos.y += distance.y;
+
+  for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    if (g) {
+      g->move(distance);
+    }
+  }
+}
+
+void STreeViewer::setPos(Vector2 pos) {
+    Vector2 diff;
+    diff.x = pos.x - this->pos.x;
+    diff.y = pos.y - this->pos.y;
+    move(diff);
+}
+
+void STreeViewer::draw() {
+  setZoom();
+  for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    g->draw();
+  }
+}
+
+void STreeViewer::receiveMousePos(Vector2 mousePos) {
+  if (ApplicationState::getInstance()->holdingRotate) {
+    Vector2 diff = Vector2Subtract(mousePos, lastMousePos);
+    move(diff);
+  }
+
+  for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    g->receiveMousePos(mousePos);
+  }
+
+  lastMousePos = mousePos;
+}
+
+void STreeViewer::receiveMouseDown(Vector2 mousePos) {
+  for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    g->receiveMouseDown(mousePos);
+  }
+}
+
+void STreeViewer::receiveMouseUp(Vector2 mousePos) {
+  for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    g->receiveMouseUp(mousePos);
+  }
+}
+
+Vector2 STreeViewer::getSize() {
+  return { areaScreenRect->width, areaScreenRect->height };
+}
+
+void STreeViewer::setAreaPointers(
+  Rectangle* screenRect,
+  Vector2* screenPos,
+  RenderTexture* texture
+) {
+  areaScreenRect = screenRect;
+  areaScreenPos = screenPos;
+  areaTexture = texture;
+  for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    g->setAreaPointers(screenRect, screenPos, texture);
+  }
+}
+
+void STreeViewer::setSTree(std::shared_ptr<STree> stree) {
+  this->stree = stree;
+  traverse(this->stree, {0, 0});
+}
+
+void STreeViewer::traverse(std::shared_ptr<STree> stree, Vector2 offset) {
+  std::shared_ptr<GraphViewer> graphViewer = std::make_shared<GraphViewer>();
+  graphViewer->setAreaPointers(areaScreenRect, areaScreenPos, areaTexture);
+  graphViewer->setGraph(stree->node);
+  graphViewer->setPos(offset);
+  float zoom = ApplicationState::getInstance()->zoom;
+  if (stree->left) {
+    traverse(
+      stree->left,
+      Vector2Add(
+        offset,
+        { -std::pow(2.0f, static_cast<float>(stree->depth() - 1)) * xOffset * zoom, yOffset * zoom }
+      )
+    );
+  }
+  if (stree->right) {
+    traverse(
+      stree->right,
+      Vector2Add(
+        offset,
+        { std::pow(2.0f, static_cast<float>(stree->depth() - 1)) * xOffset * zoom, yOffset * zoom }
+      )
+    );
+  }
+  nodes.push_back(graphViewer);
+}
+
+void STreeViewer::setZoom() {
+  for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    g->setPos(Vector2Scale(g->getPos(), ApplicationState::getInstance()->zoom / lastZoom));
+  }
+  lastZoom = ApplicationState::getInstance()->zoom;
 }
 
 /* End of namespace */ }

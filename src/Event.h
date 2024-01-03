@@ -23,6 +23,8 @@ struct collapseBoundary { Vector2 mousePos; };
 // Is subject to change in the future. Think about how hit's should be handled.
 struct groundPlaneHit { double x, y, z; Ray ray; };
 struct dumpShapes {};
+struct increaseZoom {};
+struct decreaseZoom {};
 
 struct exitProgram {};
 
@@ -41,6 +43,8 @@ using AppEvent = std::variant<
   stopRotate,
   groundPlaneHit,
   dumpShapes,
+  increaseZoom,
+  decreaseZoom,
   exitProgram
 >;
 
@@ -59,6 +63,8 @@ const AppEvent APP_EVENTS[] = {
   stopRotate {},
   groundPlaneHit {},
   dumpShapes {},
+  increaseZoom {},
+  decreaseZoom {},
   exitProgram {}
 };
 
@@ -69,6 +75,8 @@ const AppEvent NON_SERIALIZABLE[] = {
   collapseBoundary {},
   stopRotate {},
   dumpShapes {},
+  increaseZoom {},
+  decreaseZoom {},
   exitProgram {}
 };
 

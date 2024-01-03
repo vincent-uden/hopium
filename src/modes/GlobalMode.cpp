@@ -28,6 +28,12 @@ bool GlobalMode::keyPress(KeyPress key) {
   case KEY_Q:
     EventQueue::getInstance()->postEvent(exitProgram {});
     break;
+  case KEY_X:
+    EventQueue::getInstance()->postEvent(increaseZoom {});
+    break;
+  case KEY_Z:
+    EventQueue::getInstance()->postEvent(decreaseZoom {});
+    break;
   default:
     consumed = false;
   }
