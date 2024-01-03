@@ -1,5 +1,6 @@
 #include "Ui.h"
 #include "raylib.h"
+#include <cmath>
 
 namespace Ui {
 
@@ -859,8 +860,10 @@ void Row::addChild(std::shared_ptr<Ui> child) {
 }
 
 GraphViewer::GraphViewer() {
-    pos.x = 0;
-    pos.y = 0;
+  pos.x = 0;
+  pos.y = 0;
+  panOffset.x = 0;
+  panOffset.y = 0;
 }
 
 GraphViewer::~GraphViewer() {
@@ -873,12 +876,91 @@ void GraphViewer::setPos(Vector2 pos) {
 }
 
 void GraphViewer::draw() {
-  // TODO: Draw graph
-  // Update positions, forces and velocities
+  avgPos.x = 0;
+  avgPos.y = 0;
+  // Update positions, forces and velocities (Using verlet integration)
+  for (size_t i = 0; i < graph->vertices.size(); ++i) {
+    nodePos[i].x += nodeVel[i].x * dt + nodeAcc[i].x * dt * dt * 0.5;
+    nodePos[i].y += nodeVel[i].y * dt + nodeAcc[i].y * dt * dt * 0.5;
+    avgPos.x += nodePos[i].x;
+    avgPos.y += nodePos[i].y;
+
+    Vector2 a = Vector2Scale(nodeAcc[i], 0.5 * dt);
+    nodeVel[i].x += a.x;
+    nodeVel[i].y += a.y;
+
+    nodeAcc[i].x = 0;
+    nodeAcc[i].y = 0;
+  }
+  for (size_t i = 0; i < graph->vertices.size(); ++i) {
+    for (size_t j = i + 1; j < graph->vertices.size(); ++j) {
+      Vector2 diff = Vector2Subtract(nodePos[i], nodePos[j]);
+      Vector2 f = Vector2Scale(Vector2Normalize(diff), 1.0f / Vector2LengthSqr(diff));
+      nodeAcc[i].x += f.x * pushForce;
+      nodeAcc[i].y += f.y * pushForce;
+      nodeAcc[j].x -= f.x * pushForce;
+      nodeAcc[j].y -= f.y * pushForce;
+
+      if (graph->vertices[i]->isConnected(graph->vertices[j])) {
+        float springL = Vector2Length(diff);
+        nodeAcc[i].x -= diff.x * std::pow(springLength - springL, 2) * pullForce;
+        nodeAcc[i].y -= diff.y * std::pow(springLength - springL, 2) * pullForce;
+        nodeAcc[j].x += diff.x * std::pow(springLength - springL, 2) * pullForce;
+        nodeAcc[j].y += diff.y * std::pow(springLength - springL, 2) * pullForce;
+      }
+      // TODO: Drag
+    }
+    Vector2 a = Vector2Scale(nodeAcc[i], 0.5 * dt);
+    nodeVel[i].x += a.x;
+    nodeVel[i].y += a.y;
+    nodeVel[i].x *= 0.99;
+    nodeVel[i].y += 0.99;
+  }
+  avgPos.x /= graph->vertices.size();
+  avgPos.y /= graph->vertices.size();
+
+  // Drawing
   Vector2 textPos = pos;
-  for (const std::shared_ptr<GeometricElement>& e: graph->vertices) {
-    DrawTextEx(colorscheme->font, e->label.c_str(), textPos, 20, 1, colorscheme->onBackground);
+  size_t i = 0;
+  for (const std::shared_ptr<GeometricElement>& v: graph->vertices) {
+    nodePos[i].x -= avgPos.x;
+    nodePos[i].y -= avgPos.y;
+    DrawTextEx(
+      colorscheme->font,
+      v->label.c_str(),
+      Vector2Add(
+        Vector2Scale(getSize(), 0.5f),
+        Vector2Add(Vector2Scale(nodePos[i], scale), { -5, -30 })
+      ),
+      20,
+      1,
+      colorscheme->onBackground
+    );
     textPos.y += 20;
+    ++i;
+
+    size_t j = 0;
+    for (const std::shared_ptr<GeometricElement>& u: graph->vertices) {
+      if (v->isConnected(u) && false) {
+        DrawLineEx(
+          Vector2Add(Vector2Scale(nodePos[i], scale), Vector2Scale(getSize(), 0.5f)),
+          Vector2Add(Vector2Scale(nodePos[j], scale), Vector2Scale(getSize(), 0.5f)),
+          edgeThickness,
+          WHITE
+        );
+      }
+      ++j;
+    }
+  }
+
+  i = 0;
+  for (const std::shared_ptr<GeometricElement>& v: graph->vertices) {
+    DrawCircleV(
+      Vector2Add(Vector2Scale(nodePos[i], scale), Vector2Scale(getSize(), 0.5f)),
+      5,
+      GREEN
+    );
+    ++i;
   }
 }
 
@@ -908,6 +990,19 @@ void GraphViewer::setAreaPointers(
 
 void GraphViewer::setGraph(std::shared_ptr<ConstraintGraph> graph) {
   this->graph = graph;
+  nodePos.clear();
+  for (const std::shared_ptr<GeometricElement>& e: this->graph->vertices) {
+    nodePos.push_back({ (std::rand() % 1000) / 1000.0f, (std::rand() % 1000) / 1000.0f });
+    nodeVel.push_back({ 0, 0 });
+    nodeAcc.push_back({ 0, 0 });
+  }
+}
+
+Vector2 GraphViewer::toScreenSpace(const Vector2 p) {
+  Vector2 out = p;
+  // TODO: Create transformation
+
+  return out;
 }
 
 /* End of namespace */ }

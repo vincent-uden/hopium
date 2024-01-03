@@ -87,6 +87,15 @@ GeometricElement::GeometricElement(const GeometricElement &other) {
 GeometricElement::~GeometricElement() {
 }
 
+bool GeometricElement::isConnected(std::shared_ptr<GeometricElement> other) {
+  for (const auto& [edge, v] : edges) {
+    if (v == other) {
+      return true;
+    }
+  }
+  return false;
+}
+
 int GeometricElement::weight() {
   int out = 0;
   switch (type) {

@@ -40,6 +40,7 @@ Application::Application() {
 
   createBottle();
   buildGraph();
+  std::srand(1337);
 
   int count = GetMonitorCount();
   if (count == 4) {

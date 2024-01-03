@@ -48,6 +48,7 @@ public:
   GeometricElement(const GeometricElement &other);
   ~GeometricElement();
 
+  bool isConnected(std::shared_ptr<GeometricElement> other);
   int weight();
   void deleteEdge(std::shared_ptr<GeometricElement> other);
 
