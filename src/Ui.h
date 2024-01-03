@@ -11,6 +11,7 @@
 
 #include "ApplicationState.h"
 #include "Colorscheme.h"
+#include "ConstraintGraph.h"
 #include "Event.h"
 #include "Scene.h"
 
@@ -250,6 +251,33 @@ private:
   Vector2 size;
   bool hovered;
 };
+
+class GraphViewer: public Ui {
+public:
+  GraphViewer();
+  ~GraphViewer();
+
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
+
+  void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
+  void setGraph(std::shared_ptr<ConstraintGraph> graph);
+
+private:
+  Vector2 pos;
+  Vector2 lastMousePos;
+  std::shared_ptr<ConstraintGraph> graph;
+
+  Rectangle* areaScreenRect = nullptr;
+  Vector2* areaScreenPos = nullptr;
+  RenderTexture* areaTexture = nullptr;
+};
+
 }
 
 #endif

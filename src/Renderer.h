@@ -71,6 +71,7 @@ enum AreaType {
   VIEWPORT3D,
   TOOL_SELECTION,
   CONSTRAINT_SELECTION,
+  GRAPH_VIEWER,
 };
 
 class Area {
@@ -132,6 +133,7 @@ private:
   void buildViewport3D();
   void buildToolSelection();
   void buildConstraintSelection();
+  void buildGraphViewer();
   void buildEmpty();
   void buildTypeDropDown();
   void resetType();

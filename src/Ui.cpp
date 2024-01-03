@@ -858,4 +858,56 @@ void Row::addChild(std::shared_ptr<Ui> child) {
   children.push_back(child);
 }
 
+GraphViewer::GraphViewer() {
+    pos.x = 0;
+    pos.y = 0;
 }
+
+GraphViewer::~GraphViewer() {
+}
+
+void GraphViewer::move(Vector2 distance) {
+}
+
+void GraphViewer::setPos(Vector2 pos) {
+}
+
+void GraphViewer::draw() {
+  // TODO: Draw graph
+  // Update positions, forces and velocities
+  Vector2 textPos = pos;
+  for (const std::shared_ptr<GeometricElement>& e: graph->vertices) {
+    DrawTextEx(colorscheme->font, e->label.c_str(), textPos, 20, 1, colorscheme->onBackground);
+    textPos.y += 20;
+  }
+}
+
+void GraphViewer::receiveMousePos(Vector2 mousePos) {
+  lastMousePos = mousePos;
+}
+
+void GraphViewer::receiveMouseDown(Vector2 mousePos) {
+}
+
+void GraphViewer::receiveMouseUp(Vector2 mousePos) {
+}
+
+Vector2 GraphViewer::getSize() {
+  return { areaScreenRect->width, areaScreenRect->height };
+}
+
+void GraphViewer::setAreaPointers(
+  Rectangle* screenRect,
+  Vector2* screenPos,
+  RenderTexture* texture
+) {
+  areaScreenRect = screenRect;
+  areaScreenPos = screenPos;
+  areaTexture = texture;
+}
+
+void GraphViewer::setGraph(std::shared_ptr<ConstraintGraph> graph) {
+  this->graph = graph;
+}
+
+/* End of namespace */ }

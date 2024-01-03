@@ -247,6 +247,9 @@ Area::Area(
   case AreaType::CONSTRAINT_SELECTION:
     buildConstraintSelection();
     break;
+  case AreaType::GRAPH_VIEWER:
+    buildGraphViewer();
+    break;
   case AreaType::EMPTY:
     buildEmpty();
     break;
@@ -487,6 +490,15 @@ void Area::buildConstraintSelection() {
   buildTypeDropDown();
 }
 
+void Area::buildGraphViewer() {
+  std::shared_ptr<Ui::GraphViewer> viewer = std::make_shared<Ui::GraphViewer>();
+  std::shared_ptr<Ui::Ui> ptr = std::static_pointer_cast<Ui::Ui>(viewer);
+  viewer->setGraph(ApplicationState::getInstance()->graph);
+  viewer->setAreaPointers(&screenRect, &screenPos, &paneTexture);
+  addUi(ptr);
+  buildTypeDropDown();
+}
+
 void Area::buildEmpty() {
   buildTypeDropDown();
 }
@@ -496,6 +508,7 @@ void Area::buildTypeDropDown() {
   areaTypes.push_back("3D Viewport");
   areaTypes.push_back("Tool Selection");
   areaTypes.push_back("Constraints");
+  areaTypes.push_back("Graph Viewer");
   areaTypes.push_back("Empty");
 
   std::shared_ptr<Ui::DropDown> typePicker(new Ui::DropDown("Area Type", areaTypes));
@@ -512,6 +525,9 @@ void Area::buildTypeDropDown() {
       } else if (selected == "Constraints") {
         this->type = AreaType::CONSTRAINT_SELECTION;
         buildConstraintSelection();
+      } else if (selected == "Graph Viewer") {
+        this->type = AreaType::GRAPH_VIEWER;
+        buildGraphViewer();
       } else if (selected == "Empty") {
         this->type = AreaType::EMPTY;
         buildEmpty();

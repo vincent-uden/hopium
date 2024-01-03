@@ -13,6 +13,7 @@ find_package(OpenCASCADE)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 # Configure C++ compiler's includes dir
 include_directories ( SYSTEM ${OpenCASCADE_INCLUDE_DIR} )
@@ -33,6 +34,7 @@ get_filename_component(includePath ./include REALPATH)
 get_filename_component(raylibPath ./lib/libraylib.so.4.5.0 REALPATH)
 
 target_link_libraries(Lesson_04 ${raylibPath})
+target_compile_options(Lesson_04 PRIVATE -Wswitch)
 target_link_libraries(test ${raylibPath})
 
 # Add linker options

@@ -5,6 +5,7 @@
 
 #include <gp_Pnt.hxx>
 
+#include "ConstraintGraph.h"
 #include "Mode.h"
 #include "OcctScene.h"
 #include "Scene.h"
@@ -14,6 +15,7 @@ public:
   static ApplicationState* getInstance();
   ~ApplicationState();
 
+  std::shared_ptr<ConstraintGraph> graph = std::shared_ptr<ConstraintGraph>(new ConstraintGraph());;
   std::shared_ptr<ShaderStore> shaderStore = std::make_shared<ShaderStore>();
   std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new Scene(shaderStore));;
   std::shared_ptr<OcctScene> occtScene = std::shared_ptr<OcctScene>(new OcctScene());;

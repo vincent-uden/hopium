@@ -39,6 +39,7 @@ Application::Application() {
   renderer.init(1600, 900, state->shaderStore);
 
   createBottle();
+  buildGraph();
 
   int count = GetMonitorCount();
   if (count == 4) {
@@ -58,6 +59,7 @@ Application::Application() {
   state->line = std::shared_ptr<Mode>(new LineMode());
   state->extrude = std::shared_ptr<Mode>(new ExtrudeMode());
 
+
   if (fileExists(scenePath)) {
     json history = json::parse(readFromFile(scenePath));
     eventQueue.deserializeHistory(history);
@@ -70,6 +72,56 @@ Application::Application() {
     }
     state->scene->setShapes(state->occtScene->rasterizeShapes());
   }
+}
+
+void Application::buildGraph() {
+  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
+  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
+  std::shared_ptr<GeometricElement> d = std::make_shared<GeometricElement>(GeometricType::POINT, "d");
+  std::shared_ptr<GeometricElement> e = std::make_shared<GeometricElement>(GeometricType::POINT, "e");
+  std::shared_ptr<GeometricElement> f = std::make_shared<GeometricElement>(GeometricType::POINT, "f");
+  std::shared_ptr<GeometricElement> g = std::make_shared<GeometricElement>(GeometricType::POINT, "g");
+  std::shared_ptr<GeometricElement> h = std::make_shared<GeometricElement>(GeometricType::POINT, "h");
+
+  std::shared_ptr<Constraint> ab = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab");
+  std::shared_ptr<Constraint> bc = std::make_shared<Constraint>(ConstraintType::DISTANCE, "bc");
+  std::shared_ptr<Constraint> ce = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ce");
+  std::shared_ptr<Constraint> ea = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ea");
+  std::shared_ptr<Constraint> cd = std::make_shared<Constraint>(ConstraintType::DISTANCE, "cd");
+  std::shared_ptr<Constraint> ed = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ed");
+  std::shared_ptr<Constraint> ag = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ag");
+  std::shared_ptr<Constraint> af = std::make_shared<Constraint>(ConstraintType::DISTANCE, "af");
+  std::shared_ptr<Constraint> fg = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fg");
+  std::shared_ptr<Constraint> fh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "fh");
+  std::shared_ptr<Constraint> gh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "gh");
+  std::shared_ptr<Constraint> df = std::make_shared<Constraint>(ConstraintType::DISTANCE, "df");
+  std::shared_ptr<Constraint> dh = std::make_shared<Constraint>(ConstraintType::DISTANCE, "dh");
+
+  state->graph = std::make_shared<ConstraintGraph>();
+
+  state->graph->addVertex(a);
+  state->graph->addVertex(b);
+  state->graph->addVertex(c);
+  state->graph->addVertex(d);
+  state->graph->addVertex(e);
+  state->graph->addVertex(f);
+  state->graph->addVertex(g);
+  state->graph->addVertex(h);
+
+  state->graph->connect(a, b, ab);
+  state->graph->connect(b, c, bc);
+  state->graph->connect(c, e, ce);
+  state->graph->connect(e, a, ea);
+  state->graph->connect(c, d, cd);
+  state->graph->connect(e, d, ed);
+  state->graph->connect(a, g, ag);
+  state->graph->connect(a, f, af);
+  state->graph->connect(f, g, fg);
+  state->graph->connect(f, h, fh);
+  state->graph->connect(g, h, gh);
+  state->graph->connect(d, f, df);
+  state->graph->connect(d, h, dh);
 }
 
 void Application::processEvent(enableSketchMode event) {

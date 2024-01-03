@@ -29,6 +29,7 @@ public:
 private:
   Application();
 
+  void buildGraph();
   void processEvent(enableSketchMode event);
   void processEvent(disableSketchMode event);
   void processEvent(toggleSketchMode event);
