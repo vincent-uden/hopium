@@ -15,6 +15,8 @@ enum ConstraintType {
   COLINEAR,
   DISTANCE,
   ANGLE,
+  HORIZONTAL,
+  VERTICAL,
   VIRTUAL,
 };
 
@@ -32,6 +34,7 @@ public:
   ConstraintType type;
   int id;
   std::string label;
+  float value;
 
 private:
   static int nextId;
