@@ -24,7 +24,7 @@
 
 #include "raylib.h"
 
-#include "Scene.h"
+#include "../rendering/Scene.h"
 
 
 class OcctScene {

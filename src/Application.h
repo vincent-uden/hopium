@@ -6,16 +6,16 @@
 #include "ApplicationState.h"
 #include "Event.h"
 #include "Mode.h"
-#include "OcctScene.h"
-#include "OcctTest.h"
-#include "Renderer.h"
-#include "Scene.h"
 #include "System.h"
+#include "cad/OcctScene.h"
+#include "cad/OcctTest.h"
 #include "modes/ExtrudeMode.h"
 #include "modes/GlobalMode.h"
 #include "modes/LineMode.h"
 #include "modes/PointMode.h"
 #include "modes/SketchMode.h"
+#include "rendering/Renderer.h"
+#include "rendering/Scene.h"
 
 class Application {
 public:

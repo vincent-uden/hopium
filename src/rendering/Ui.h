@@ -9,10 +9,10 @@
 #include <cfloat>
 #include <iostream>
 
-#include "ApplicationState.h"
+#include "../ApplicationState.h"
+#include "../Event.h"
+#include "../cad/ConstraintGraph.h"
 #include "Colorscheme.h"
-#include "ConstraintGraph.h"
-#include "Event.h"
 #include "Scene.h"
 
 #include <raylib.h>

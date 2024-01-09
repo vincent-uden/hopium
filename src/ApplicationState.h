@@ -5,10 +5,10 @@
 
 #include <gp_Pnt.hxx>
 
-#include "ConstraintGraph.h"
 #include "Mode.h"
-#include "OcctScene.h"
-#include "Scene.h"
+#include "rendering/Scene.h"
+#include "cad/ConstraintGraph.h"
+#include "cad/OcctScene.h"
 
 class ApplicationState {
 public:
