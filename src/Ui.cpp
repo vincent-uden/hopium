@@ -895,8 +895,8 @@ void GraphViewer::draw() {
   for (size_t i = 0; i < graph->vertices.size(); ++i) {
     Vector2 direction = Vector2Normalize(nodePos[i]);
     float mag = std::max(Vector2LengthSqr(nodePos[i]), 0.1f);
-    nodeAcc[i].x -= direction.x / mag * centralAttraction;
-    nodeAcc[i].y -= direction.y / mag * centralAttraction;
+    nodeAcc[i].x -= direction.x * mag * centralAttraction;
+    nodeAcc[i].y -= direction.y * mag * centralAttraction;
 
     for (size_t j = i + 1; j < graph->vertices.size(); ++j) {
       Vector2 diff = Vector2Subtract(nodePos[i], nodePos[j]);
@@ -1026,17 +1026,36 @@ Vector2 GraphViewer::getPos() {
   return pos;
 }
 
+Rectangle GraphViewer::boundingBox(float padding) {
+  Vector2 min = { std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
+  Vector2 max = { -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max() };
+  for (const Vector2& p: nodePos) {
+    if (p.x < min.x) { min.x = p.x; }
+    if (p.y < min.y) { min.y = p.y; }
+    if (p.x > max.x) { max.x = p.x; }
+    if (p.y > max.y) { max.y = p.y; }
+  }
+  min = toScreenSpace(min);
+  max = toScreenSpace(max);
+  min.x -= padding;
+  min.y -= padding;
+  max.x += padding;
+  max.y += padding;
+
+  return Rectangle { min.x, min.y, max.x - min.x, max.y - min.y };
+}
+
 Vector2 GraphViewer::toScreenSpace(const Vector2 p) {
   Vector2 out = p;
   out = Vector2Scale(out, scale);
-  out = Vector2Add(out, Vector2Scale(getSize(), 0.5f));
+  out = Vector2Add(out, Vector2Scale(Vector2(areaScreenRect->width, areaScreenRect->height), 0.5f));
   out = Vector2Add(pos, out);
   return out;
 }
 
 Vector2 GraphViewer::toGraphSpace(const Vector2 p) {
   Vector2 out = p;
-  out = Vector2Subtract(out, Vector2Scale(getSize(), 0.5f));
+  out = Vector2Subtract(out, Vector2Scale(Vector2(areaScreenRect->width, areaScreenRect->height), 0.5f));
   out = Vector2Subtract(out, pos);
   out = Vector2Scale(out, 1/scale);
   return out;
@@ -1071,6 +1090,7 @@ void STreeViewer::setPos(Vector2 pos) {
 void STreeViewer::draw() {
   setZoom();
   for (const std::shared_ptr<GraphViewer>& g: nodes) {
+    DrawRectangleRec(g->boundingBox(10), {205, 205, 255, 30});
     g->draw();
   }
 }

@@ -26,14 +26,16 @@ public:
   ~Constraint();
 
   int weight();
+  int getFlow();
+  void setFlow(int flow);
 
   ConstraintType type;
-  int flow = 0;
   int id;
   std::string label;
 
 private:
   static int nextId;
+  int flow = 0;
 };
 
 enum GeometricType {
@@ -93,7 +95,7 @@ public:
   int deficit();
   int maxFlow(std::shared_ptr<GeometricElement> source, std::shared_ptr<GeometricElement> sink);
   std::optional<std::vector<std::shared_ptr<Constraint>>> breadthFirstSearch(std::shared_ptr<GeometricElement> start, std::shared_ptr<GeometricElement> end);
-  std::pair<std::shared_ptr<ConstraintGraph>,std::shared_ptr<ConstraintGraph>> separatingGraphs(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b);
+  std::pair<std::shared_ptr<ConstraintGraph>,std::shared_ptr<ConstraintGraph>> splitGraphs(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b);
   std::pair<std::shared_ptr<GeometricElement>,std::shared_ptr<GeometricElement>> separatingVertices();
   std::shared_ptr<ConstraintGraph> deepCopy();
   std::shared_ptr<GeometricElement> findVertexById(int id);

@@ -697,7 +697,7 @@ int canSeparateGraphIntoConnectedComponents() {
   setupDecomposableTestGraph(G);
 
   std::pair<std::shared_ptr<GeometricElement>, std::shared_ptr<GeometricElement>> p = G.separatingVertices();
-  std::pair<std::shared_ptr<ConstraintGraph>, std::shared_ptr<ConstraintGraph>> GPrimes = G.separatingGraphs(p.first, p.second);
+  std::pair<std::shared_ptr<ConstraintGraph>, std::shared_ptr<ConstraintGraph>> GPrimes = G.splitGraphs(p.first, p.second);
   ASSERT(GPrimes.first->connected() && GPrimes.second->connected(), "The graphs should be connected");
   ASSERT(GPrimes.first->vertices.size() == 7 && GPrimes.second->vertices.size() == 3, "The number of vertices should be 7 and 3");
 

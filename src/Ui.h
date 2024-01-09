@@ -268,6 +268,7 @@ public:
   void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
   void setGraph(std::shared_ptr<ConstraintGraph> graph);
   Vector2 getPos();
+  Rectangle boundingBox(float padding);
 
 private:
   Vector2 toScreenSpace(const Vector2 p);
@@ -275,10 +276,10 @@ private:
 
   Vector2 lastMousePos;
   Vector2 pos;
-  float centralAttraction = 0.4f;
+  float centralAttraction = 0.5f;
   float dt = 0.01;
   float edgeThickness = 2.f;
-  float pullForce = 20.f;
+  float pullForce = 40.f;
   float pushForce = 0.3f;
   float scale = 200.f;
   float springLength = 0.2f;
@@ -319,9 +320,9 @@ private:
   Vector2 pos;
   Vector2 lastMousePos;
   Vector2 panOffset;
-  float xOffset = 30.0f;
+  float xOffset = 50.0f;
   float yOffset = 250.0f;
-  // TODO: Don't it like this
+  // TODO: Don't do it like this
   float lastZoom = 1.0f;
   std::shared_ptr<STree> stree;
   std::vector<std::shared_ptr<GraphViewer>> nodes;

@@ -61,6 +61,17 @@ int Constraint::weight() {
   return out;
 }
 
+int Constraint::getFlow() {
+  //return (type == ConstraintType::VIRTUAL) + flow;
+  return flow;
+}
+
+void Constraint::setFlow(int flow) {
+  //if (type != ConstraintType::VIRTUAL) {
+    this->flow = flow;
+  //}
+}
+
 int GeometricElement::nextId = 0;
 
 GeometricElement::GeometricElement(GeometricType type) {
@@ -175,7 +186,8 @@ void ConstraintGraph::addVirtualEdge(
 }
 
 int ConstraintGraph::deficit() {
-  return -1;
+  int out = 2 * vertices.size() - 3 - edges.size();
+  return out;
 }
 
 void ConstraintGraph::addVertex(std::shared_ptr<GeometricElement> element) {
@@ -196,12 +208,13 @@ void ConstraintGraph::deleteVertex(std::shared_ptr<GeometricElement> a) {
   std::erase_if(vertices, [a](std::shared_ptr<GeometricElement> b) { return a->id == b->id; });
   for (const auto& [edge, other] : a->edges) {
     other->deleteEdge(a);
+    std::erase_if(edges, [edge](std::shared_ptr<Constraint> c) { return c == edge; });
   }
 }
 
 void ConstraintGraph::print() {
   for (const std::shared_ptr<GeometricElement>& vertex : vertices) {
-    std::cout << vertex->label << " " << vertex->id << std::endl;
+    std::cout << vertex->label << " " << vertex->id << " Explored: " << vertex->explored << std::endl;
     for (const auto& edge : vertex->edges) {
       std::cout << "  " << edge.first->label << " " << edge.second->label << std::endl;
     }
@@ -260,7 +273,7 @@ bool ConstraintGraph::triconnected() {
 }
 
 std::pair<std::shared_ptr<ConstraintGraph>,std::shared_ptr<ConstraintGraph>>
-ConstraintGraph::separatingGraphs(
+ConstraintGraph::splitGraphs(
     std::shared_ptr<GeometricElement> a,
     std::shared_ptr<GeometricElement> b
 ) {
@@ -270,21 +283,29 @@ ConstraintGraph::separatingGraphs(
   G1->floodFill(G1->vertices.front());
   std::shared_ptr<ConstraintGraph> G2 = G1->deepCopy();
 
-  std::erase_if(
-    G1->vertices,
-    [](std::shared_ptr<GeometricElement> v) { return v->explored; }
-  );
-  std::erase_if(
-    G2->vertices,
-    [](std::shared_ptr<GeometricElement> v) { return !v->explored; }
-  );
+  for (auto it = G1->vertices.begin(); it != G1->vertices.end();) {
+    std::shared_ptr<GeometricElement> v = *it;
+    if (v->explored) {
+      G1->deleteVertex(v);
+    } else {
+      ++it;
+    }
+  }
+  for (auto it = G2->vertices.begin(); it != G2->vertices.end();) {
+    std::shared_ptr<GeometricElement> v = *it;
+    if (!v->explored) {
+      G2->deleteVertex(v);
+    } else {
+      ++it;
+    }
+  }
 
   std::shared_ptr<GeometricElement> a1 = std::make_shared<GeometricElement>(*a);
   std::shared_ptr<GeometricElement> b1 = std::make_shared<GeometricElement>(*b);
   std::shared_ptr<GeometricElement> a2 = std::make_shared<GeometricElement>(*a);
   std::shared_ptr<GeometricElement> b2 = std::make_shared<GeometricElement>(*b);
 
-  // Reconnect the separation pair (a,b)
+
   G1->addVertex(a1);
   G1->addVertex(b1);
   for (const auto& [edge, other] : a->edges) {
@@ -295,7 +316,7 @@ ConstraintGraph::separatingGraphs(
   }
   for (const auto& [edge, other] : b->edges) {
     std::shared_ptr<GeometricElement> other1 = G1->findVertexById(other->id);
-    if (other1) {
+    if (other1 && other1->id != a1->id) {
       G1->connect(b1, other1, edge);
     }
   }
@@ -304,13 +325,13 @@ ConstraintGraph::separatingGraphs(
   G2->addVertex(b2);
   for (const auto& [edge, other] : a->edges) {
     std::shared_ptr<GeometricElement> other2 = G2->findVertexById(other->id);
-    if (other2) {
+    if (other2 && other2->id != b2->id) {
       G2->connect(a2, other2, edge);
     }
   }
   for (const auto& [edge, other] : b->edges) {
     std::shared_ptr<GeometricElement> other2 = G2->findVertexById(other->id);
-    if (other2) {
+    if (other2 && other2->id != a2->id) {
       G2->connect(b2, other2, edge);
     }
   }
@@ -329,13 +350,13 @@ int ConstraintGraph::maxFlow(
   std::optional<std::vector<std::shared_ptr<Constraint>>> path;
   while ( (path = breadthFirstSearch(source, sink)).has_value() ) {
     for (const auto& e: path.value()) {
-      e->flow++;
+      e->setFlow(e->getFlow() + 1);
     }
     flow++;
   }
 
   for (const auto& e: edges) {
-    e->flow = 0;
+    e->setFlow(0);
   }
 
   return flow;
@@ -348,11 +369,6 @@ ConstraintGraph::separatingVertices() {
     for (size_t j = i + 1; j < vertices.size(); ++j) {
       std::shared_ptr<GeometricElement> a = vertices[i];
       std::shared_ptr<GeometricElement> b = vertices[j];
-      /*
-      if (adjacent(a, b)) {
-        continue;
-      }
-      */
 
       a->explored = true;
       b->explored = true;
@@ -428,7 +444,7 @@ ConstraintGraph::breadthFirstSearch(
     }
 
     for (const auto& [edge, other] : v->edges) {
-      if (!other->explored && edge->flow == 0) {
+      if (!other->explored && edge->getFlow() == 0) {
         Q.push(other);
         other->explored = true;
         other->parent = v;
@@ -466,7 +482,8 @@ void ConstraintGraph::floodFill(std::shared_ptr<GeometricElement> start) {
     Q.pop();
 
     for (const auto& [edge, other] : v->edges) {
-      if (!other->explored) {
+      //if (!other->explored && edge->type != ConstraintType::VIRTUAL) {
+      if (!other->explored && edge->type) {
         Q.push(other);
         other->explored = true;
         other->parent = v;
@@ -492,18 +509,17 @@ std::shared_ptr<STree> analyze(std::shared_ptr<ConstraintGraph> G) {
     std::pair<std::shared_ptr<GeometricElement>, std::shared_ptr<GeometricElement>> sepVertices = G->separatingVertices();
     std::shared_ptr<GeometricElement> a = sepVertices.first;
     std::shared_ptr<GeometricElement> b = sepVertices.second;
-
-    std::pair<std::shared_ptr<ConstraintGraph>, std::shared_ptr<ConstraintGraph>> Gs = G->separatingGraphs(a, b);
+    std::pair<std::shared_ptr<ConstraintGraph>, std::shared_ptr<ConstraintGraph>> Gs = G->splitGraphs(a, b);
     std::shared_ptr<ConstraintGraph> G1 = Gs.first;
     std::shared_ptr<ConstraintGraph> G2 = Gs.second;
-
     if (G1->deficit() > G2->deficit()) {
       G1->addVirtualEdge(a, b);
     } else {
       G2->addVirtualEdge(a, b);
     }
-
-    // TODO: Something isn't working when adding in virtual edges
+    if (G1->deficit() + G2->deficit() != G->deficit()) {
+      exit(1);
+    }
     out->node = G;
     out->left = analyze(G1);
     out->right = analyze(G2);
@@ -511,3 +527,4 @@ std::shared_ptr<STree> analyze(std::shared_ptr<ConstraintGraph> G) {
 
   return out;
 }
+
