@@ -6,7 +6,7 @@
 #include <vector>
 #include <queue>
 
-enum ConstraintType {
+enum class ConstraintType {
   COINCIDENT,
   EQUAL,
   PARALLEL,

@@ -12,10 +12,10 @@ void Boundary::draw() {
   Vector2 startPos = side2[0]->screenPos;
   Vector2 endPos = side2[0]->screenPos;
   switch (orientation) {
-  case VERTICAL:
+  case BoundaryOrientation::VERTICAL:
     endPos.y += extent();
     break;
-  case HORIZONTAL:
+  case BoundaryOrientation::HORIZONTAL:
     endPos.x += extent();
     break;
   }
@@ -26,12 +26,12 @@ float Boundary::extent() {
   float total = 0;
 
   switch(orientation) {
-  case VERTICAL:
+  case BoundaryOrientation::VERTICAL:
     for (auto& area : side2) {
       total += area->screenRect.height;
     }
     break;
-  case HORIZONTAL:
+  case BoundaryOrientation::HORIZONTAL:
     for (auto& area : side2) {
       total += area->screenRect.width;
     }
@@ -43,11 +43,11 @@ float Boundary::extent() {
 
 float Boundary::distanceToPoint(Vector2 pos) {
   switch (orientation) {
-  case VERTICAL:
+  case BoundaryOrientation::VERTICAL:
     if (pos.y > side2[0]->screenPos.y && pos.y < side2[0]->screenPos.y + extent()) {
       return std::fabs(side2[0]->screenPos.x - pos.x);
     }
-  case HORIZONTAL:
+  case BoundaryOrientation::HORIZONTAL:
     if (pos.x > side2[0]->screenPos.x && pos.x < side2[0]->screenPos.x + extent()) {
       return std::fabs(side2[0]->screenPos.y - pos.y);
     }
@@ -152,7 +152,7 @@ void Boundary::deleteArea(Area* toDelete) {
 void Boundary::moveBoundary(Vector2 screenPos) {
   float diff = 0;
   switch (orientation) {
-  case VERTICAL:
+  case BoundaryOrientation::VERTICAL:
     diff = screenPos.x - side2[0]->screenPos.x;
     // --- Ensure minimum extent of areas
     for (auto& area : side1) {
@@ -174,7 +174,7 @@ void Boundary::moveBoundary(Vector2 screenPos) {
       area->screenRect.width -= diff;
     }
     break;
-  case HORIZONTAL:
+  case BoundaryOrientation::HORIZONTAL:
     diff = screenPos.y - side2[0]->screenPos.y;
     // --- Ensure minimum extent of areas
     for (auto& area : side1) {

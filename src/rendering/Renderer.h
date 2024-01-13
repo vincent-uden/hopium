@@ -23,7 +23,7 @@ using json = nlohmann::json;
 // Forward declarations
 class Area;
 
-enum BoundaryOrientation {
+enum class BoundaryOrientation {
   VERTICAL,
   HORIZONTAL
 };

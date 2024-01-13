@@ -13,10 +13,10 @@
 #include <unistd.h>
 
 #include "../src/Mode.h"
-#include "../src/Renderer.h"
-#include "../src/Ui.h"
-#include "../src/OcctScene.h"
-#include "../src/ConstraintGraph.h"
+#include "../src/rendering/Renderer.h"
+#include "../src/rendering/Ui.h"
+#include "../src/cad/OcctScene.h"
+#include "../src/cad/ConstraintGraph.h"
 
 #define ADD_TEST(func, group) \
   tests.push_back({ func, #func, group });

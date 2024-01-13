@@ -29,32 +29,38 @@ Constraint::~Constraint() {
 int Constraint::weight() {
   int out = 0;
   switch (type) {
-  case COINCIDENT:
+  case ConstraintType::COINCIDENT:
     out = 2;
     break;
-  case EQUAL:
+  case ConstraintType::EQUAL:
     out = 1;
     break;
-  case PARALLEL:
+  case ConstraintType::PARALLEL:
     out = 1;
     break;
-  case PERPENDICULAR:
+  case ConstraintType::PERPENDICULAR:
     out = 1;
     break;
-  case MIDPOINT:
+  case ConstraintType::MIDPOINT:
     out = 1;
     break;
-  case COLINEAR:
+  case ConstraintType::COLINEAR:
     out = 1;
     break;
-  case DISTANCE:
+  case ConstraintType::DISTANCE:
     out = 1;
     break;
-  case ANGLE:
+  case ConstraintType::ANGLE:
     out = 1;
     break;
-  case VIRTUAL:
+  case ConstraintType::VIRTUAL:
     out = 0;
+    break;
+  case ConstraintType::HORIZONTAL:
+    out = 1;
+    break;
+  case ConstraintType::VERTICAL:
+    out = 1;
     break;
   };
 
@@ -483,7 +489,7 @@ void ConstraintGraph::floodFill(std::shared_ptr<GeometricElement> start) {
 
     for (const auto& [edge, other] : v->edges) {
       //if (!other->explored && edge->type != ConstraintType::VIRTUAL) {
-      if (!other->explored && edge->type) {
+      if (!other->explored) {
         Q.push(other);
         other->explored = true;
         other->parent = v;

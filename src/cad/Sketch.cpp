@@ -1,9 +1,16 @@
 #include "Sketch.h"
+#include "raymath.h"
 
 namespace Sketch {
 
 Point::Point(std::shared_ptr<GeometricElement> v) {
   this->v = v;
+  std::default_random_engine e;
+  std::uniform_real_distribution<float> dis(0, 1);
+  pos = {
+    dis(e),
+    dis(e)
+  };
 }
 
 Point::~Point() {
@@ -21,6 +28,49 @@ float error(Point& p1, Point& p2, Constraint& c) {
     return 0;
   }
 }
+
+// What is the gradient of this thing?? One output per coordinate in the inputs?
+std::pair<Vector2,Vector2> gradError(Point& p1, Point& p2, Constraint& c) {
+  float dist = Vector2Distance(p1.pos, p2.pos);
+  switch (c.type) {
+  case ConstraintType::DISTANCE:
+    return std::make_pair(
+        (Vector2) { (p1.pos.x - p2.pos.x)/dist, (p1.pos.y - p2.pos.y)/dist },
+        (Vector2) { -(p1.pos.x - p2.pos.x)/dist, -(p1.pos.y - p2.pos.y)/dist }
+    );
+  case ConstraintType::VERTICAL:
+    return std::make_pair(
+        (Vector2) { 2*(p1.pos.x - p2.pos.x), 0 },
+        (Vector2) { -2*(p1.pos.x - p2.pos.x), 0 }
+    );
+  case ConstraintType::HORIZONTAL:
+    return std::make_pair(
+        (Vector2) { 0, 2*(p1.pos.y - p2.pos.y) },
+        (Vector2) { 0, -2*(p1.pos.y - p2.pos.y) }
+    );
+  default:
+    return std::make_pair(
+        (Vector2) {0, 0},
+        (Vector2) {0, 0}
+        );
+  }
+}
+
+Realisation::Realisation() {
+}
+
+Realisation::~Realisation() {
+}
+
+void Realisation::setGraph(std::shared_ptr<ConstraintGraph> g) {
+  points.clear();
+  this->g = g;
+
+  for (const auto& v: g->vertices) {
+    points.push_back(Point(v));
+  }
+}
+
 
 Sketch::Sketch() {
 }

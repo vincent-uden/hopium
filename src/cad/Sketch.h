@@ -2,6 +2,8 @@
 #define UDEN_SKETCH
 
 #include <algorithm>
+#include <random>
+#include <utility>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -20,9 +22,24 @@ public:
   std::shared_ptr<GeometricElement> v;
 };
 
+// TODO: These need to be mult-dimensional
 float error(Point& p1, Point& p2, Constraint& c);
+std::pair<Vector2,Vector2> gradError(Point& p1, Point& p2, Constraint& c);
 
 // TODO: Create a comprehensive solution proposition class
+
+class Realisation {
+public:
+  Realisation();
+  ~Realisation();
+
+  void setGraph(std::shared_ptr<ConstraintGraph> g);
+
+  std::vector<Point> points;
+
+private:
+  std::shared_ptr<ConstraintGraph> g;
+};
 
 class Sketch {
 public:
