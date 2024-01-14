@@ -21,6 +21,7 @@ Constraint::Constraint(const Constraint& other) {
   this->flow = other.flow;
   this->id = other.id;
   this->label = other.label;
+  this->value = other.value;
 }
 
 Constraint::~Constraint() {

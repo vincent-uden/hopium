@@ -17,6 +17,7 @@
 #include "../src/rendering/Ui.h"
 #include "../src/cad/OcctScene.h"
 #include "../src/cad/ConstraintGraph.h"
+#include "../src/cad/Sketch.h"
 
 #define ADD_TEST(func, group) \
   tests.push_back({ func, #func, group });
@@ -711,8 +712,32 @@ int canDecomposeGraphIntoSTree() {
   std::shared_ptr<STree> stree = analyze(G);
   ASSERT(stree->node, "The STree should have a root node");
   ASSERT(stree->depth() == 6, "The STree should be 6 layers deep. It is: " << stree->depth());
-  // TODO: Figure out what the actual size should be
-  //ASSERT(stree->size() == 11, "The STree should have 11 nodes. It is: " << stree->size());
+
+  return 0;
+}
+
+int canSolveRightTriangleSystem() {
+  Sketch::Sketch S;
+
+  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
+  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
+
+  std::shared_ptr<Constraint> ab = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
+  std::shared_ptr<Constraint> bc = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "bc");
+  std::shared_ptr<Constraint> ac = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ac");
+  ac->value = 1;
+
+  S.addVertex(a);
+  S.addVertex(b);
+  S.addVertex(c);
+  S.connect(a, b, ab);
+  S.connect(b, c, bc);
+  S.connect(a, c, ac);
+
+  std::shared_ptr<ConstraintGraph> G = S.asGraph();
+
+  ASSERT(S.solve(), "Right triangle should be solvable");
 
   return 0;
 }
@@ -770,6 +795,7 @@ int main(int argc, char** argv) {
   ADD_TEST(graphDeepCopyProducesIdenticalGraph, CONSTRAINT_GRAPH);
   ADD_TEST(canSeparateGraphIntoConnectedComponents, CONSTRAINT_GRAPH);
   ADD_TEST(canDecomposeGraphIntoSTree, CONSTRAINT_GRAPH);
+  ADD_TEST(canSolveRightTriangleSystem, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

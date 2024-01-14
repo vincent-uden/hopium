@@ -1,11 +1,15 @@
 #include "Sketch.h"
 #include "raymath.h"
+#include <iostream>
+#include <math.h>
+#include <stack>
 
 namespace Sketch {
 
+std::default_random_engine Point::e = std::default_random_engine();
+
 Point::Point(std::shared_ptr<GeometricElement> v) {
   this->v = v;
-  std::default_random_engine e;
   std::uniform_real_distribution<float> dis(0, 1);
   pos = {
     dis(e),
@@ -16,13 +20,13 @@ Point::Point(std::shared_ptr<GeometricElement> v) {
 Point::~Point() {
 }
 
-float error(Point& p1, Point& p2, Constraint& c) {
+float error(const Point& p1, const Point& p2, const Constraint& c) {
   switch (c.type) {
   case ConstraintType::DISTANCE:
     return std::pow(Vector2Distance(p1.pos, p2.pos) - c.value, 2);
-  case ConstraintType::HORIZONTAL:
-    return std::pow(p1.pos.x - p2.pos.x, 2);
   case ConstraintType::VERTICAL:
+    return std::pow(p1.pos.x - p2.pos.x, 2);
+  case ConstraintType::HORIZONTAL:
     return std::pow(p1.pos.y - p2.pos.y, 2);
   default:
     return 0;
@@ -30,13 +34,17 @@ float error(Point& p1, Point& p2, Constraint& c) {
 }
 
 // What is the gradient of this thing?? One output per coordinate in the inputs?
-std::pair<Vector2,Vector2> gradError(Point& p1, Point& p2, Constraint& c) {
+std::pair<Vector2,Vector2> gradError(
+  const Point& p1,
+  const Point& p2,
+  const Constraint& c
+) {
   float dist = Vector2Distance(p1.pos, p2.pos);
   switch (c.type) {
   case ConstraintType::DISTANCE:
     return std::make_pair(
-        (Vector2) { (p1.pos.x - p2.pos.x)/dist, (p1.pos.y - p2.pos.y)/dist },
-        (Vector2) { -(p1.pos.x - p2.pos.x)/dist, -(p1.pos.y - p2.pos.y)/dist }
+        (Vector2) { 2*(p1.pos.x-p2.pos.x)*(dist-c.value)/dist, 2*(p1.pos.y-p2.pos.y)*(dist-c.value)/dist },
+        (Vector2) { -2*(p1.pos.x-p2.pos.x)*(dist-c.value)/dist, -2*(p1.pos.y-p2.pos.y)*(dist-c.value)/dist }
     );
   case ConstraintType::VERTICAL:
     return std::make_pair(
@@ -59,7 +67,46 @@ std::pair<Vector2,Vector2> gradError(Point& p1, Point& p2, Constraint& c) {
 Realisation::Realisation() {
 }
 
+Realisation::Realisation(std::shared_ptr<ConstraintGraph> g) {
+  setGraph(g);
+}
+
 Realisation::~Realisation() {
+}
+
+float Realisation::sgdStep() {
+  std::vector<Vector2> step;
+  float err = 0.0f;
+  for (const auto& p: points) {
+    step.push_back({0.0f, 0.0f});
+  }
+
+  // TODO: Dont iterate twice over all constraints
+  int total_constraints = 0;
+  for (int b = 0; b < BATCH_SIZE; ++b) {
+    for (size_t i = 0; i < points.size(); ++i) {
+      const Point& p = points[i];
+      for (const auto& [edge, other]: p.v->edges) {
+        Point otherP = *findPoint(other);
+        float e = error(p, otherP, *edge.get());
+        err += e;
+        std::pair<Vector2, Vector2> grads = gradError(p, otherP, *edge.get());
+        step[i].x -= grads.first.x / BATCH_SIZE;
+        step[i].y -= grads.first.y / BATCH_SIZE;
+        ++total_constraints;
+      }
+    }
+  }
+  err /= total_constraints;
+
+  size_t i = 0;
+  for (auto& p: points) {
+    p.pos.x += step[i].x * stepSize;
+    p.pos.y += step[i].y * stepSize;
+    ++i;
+  }
+
+  return err;
 }
 
 void Realisation::setGraph(std::shared_ptr<ConstraintGraph> g) {
@@ -71,6 +118,15 @@ void Realisation::setGraph(std::shared_ptr<ConstraintGraph> g) {
   }
 }
 
+Point* Realisation::findPoint(std::shared_ptr<GeometricElement> v) {
+  for (Point& p: points) {
+    if (p.v == v) {
+      return &p;
+    }
+  }
+
+  return nullptr;
+}
 
 Sketch::Sketch() {
 }
@@ -84,16 +140,35 @@ bool Sketch::contains(std::shared_ptr<GeometricElement> a) {
 }
 
 bool Sketch::solve() {
-  if (deficit() != 0) {
-    return false;
-  }
-
   std::shared_ptr<STree> stree = analyze(asGraph());
   if (!stree || !stree->node) {
     return false;
   }
+  std::vector<std::pair<std::shared_ptr<STree>,Realisation>> solutionOrder;
+  std::queue<std::shared_ptr<STree>> parseOrder;
+  // Walk the tree
+  // Solve sub trees in order using Stochastic Gradient Descent
+  parseOrder.push(stree);
+  while (!parseOrder.empty()) {
+    const std::shared_ptr<STree> current = parseOrder.front();
+    parseOrder.pop();
+    solutionOrder.push_back(std::make_pair(current, Realisation(current->node)));
+    if (current->left) {
+      parseOrder.push(current->left);
+    }
+    if (current->right) {
+      parseOrder.push(current->right);
+    }
+  }
 
-  return false;
+  float err;
+  for (int i = solutionOrder.size() - 1; i >= 0; --i) {
+    for (size_t j = 0; j < 1000; ++j) {
+      err = solutionOrder[i].second.sgdStep();
+    }
+  }
+
+  return err < tolerance;
 }
 
 int Sketch::deficit() {
