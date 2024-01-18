@@ -1,8 +1,7 @@
 #include "Sketch.h"
 #include "raymath.h"
 #include <iostream>
-#include <math.h>
-#include <stack>
+#include <memory>
 
 namespace Sketch {
 
@@ -15,6 +14,11 @@ Point::Point(std::shared_ptr<GeometricElement> v) {
     dis(e),
     dis(e)
   };
+}
+
+Point::Point(const Point& other) {
+  v = other.v;
+  pos = other.pos;
 }
 
 Point::~Point() {
@@ -71,6 +75,15 @@ Realisation::Realisation(std::shared_ptr<ConstraintGraph> g) {
   setGraph(g);
 }
 
+Realisation::Realisation(const Realisation& other) {
+  setGraph(other.g);
+  stepSize = other.stepSize;
+  points.clear();
+  for (const Point& p: other.points) {
+    points.push_back(Point(p));
+  }
+}
+
 Realisation::~Realisation() {
 }
 
@@ -109,6 +122,16 @@ float Realisation::sgdStep() {
   return err;
 }
 
+Point* Realisation::findPointById(std::shared_ptr<GeometricElement> v) {
+  for (Point& p: points) {
+    if (p.v->id == v->id) {
+      return &p;
+    }
+  }
+
+  return nullptr;
+}
+
 void Realisation::setGraph(std::shared_ptr<ConstraintGraph> g) {
   points.clear();
   this->g = g;
@@ -139,10 +162,10 @@ bool Sketch::contains(std::shared_ptr<GeometricElement> a) {
   return std::find(vertices.begin(), vertices.end(), a) != vertices.end();
 }
 
-bool Sketch::solve() {
+std::optional<std::shared_ptr<Realisation>> Sketch::solve() {
   std::shared_ptr<STree> stree = analyze(asGraph());
   if (!stree || !stree->node) {
-    return false;
+    return std::nullopt;
   }
   std::vector<std::pair<std::shared_ptr<STree>,Realisation>> solutionOrder;
   std::queue<std::shared_ptr<STree>> parseOrder;
@@ -168,7 +191,13 @@ bool Sketch::solve() {
     }
   }
 
-  return err < tolerance;
+  if (err < tolerance) {
+    return std::make_shared<Realisation>(
+      solutionOrder[solutionOrder.size() - 1].second
+    );
+  } else {
+    return std::nullopt;
+  }
 }
 
 int Sketch::deficit() {

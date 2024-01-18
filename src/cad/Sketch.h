@@ -16,6 +16,7 @@ namespace Sketch {
 class Point {
 public:
   Point(std::shared_ptr<GeometricElement> v);
+  Point(const Point& other);
   ~Point();
 
   Vector2 pos;
@@ -36,8 +37,10 @@ class Realisation {
 public:
   Realisation();
   Realisation(std::shared_ptr<ConstraintGraph> g);
+  Realisation(const Realisation& other);
   ~Realisation();
 
+  Point* findPointById(std::shared_ptr<GeometricElement> v);
   float sgdStep();
   void setGraph(std::shared_ptr<ConstraintGraph> g);
 
@@ -57,8 +60,8 @@ public:
   ~Sketch();
 
   bool contains(std::shared_ptr<GeometricElement> a);
-  bool solve();
   int deficit();
+  std::optional<std::shared_ptr<Realisation>> solve();
   std::shared_ptr<ConstraintGraph> asGraph();
   void addVertex(std::shared_ptr<GeometricElement> element);
   void connect(std::shared_ptr<GeometricElement> a, std::shared_ptr<GeometricElement> b, std::shared_ptr<Constraint> c);

@@ -18,6 +18,7 @@
 #include "../src/cad/OcctScene.h"
 #include "../src/cad/ConstraintGraph.h"
 #include "../src/cad/Sketch.h"
+#include "raymath.h"
 
 #define ADD_TEST(func, group) \
   tests.push_back({ func, #func, group });
@@ -726,7 +727,9 @@ int canSolveRightTriangleSystem() {
   std::shared_ptr<Constraint> ab = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
   std::shared_ptr<Constraint> bc = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "bc");
   std::shared_ptr<Constraint> ac = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ac");
-  ac->value = 1;
+  std::shared_ptr<Constraint> ab2 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab2");
+  ac->value = 5;
+  ab2->value = 3;
 
   S.addVertex(a);
   S.addVertex(b);
@@ -734,10 +737,18 @@ int canSolveRightTriangleSystem() {
   S.connect(a, b, ab);
   S.connect(b, c, bc);
   S.connect(a, c, ac);
+  S.connect(a, b, ab2);
 
   std::shared_ptr<ConstraintGraph> G = S.asGraph();
+  std::optional<std::shared_ptr<Sketch::Realisation>> solution = S.solve();
 
-  ASSERT(S.solve(), "Right triangle should be solvable");
+  ASSERT(solution.has_value(), "Right triangle should be solvable");
+  std::shared_ptr<Sketch::Realisation> sol = solution.value();
+  Sketch::Point pa = *sol->findPointById(a);
+  Sketch::Point pb = *sol->findPointById(b);
+  Sketch::Point pc = *sol->findPointById(c);
+  float dist = Vector2Distance(pb.pos, pc.pos);
+  ASSERT(std::abs(dist - 4) < 1e-3, "The final side should be 4 long. It is " << dist);
 
   return 0;
 }
