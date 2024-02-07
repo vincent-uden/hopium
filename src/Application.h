@@ -30,6 +30,7 @@ private:
   Application();
 
   void buildGraph();
+  void buildGraph2();
   void processEvent(enableSketchMode event);
   void processEvent(disableSketchMode event);
   void processEvent(toggleSketchMode event);

@@ -39,7 +39,7 @@ Application::Application() {
   renderer.init(1600, 900, state->shaderStore);
 
   createBottle();
-  buildGraph();
+  buildGraph2();
   std::srand(1337);
 
   int count = GetMonitorCount();
@@ -126,6 +126,46 @@ void Application::buildGraph() {
 
   state->stree = analyze(state->graph);
 }
+
+void Application::buildGraph2() {
+  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
+  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
+  std::shared_ptr<GeometricElement> d = std::make_shared<GeometricElement>(GeometricType::POINT, "d");
+  std::shared_ptr<GeometricElement> e = std::make_shared<GeometricElement>(GeometricType::POINT, "e");
+
+  std::shared_ptr<Constraint> ab  = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
+  std::shared_ptr<Constraint> ab2 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab2");
+  std::shared_ptr<Constraint> bc  = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "bc");
+  std::shared_ptr<Constraint> bd  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "bd");
+  std::shared_ptr<Constraint> ac  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ac");
+  std::shared_ptr<Constraint> ce  = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "ce");
+  std::shared_ptr<Constraint> cd  = std::make_shared<Constraint>(ConstraintType::VERTICAL, "cd");
+  std::shared_ptr<Constraint> de  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "de");
+  ab2->value = 3;
+  ac->value = 5;
+  de->value = std::sqrt(2.0f);
+  bd->value = 6;
+
+  state->graph = std::make_shared<ConstraintGraph>();
+
+  state->graph->addVertex(a);
+  state->graph->addVertex(b);
+  state->graph->addVertex(c);
+  state->graph->addVertex(d);
+  state->graph->addVertex(e);
+  state->graph->connect(a, b, ab);
+  state->graph->connect(a, b, ab2);
+  state->graph->connect(b, c, bc);
+  state->graph->connect(b, d, bd);
+  state->graph->connect(a, c, ac);
+  state->graph->connect(c, e, ce);
+  state->graph->connect(c, d, cd);
+  state->graph->connect(d, e, de);
+
+  state->stree = analyze(state->graph);
+}
+
 
 void Application::processEvent(enableSketchMode event) {
   state->modeStack.push(state->sketch);

@@ -146,6 +146,15 @@ void GeometricElement::deleteEdge(std::shared_ptr<GeometricElement> other) {
   );
 }
 
+std::shared_ptr<Constraint> GeometricElement::getConnection(std::shared_ptr<GeometricElement> other) {
+  for (const auto& [edge, v] : edges) {
+    if (v == other) {
+      return edge;
+    }
+  }
+  return nullptr;
+}
+
 STree::STree() {
 }
 

@@ -56,6 +56,7 @@ public:
   bool isConnected(std::shared_ptr<GeometricElement> other);
   bool isVirtuallyConnected(std::shared_ptr<GeometricElement> other);
   int weight();
+  std::shared_ptr<Constraint> getConnection(std::shared_ptr<GeometricElement> other);
   void deleteEdge(std::shared_ptr<GeometricElement> other);
 
   std::vector<std::pair<std::shared_ptr<Constraint>,std::shared_ptr<GeometricElement>>> edges;

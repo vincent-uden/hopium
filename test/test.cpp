@@ -122,6 +122,41 @@ void setupDecomposableTestGraph(ConstraintGraph& G) {
   G.connect(d, h, dh);
 }
 
+void setupDoubleRightTriangle(std::shared_ptr<ConstraintGraph> G) {
+  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
+  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
+  std::shared_ptr<GeometricElement> d = std::make_shared<GeometricElement>(GeometricType::POINT, "d");
+  std::shared_ptr<GeometricElement> e = std::make_shared<GeometricElement>(GeometricType::POINT, "e");
+
+  std::shared_ptr<Constraint> ab  = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
+  std::shared_ptr<Constraint> ab2 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab2");
+  std::shared_ptr<Constraint> bc  = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "bc");
+  std::shared_ptr<Constraint> bd  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "bd");
+  std::shared_ptr<Constraint> ac  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ac");
+  std::shared_ptr<Constraint> ce  = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "ce");
+  std::shared_ptr<Constraint> cd  = std::make_shared<Constraint>(ConstraintType::VERTICAL, "cd");
+  std::shared_ptr<Constraint> de  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "de");
+  ab2->value = 3;
+  ac->value = 5;
+  de->value = std::sqrt(2.0f);
+  bd->value = 6;
+
+  G->addVertex(a);
+  G->addVertex(b);
+  G->addVertex(c);
+  G->addVertex(d);
+  G->addVertex(e);
+  G->connect(a, b, ab);
+  G->connect(a, b, ab2); // TODO: I dont think this constraint is working. a and b are not 3 apart after solving
+  G->connect(b, c, bc);
+  G->connect(b, d, bd);
+  //G->connect(a, c, ac);
+  G->connect(c, e, ce);
+  G->connect(c, d, cd);
+  G->connect(d, e, de);
+}
+
 int windowCanBeSplitIntoArea() {
   const int screenWidth = 1600;
   const int screenHeight = 900;
@@ -753,6 +788,19 @@ int canSolveRightTriangleSystem() {
   return 0;
 }
 
+int canSolveDoubleTriangleSystem() {
+  std::shared_ptr<ConstraintGraph> G = std::make_shared<ConstraintGraph>();
+  setupDoubleRightTriangle(G);
+  Sketch::Sketch S(G);
+
+
+  std::shared_ptr<ConstraintGraph> G2 = S.asGraph();
+  std::optional<std::shared_ptr<Sketch::Realisation>> solution = S.solve();
+  ASSERT(solution.has_value(), "Double Right triangle should be solvable");
+
+  return 1;
+}
+
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -786,6 +834,7 @@ CliArgs parseCliArgs(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
+  std::srand(std::time(nullptr));
   std::vector<Test> tests;
 
   ADD_TEST(windowCanBeSplitIntoArea, AREA_SPLITTING);
@@ -807,6 +856,7 @@ int main(int argc, char** argv) {
   ADD_TEST(canSeparateGraphIntoConnectedComponents, CONSTRAINT_GRAPH);
   ADD_TEST(canDecomposeGraphIntoSTree, CONSTRAINT_GRAPH);
   ADD_TEST(canSolveRightTriangleSystem, CONSTRAINT_GRAPH);
+  ADD_TEST(canSolveDoubleTriangleSystem, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);

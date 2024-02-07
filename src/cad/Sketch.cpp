@@ -1,5 +1,7 @@
 #include "Sketch.h"
 #include "raymath.h"
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <memory>
 
@@ -37,7 +39,6 @@ float error(const Point& p1, const Point& p2, const Constraint& c) {
   }
 }
 
-// What is the gradient of this thing?? One output per coordinate in the inputs?
 std::pair<Vector2,Vector2> gradError(
   const Point& p1,
   const Point& p2,
@@ -94,19 +95,24 @@ float Realisation::sgdStep() {
     step.push_back({0.0f, 0.0f});
   }
 
-  // TODO: Dont iterate twice over all constraints
   int total_constraints = 0;
   for (int b = 0; b < BATCH_SIZE; ++b) {
     for (size_t i = 0; i < points.size(); ++i) {
       const Point& p = points[i];
-      for (const auto& [edge, other]: p.v->edges) {
-        Point otherP = *findPoint(other);
-        float e = error(p, otherP, *edge.get());
-        err += e;
-        std::pair<Vector2, Vector2> grads = gradError(p, otherP, *edge.get());
-        step[i].x -= grads.first.x / BATCH_SIZE;
-        step[i].y -= grads.first.y / BATCH_SIZE;
-        ++total_constraints;
+      for (size_t j = i + 1; j < points.size(); ++j) {
+        const Point& other = points[j];
+        if (p.v->isConnected(other.v) && std::rand() % 2 == 0) {
+          float e = error(p, other, *p.v->getConnection(other.v).get());
+          err += e;
+          std::pair<Vector2, Vector2> grads = gradError(
+            p,
+            other,
+            *p.v->getConnection(other.v).get()
+          );
+          step[i].x -= grads.first.x / BATCH_SIZE;
+          step[i].y -= grads.first.y / BATCH_SIZE;
+          ++total_constraints;
+        }
       }
     }
   }
@@ -132,12 +138,47 @@ Point* Realisation::findPointById(std::shared_ptr<GeometricElement> v) {
   return nullptr;
 }
 
+bool Realisation::containsPointById(std::shared_ptr<GeometricElement> v) {
+  return findPointById(v) != nullptr;
+}
+
 void Realisation::setGraph(std::shared_ptr<ConstraintGraph> g) {
   points.clear();
   this->g = g;
 
   for (const auto& v: g->vertices) {
     points.push_back(Point(v));
+  }
+}
+
+void Realisation::mergeSubRealisations(Realisation* r1, Realisation* r2) {
+  if ((r1 == nullptr) != (r2 == nullptr)) {
+    std::cout << "A realisation always has two or no sub-realisations" << std::endl;
+    exit(1);
+  }
+  if (r2->points.size() > r1->points.size()) {
+    std::swap(r1, r2);
+  }
+  for (const Point& subP: r1->points) {
+    Point* p = findPointById(subP.v);
+    p->pos.x = subP.pos.x;
+    p->pos.y = subP.pos.y;
+  }
+  Vector2 translation = { 0.0f, 0.0f };
+  // Find one of the separation vertices to get a translation
+  for (const Point& subP: r2->points) {
+    Point* sepVertex = r1->findPointById(subP.v);
+    if (sepVertex != nullptr) {
+      // Must be a separation vertex to exist in both realisations
+      translation = Vector2Subtract(subP.pos, sepVertex->pos);
+      break;
+    }
+  }
+  // It is safe to assume that a translation is always present
+  for (const Point& subP: r2->points) {
+    Point* p = findPointById(subP.v);
+    p->pos.x += translation.x;
+    p->pos.y += translation.y;
   }
 }
 
@@ -152,6 +193,25 @@ Point* Realisation::findPoint(std::shared_ptr<GeometricElement> v) {
 }
 
 Sketch::Sketch() {
+}
+
+Sketch::Sketch(std::shared_ptr<ConstraintGraph> g) {
+  for (const std::shared_ptr<GeometricElement>& v: g->vertices) {
+    std::shared_ptr<GeometricElement> newV = std::make_shared<GeometricElement>(*v);
+    addVertex(newV);
+  }
+
+  for (const std::shared_ptr<GeometricElement>& v: g->vertices) {
+    for (const auto& [edge, other] : v->edges) {
+      if (!findEdgeById(edge->id)) {
+      std::shared_ptr<Constraint> newC(new Constraint(*edge));
+
+      std::shared_ptr<GeometricElement> vPrime = findVertexById(v->id);
+      std::shared_ptr<GeometricElement> otherPrime = findVertexById(other->id);
+      connect(vPrime, otherPrime, newC);
+      }
+    }
+  }
 }
 
 Sketch::~Sketch() {
@@ -169,8 +229,7 @@ std::optional<std::shared_ptr<Realisation>> Sketch::solve() {
   }
   std::vector<std::pair<std::shared_ptr<STree>,Realisation>> solutionOrder;
   std::queue<std::shared_ptr<STree>> parseOrder;
-  // Walk the tree
-  // Solve sub trees in order using Stochastic Gradient Descent
+  // Walk the tree in breadth-first order
   parseOrder.push(stree);
   while (!parseOrder.empty()) {
     const std::shared_ptr<STree> current = parseOrder.front();
@@ -186,14 +245,51 @@ std::optional<std::shared_ptr<Realisation>> Sketch::solve() {
 
   float err;
   for (int i = solutionOrder.size() - 1; i >= 0; --i) {
-    for (size_t j = 0; j < 1000; ++j) {
+    Realisation* r1 = nullptr;
+    Realisation* r2 = nullptr;
+    if (solutionOrder[i].first->left) {
+      for (int j = i + 1; j < solutionOrder.size(); ++j) {
+        if (solutionOrder[j].first.get() == solutionOrder[i].first->left.get()) {
+          r1 = &solutionOrder[j].second;
+        }
+      }
+    }
+    if (solutionOrder[i].first->right) {
+      for (int j = i + 1; j < solutionOrder.size(); ++j) {
+        if (solutionOrder[j].first.get() == solutionOrder[i].first->right.get()) {
+          r2 = &solutionOrder[j].second;
+        }
+      }
+    }
+    if (r1 && r2) {
+       solutionOrder[i].second.mergeSubRealisations(r1, r2);
+    }
+
+    // TODO: Error tolerance criteria. Allows for quicker termination if possible
+    for (size_t j = 0; j < 10000; ++j) {
       err = solutionOrder[i].second.sgdStep();
+    }
+    // TODO: Recombination does not seem to work very well. Individual errors are small. Combined its really big
+    std::cout << "Final error: " << err << std::endl;
+    std::cout << "x,y" << std::endl;
+    for (const auto& p : solutionOrder[i].second.points) {
+      std::cout << p.pos.x << "," << p.pos.y << std::endl;
+    }
+    for (const auto& p : solutionOrder[0].second.points) {
+      std::cout << p.v->label << std::endl;
     }
   }
 
+  std::cout << "x,y" << std::endl;
+  for (const auto& p : solutionOrder[0].second.points) {
+    std::cout << p.pos.x << "," << p.pos.y << std::endl;
+  }
+  for (const auto& p : solutionOrder[0].second.points) {
+    std::cout << p.v->label << std::endl;
+  }
   if (err < tolerance) {
     return std::make_shared<Realisation>(
-      solutionOrder[solutionOrder.size() - 1].second
+      solutionOrder[0].second
     );
   } else {
     return std::nullopt;
@@ -225,6 +321,24 @@ std::shared_ptr<ConstraintGraph> Sketch::asGraph() {
   return out;
 }
 
+std::shared_ptr<GeometricElement> Sketch::findVertexById(int id) {
+  for (const std::shared_ptr<GeometricElement>& v: vertices) {
+    if (v->id == id) {
+      return v;
+    }
+  }
+  return std::shared_ptr<GeometricElement>(nullptr);
+}
+
+
+std::shared_ptr<Constraint> Sketch::findEdgeById(int id) {
+  for (const std::shared_ptr<Constraint>& e: edges) {
+    if (e->id == id) {
+      return e;
+    }
+  }
+  return std::shared_ptr<Constraint>(nullptr);
+}
 
 void Sketch::addVertex(std::shared_ptr<GeometricElement> element) {
   vertices.push_back(element);
