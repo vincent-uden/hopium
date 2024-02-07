@@ -1176,4 +1176,75 @@ void STreeViewer::setZoom() {
   lastZoom = ApplicationState::getInstance()->zoom;
 }
 
+
+SketchViewer::SketchViewer() {
+  pos.x = 0;
+  pos.y = 0;
+  panOffset.x = 0;
+  panOffset.y = 0;
+}
+
+SketchViewer::~SketchViewer() {
+}
+
+void SketchViewer::move(Vector2 distance) {
+  pos.x += distance.x;
+  pos.y += distance.y;
+}
+
+void SketchViewer::setPos(Vector2 pos) {
+    Vector2 diff;
+    diff.x = pos.x - this->pos.x;
+    diff.y = pos.y - this->pos.y;
+    move(diff);
+}
+
+void SketchViewer::draw() {
+  Color color = GREEN;
+  DrawLineV({-1000.0, panOffset.y}, {1000.0, panOffset.y}, {255, 255, 255, 100});
+  DrawLineV({panOffset.x, -1000.0}, {panOffset.x, 1000.0}, {255, 255, 255, 100});
+  for (const std::shared_ptr<Sketch::Point>& p: sketch->points) {
+    Vector2 v = Vector2Add(Vector2Scale(p->pos, scale * zoom), panOffset);
+    DrawCircleV(
+      v,
+      4.0,
+      color
+    );
+  }
+}
+
+void SketchViewer::receiveMousePos(Vector2 mousePos) {
+  if (ApplicationState::getInstance()->holdingRotate) {
+    Vector2 diff = Vector2Subtract(mousePos, lastMousePos);
+    panOffset.x += diff.x;
+    panOffset.y += diff.y;
+  }
+
+  lastMousePos = mousePos;
+}
+
+void SketchViewer::receiveMouseDown(Vector2 mousePos) {
+}
+
+void SketchViewer::receiveMouseUp(Vector2 mousePos) {
+}
+
+Vector2 SketchViewer::getSize() {
+  return { areaScreenRect->width, areaScreenRect->height };
+}
+
+void SketchViewer::setAreaPointers(
+  Rectangle* screenRect,
+  Vector2* screenPos,
+  RenderTexture* texture
+) {
+  areaScreenRect = screenRect;
+  areaScreenPos = screenPos;
+  areaTexture = texture;
+}
+
+void SketchViewer::setSketch(std::shared_ptr<Sketch::NewSketch> sketch) {
+  this->sketch = sketch;
+}
+
 /* End of namespace */ }

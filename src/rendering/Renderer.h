@@ -72,6 +72,7 @@ enum AreaType {
   TOOL_SELECTION,
   CONSTRAINT_SELECTION,
   GRAPH_VIEWER,
+  SKETCH_VIEWER,
 };
 
 class Area {
@@ -134,6 +135,7 @@ private:
   void buildToolSelection();
   void buildConstraintSelection();
   void buildGraphViewer();
+  void buildSketchViewer();
   void buildEmpty();
   void buildTypeDropDown();
   void resetType();

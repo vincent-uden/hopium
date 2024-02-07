@@ -12,6 +12,7 @@
 #include "../ApplicationState.h"
 #include "../Event.h"
 #include "../cad/ConstraintGraph.h"
+#include "../cad/Sketch.h"
 #include "Colorscheme.h"
 #include "Scene.h"
 
@@ -331,6 +332,37 @@ private:
   Vector2* areaScreenPos = nullptr;
   RenderTexture* areaTexture = nullptr;
 };
+
+class SketchViewer: public Ui {
+public:
+  SketchViewer();
+  ~SketchViewer();
+
+  void move(Vector2 distance) override;
+  void setPos(Vector2 pos) override;
+  void draw() override;
+  void receiveMousePos(Vector2 mousePos) override;
+  void receiveMouseDown(Vector2 mousePos) override;
+  void receiveMouseUp(Vector2 mousePos) override;
+  Vector2 getSize() override;
+
+  void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
+  void setSketch(std::shared_ptr<Sketch::NewSketch> sketch);
+
+private:
+  Vector2 pos;
+  Vector2 lastMousePos;
+  Vector2 panOffset;
+  float scale = 30.0f;
+  float zoom = 1.0f;
+
+  std::shared_ptr<Sketch::NewSketch> sketch;
+
+  Rectangle* areaScreenRect = nullptr;
+  Vector2* areaScreenPos = nullptr;
+  RenderTexture* areaTexture = nullptr;
+};
+
 
 }
 

@@ -40,6 +40,7 @@ Application::Application() {
 
   createBottle();
   buildGraph2();
+  buildSketch();
   std::srand(1337);
 
   int count = GetMonitorCount();
@@ -166,6 +167,19 @@ void Application::buildGraph2() {
   state->stree = analyze(state->graph);
 }
 
+void Application::buildSketch() {
+  state->paramSketch = std::make_shared<Sketch::NewSketch>();
+  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
+  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<Sketch::Point> pa = std::make_shared<Sketch::Point>(a);
+  std::shared_ptr<Sketch::Point> pb = std::make_shared<Sketch::Point>(b);
+  pa->pos = { 0.0, 0.0 };
+  pb->pos = { 0.2, 1.0 };
+  state->paramSketch->addPoint(pa);
+  state->paramSketch->addPoint(pb);
+  std::shared_ptr<Constraint> ab  = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
+  state->paramSketch->connect(pa, pb, ab);
+}
 
 void Application::processEvent(enableSketchMode event) {
   state->modeStack.push(state->sketch);

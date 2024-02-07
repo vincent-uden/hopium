@@ -84,6 +84,26 @@ private:
   float tolerance = 1e-9;
 };
 
+class NewSketch {
+public:
+  NewSketch();
+  ~NewSketch();
+
+  std::shared_ptr<Point> findPointById(std::shared_ptr<GeometricElement> v);
+  float totalError();
+  void addPoint(std::shared_ptr<Point> p);
+  void connect(
+    std::shared_ptr<Point> a,
+    std::shared_ptr<Point> b,
+    std::shared_ptr<Constraint> c
+  );
+  void deleteVertex(std::shared_ptr<Point> a);
+
+  std::vector<std::shared_ptr<Point>> points;
+private:
+  std::vector<std::shared_ptr<Constraint>> edges;
+};
+
 }
 
 #endif

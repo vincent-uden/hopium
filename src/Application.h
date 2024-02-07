@@ -31,6 +31,7 @@ private:
 
   void buildGraph();
   void buildGraph2();
+  void buildSketch();
   void processEvent(enableSketchMode event);
   void processEvent(disableSketchMode event);
   void processEvent(toggleSketchMode event);

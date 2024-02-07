@@ -362,4 +362,54 @@ void Sketch::deleteVertex(std::shared_ptr<GeometricElement> a) {
   }
 }
 
+NewSketch::NewSketch() {
+}
+
+NewSketch::~NewSketch() {
+}
+
+std::shared_ptr<Point> NewSketch::findPointById(std::shared_ptr<GeometricElement> v) {
+  for (const auto& p: points) {
+    if (p->v->id == v->id) {
+      return p;
+    }
+  }
+
+  return nullptr;
+}
+
+float NewSketch::totalError() {
+  float total = 0.0f;
+  for (const auto& p: points) {
+    for (const auto& [edge, other] : p->v->edges) {
+      const auto p2 = findPointById(other);
+      total += error(*p.get(), *p2.get(), *edge.get());
+    }
+  }
+
+  return total / 2.0f;
+}
+
+void NewSketch::addPoint(std::shared_ptr<Point> p) {
+  points.push_back(p);
+}
+
+void NewSketch::connect(
+  std::shared_ptr<Point> a,
+  std::shared_ptr<Point> b,
+  std::shared_ptr<Constraint> c
+) {
+  a->v->edges.push_back(std::make_pair(c, b->v));
+  b->v->edges.push_back(std::make_pair(c, a->v));
+  edges.push_back(c);
+}
+
+void NewSketch::deleteVertex(std::shared_ptr<Point> a) {
+  std::erase_if(points, [a](std::shared_ptr<Point> b) { return a->v->id == b->v->id; });
+  for (const auto& [edge, other] : a->v->edges) {
+    other->deleteEdge(a->v);
+    std::erase_if(edges, [edge](std::shared_ptr<Constraint> c) { return c == edge; });
+  }
+}
+
 }

@@ -9,6 +9,7 @@
 #include "rendering/Scene.h"
 #include "cad/ConstraintGraph.h"
 #include "cad/OcctScene.h"
+#include "cad/Sketch.h"
 
 class ApplicationState {
 public:
@@ -16,7 +17,8 @@ public:
   ~ApplicationState();
 
   std::shared_ptr<ConstraintGraph> graph = std::shared_ptr<ConstraintGraph>(new ConstraintGraph());;
-  std::shared_ptr<STree> stree = std::shared_ptr<STree>(new STree());;
+  std::shared_ptr<STree> stree = std::shared_ptr<STree>(new STree());
+  std::shared_ptr<Sketch::NewSketch> paramSketch = std::make_shared<Sketch::NewSketch>();
   std::shared_ptr<ShaderStore> shaderStore = std::make_shared<ShaderStore>();
   std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new Scene(shaderStore));;
   std::shared_ptr<OcctScene> occtScene = std::shared_ptr<OcctScene>(new OcctScene());;
