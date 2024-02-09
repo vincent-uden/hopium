@@ -22,6 +22,7 @@ void Application::update() {
   if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
     renderer.mouseUp(mousePos);
   }
+  renderer.mouseWheelMove(GetMouseWheelMove());
 
   while (!eventQueue.empty()) {
     AppEvent event = eventQueue.pop();

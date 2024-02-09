@@ -357,6 +357,14 @@ void Area::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
+void Area::receiveMouseWheel(Vector2 mousePos, float movement) {
+  if (containsPoint(mousePos)) {
+    for (auto& ui : contents) {
+      ui->receiveMouseWheel(Vector2Subtract(mousePos, screenPos), movement);
+    }
+  }
+}
+
 void Area::updateShaders() {
   for (auto& ui : contents) {
     std::shared_ptr<Ui::Viewport> ui3d = std::dynamic_pointer_cast<Ui::Viewport>(ui);
@@ -478,6 +486,12 @@ void Area::buildConstraintSelection() {
   std::shared_ptr<Ui::Icon> perpendicular = std::make_shared<Ui::Icon>();
   perpendicular->setImgPath("../assets/icons/Perpendicular.png");
   perpendicular->setHoverTooltip("Perpendicular");
+  std::shared_ptr<Ui::Icon> vertical = std::make_shared<Ui::Icon>();
+  vertical->setImgPath("../assets/icons/Vertical.png");
+  vertical->setHoverTooltip("Vertical");
+  std::shared_ptr<Ui::Icon> horizontal = std::make_shared<Ui::Icon>();
+  horizontal->setImgPath("../assets/icons/Horizontal.png");
+  horizontal->setHoverTooltip("Horizontal");
 
   std::shared_ptr<Ui::Row> constraintRow = std::make_shared<Ui::Row>();
   constraintRow->addChild(coincident);
@@ -486,6 +500,8 @@ void Area::buildConstraintSelection() {
   constraintRow->addChild(midpoint);
   constraintRow->addChild(parallel);
   constraintRow->addChild(perpendicular);
+  constraintRow->addChild(vertical);
+  constraintRow->addChild(horizontal);
 
   std::shared_ptr<Ui::Ui> ptr = std::static_pointer_cast<Ui::Ui>(constraintRow);
   ptr->move(Vector2 {4, 32});
@@ -613,6 +629,7 @@ void Renderer::draw() {
 }
 
 void Renderer::receiveMousePos(Vector2 mousePos) {
+  this->mousePos = mousePos;
   for (auto& area : areas) {
     area->receiveMousePos(mousePos);
   }
@@ -655,6 +672,12 @@ void Renderer::mouseUp(Vector2 mousePos) {
       for (auto& area : areas) {
         area->receiveMouseUp(mousePos);
       }
+  }
+}
+
+void Renderer::mouseWheelMove(float movement) {
+  for (auto& area : areas) {
+    area->receiveMouseWheel(mousePos, movement);
   }
 }
 

@@ -29,6 +29,7 @@ public:
   virtual void receiveMousePos(Vector2 mousePos)=0;
   virtual void receiveMouseDown(Vector2 mousePos)=0;
   virtual void receiveMouseUp(Vector2 mousePos)=0;
+  virtual void receiveMouseWheel(Vector2 mousePos, float movement)=0;
   virtual Vector2 getSize()=0;
 
   void setOnClick(std::function<void(Ui*)>);
@@ -40,6 +41,12 @@ protected:
   std::function<void(Ui*)> onClick;
   std::function<void(Ui*)> onMouseEnter;
   std::function<void(Ui*)> onMouseExit;
+};
+
+enum TextAlignment {
+  LEFT,
+  CENTER,
+  RIGHT
 };
 
 class Text: public Ui {
@@ -54,13 +61,16 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
+  void setAlignment(TextAlignment align);
   void setColor(Color c);
   void setText(std::string text);
 
 private:
   bool hovered = false;
+  TextAlignment align = TextAlignment::LEFT;
 
   Vector2 pos;
   Vector2 size;
@@ -80,6 +90,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void setColor(Color c);
@@ -104,6 +115,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void setOnSelected(std::function<void(std::string)> f);
@@ -143,6 +155,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void setScene(std::shared_ptr<Scene> scene);
@@ -185,6 +198,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   Vector2 btnSize;
@@ -209,14 +223,18 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void setImgPath(std::string path);
   void setHoverTooltip(std::string tooltip);
+  void setBgColor(Color color);
 
-private:
+  std::string tooltip;
   Texture2D texture;
   bool loadedTexture;
+
+private:
   bool hovered;
   std::chrono::time_point<std::chrono::system_clock> hoverBegin;
   std::chrono::duration<double> tooltipDelay;
@@ -240,6 +258,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void addChild(std::shared_ptr<Ui> child);
@@ -264,6 +283,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
@@ -309,6 +329,7 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
@@ -344,16 +365,20 @@ public:
   void receiveMousePos(Vector2 mousePos) override;
   void receiveMouseDown(Vector2 mousePos) override;
   void receiveMouseUp(Vector2 mousePos) override;
+  void receiveMouseWheel(Vector2 mousePos, float movement) override;
   Vector2 getSize() override;
 
   void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
   void setSketch(std::shared_ptr<Sketch::NewSketch> sketch);
 
 private:
+  Vector2 toScreenSpace(Vector2 sketchPos);
+  void drawConstraints();
+
   Vector2 pos;
   Vector2 lastMousePos;
   Vector2 panOffset;
-  float scale = 30.0f;
+  float scale = 200.0f;
   float zoom = 1.0f;
 
   std::shared_ptr<Sketch::NewSketch> sketch;
@@ -361,6 +386,9 @@ private:
   Rectangle* areaScreenRect = nullptr;
   Vector2* areaScreenPos = nullptr;
   RenderTexture* areaTexture = nullptr;
+
+  Text error;
+  std::map<ConstraintType, std::shared_ptr<Icon>> constraintIcons;
 };
 
 

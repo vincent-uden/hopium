@@ -95,6 +95,7 @@ public:
   void receiveMousePos(Vector2 mousePos);
   void receiveMouseDown(Vector2 mousePos);
   void receiveMouseUp(Vector2 mousePos);
+  void receiveMouseWheel(Vector2 mousePos, float movement);
   void updateShaders();
 
   // Event Listeners
@@ -160,6 +161,7 @@ public:
   void receiveMousePos(Vector2 mousePos);
   void mouseDown(Vector2 mousePos);
   void mouseUp(Vector2 mousePos);
+  void mouseWheelMove(float movement);
   void splitPaneHorizontal(Vector2 mousePos);
   void splitPaneVertical(Vector2 mousePos);
   void collapseBoundary(Vector2 mousePos);
@@ -194,6 +196,8 @@ private:
   std::shared_ptr<Area> findArea(Vector2 pos);
   std::shared_ptr<Area> findArea(int id);
   void deleteArea(std::shared_ptr<Area> toDelete);
+
+  Vector2 mousePos;
 };
 
 #endif

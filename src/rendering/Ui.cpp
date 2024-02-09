@@ -1,6 +1,7 @@
 #include "Ui.h"
 #include "raylib.h"
 #include <cmath>
+#include <format>
 
 namespace Ui {
 
@@ -19,36 +20,47 @@ void Ui::setOnMouseExit(std::function<void (Ui *)> f) {
 }
 
 Text::Text() {
-    pos.x = 0;
-    pos.y = 0;
-    setText("");
-    color = { 0, 0, 0, 255 };
+  pos.x = 0;
+  pos.y = 0;
+  setText("");
+  color = { 0, 0, 0, 255 };
 }
 
 Text::Text(std::string text) {
-    pos.x = 0;
-    pos.y = 0;
-    setText(text);
-    color = { 0, 0, 0, 255 };
+  pos.x = 0;
+  pos.y = 0;
+  setText(text);
+  color = { 0, 0, 0, 255 };
 }
 
 Text::~Text() {
 }
 
 void Text::move(Vector2 distance) {
-    pos.x += distance.x;
-    pos.y += distance.y;
+  pos.x += distance.x;
+  pos.y += distance.y;
 }
 
 void Text::setPos(Vector2 pos) {
-    Vector2 diff;
-    diff.x = pos.x - this->pos.x;
-    diff.y = pos.y - this->pos.y;
-    move(diff);
+  Vector2 diff;
+  diff.x = pos.x - this->pos.x;
+  diff.y = pos.y - this->pos.y;
+  move(diff);
 }
 
 void Text::draw() {
-    DrawTextEx(colorscheme->font, text.c_str(), pos, 20, 1, color);
+  Vector2 drawPos = pos;
+  switch (align) {
+  case LEFT:
+    break;
+  case CENTER:
+    pos.x -= size.x / 2.f;
+    break;
+  case RIGHT:
+    pos.x -= size.x;
+    break;
+  }
+  DrawTextEx(colorscheme->font, text.c_str(), pos, 20, 1, color);
 }
 
 void Text::receiveMousePos(Vector2 mousePos) {
@@ -86,8 +98,15 @@ void Text::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
+void Text::receiveMouseWheel(Vector2 mousePos, float movement) {
+}
+
 Vector2 Text::getSize() {
   return size;
+}
+
+void Text::setAlignment(TextAlignment align) {
+  this->align = align;
 }
 
 void Text::setColor(Color c) {
@@ -148,6 +167,9 @@ void Rect::receiveMouseUp(Vector2 mousePos) {
       onClick(this);
     }
   }
+}
+
+void Rect::receiveMouseWheel(Vector2 mousePos, float movement) {
 }
 
 Vector2 Rect::getSize() {
@@ -308,6 +330,9 @@ void DropDown::receiveMouseDown(Vector2 mousePos) {
   }
 }
 
+void DropDown::receiveMouseWheel(Vector2 mousePos, float movement) {
+}
+
 void DropDown::receiveMouseUp(Vector2 mousePos) {
   if (open) {
     if (
@@ -465,6 +490,9 @@ void Viewport::receiveMouseDown(Vector2 mousePos) {
 }
 
 void Viewport::receiveMouseUp(Vector2 mousePos) {
+}
+
+void Viewport::receiveMouseWheel(Vector2 mousePos, float movement) {
 }
 
 Vector2 Viewport::getSize() {
@@ -652,6 +680,9 @@ void ToolList::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
+void ToolList::receiveMouseWheel(Vector2 mousePos, float movement) {
+}
+
 Vector2 ToolList::getSize() {
   return Vector2 { (btnSize.x + margin) * btnNames.size() - margin, btnSize.y };
 }
@@ -747,6 +778,9 @@ void Icon::receiveMouseUp(Vector2 mousePos) {
   }
 }
 
+void Icon::receiveMouseWheel(Vector2 mousePos, float movement) {
+}
+
 Vector2 Icon::getSize() {
   return size;
 }
@@ -765,7 +799,13 @@ void Icon::setImgPath(std::string path) {
 void Icon::setHoverTooltip(std::string tooltip) {
   hoverTooltip->setText(tooltip);
   hoverTooltipBg->setSize(Vector2Add(hoverTooltip->getSize(), {12, 0}));
+  this->tooltip = tooltip;
 }
+
+void Icon::setBgColor(Color color) {
+  bg->setColor(color);
+}
+
 
 Row::Row() {
     pos.x = 0;
@@ -840,6 +880,9 @@ void Row::receiveMouseUp(Vector2 mousePos) {
       }
     }
   }
+}
+
+void Row::receiveMouseWheel(Vector2 mousePos, float movement) {
 }
 
 Vector2 Row::getSize() {
@@ -998,6 +1041,9 @@ void GraphViewer::receiveMouseUp(Vector2 mousePos) {
   grabbedId = -1;
 }
 
+void GraphViewer::receiveMouseWheel(Vector2 mousePos, float movement) {
+}
+
 Vector2 GraphViewer::getSize() {
   return { areaScreenRect->width, areaScreenRect->height };
 }
@@ -1114,6 +1160,9 @@ void STreeViewer::receiveMouseDown(Vector2 mousePos) {
   }
 }
 
+void STreeViewer::receiveMouseWheel(Vector2 mousePos, float movement) {
+}
+
 void STreeViewer::receiveMouseUp(Vector2 mousePos) {
   for (const std::shared_ptr<GraphViewer>& g: nodes) {
     g->receiveMouseUp(mousePos);
@@ -1182,6 +1231,53 @@ SketchViewer::SketchViewer() {
   pos.y = 0;
   panOffset.x = 0;
   panOffset.y = 0;
+
+  error.setAlignment(TextAlignment::RIGHT);
+  error.setColor(WHITE);
+  error.setPos(pos);
+
+  std::shared_ptr<Icon> coincident = std::make_shared<Icon>();
+  coincident->setImgPath("../assets/icons/Coincident.png");
+  coincident->setHoverTooltip("Coincident");
+  coincident->setBgColor({ 0, 0, 0, 0 });
+  std::shared_ptr<Icon> colinear = std::make_shared<Icon>();
+  colinear->setImgPath("../assets/icons/Colinear.png");
+  colinear->setHoverTooltip("Colinear");
+  colinear->setBgColor({ 0, 0, 0, 0 });
+  std::shared_ptr<Icon> equal = std::make_shared<Icon>();
+  equal->setImgPath("../assets/icons/Equal.png");
+  equal->setHoverTooltip("Equal");
+  equal->setBgColor({ 0, 0, 0, 0 });
+  std::shared_ptr<Icon> midpoint = std::make_shared<Icon>();
+  midpoint->setImgPath("../assets/icons/Midpoint.png");
+  midpoint->setHoverTooltip("Midpoint");
+  midpoint->setBgColor({ 0, 0, 0, 0 });
+  std::shared_ptr<Icon> parallel = std::make_shared<Icon>();
+  parallel->setImgPath("../assets/icons/Parallel.png");
+  parallel->setHoverTooltip("Parallel");
+  parallel->setBgColor({ 0, 0, 0, 0 });
+  std::shared_ptr<Icon> perpendicular = std::make_shared<Icon>();
+  perpendicular->setImgPath("../assets/icons/Perpendicular.png");
+  perpendicular->setHoverTooltip("Perpendicular");
+  perpendicular->setBgColor({ 0, 0, 0, 0 });
+  std::shared_ptr<Icon> vertical = std::make_shared<Icon>();
+  vertical->setImgPath("../assets/icons/Vertical.png");
+  std::cout << "VERTICAL: " << &vertical->texture << std::endl;
+  vertical->setHoverTooltip("Vertical");
+  vertical->setBgColor({ 0, 0, 0, 0 });
+  std::shared_ptr<Icon> horizontal = std::make_shared<Icon>();
+  horizontal->setImgPath("../assets/icons/Horizontal.png");
+  horizontal->setHoverTooltip("Horizontal");
+  horizontal->setBgColor({ 0, 0, 0, 0 });
+
+  constraintIcons[ConstraintType::COINCIDENT] = coincident;
+  constraintIcons[ConstraintType::COLINEAR] = colinear;
+  constraintIcons[ConstraintType::EQUAL] = equal;
+  constraintIcons[ConstraintType::MIDPOINT] = midpoint;
+  constraintIcons[ConstraintType::PARALLEL] = parallel;
+  constraintIcons[ConstraintType::PERPENDICULAR] = perpendicular;
+  constraintIcons[ConstraintType::VERTICAL] = vertical;
+  constraintIcons[ConstraintType::HORIZONTAL] = horizontal;
 }
 
 SketchViewer::~SketchViewer() {
@@ -1190,6 +1286,11 @@ SketchViewer::~SketchViewer() {
 void SketchViewer::move(Vector2 distance) {
   pos.x += distance.x;
   pos.y += distance.y;
+
+  error.move(distance);
+  for (auto& icon: constraintIcons) {
+    icon.second->move(distance);
+  }
 }
 
 void SketchViewer::setPos(Vector2 pos) {
@@ -1201,16 +1302,23 @@ void SketchViewer::setPos(Vector2 pos) {
 
 void SketchViewer::draw() {
   Color color = GREEN;
-  DrawLineV({-1000.0, panOffset.y}, {1000.0, panOffset.y}, {255, 255, 255, 100});
-  DrawLineV({panOffset.x, -1000.0}, {panOffset.x, 1000.0}, {255, 255, 255, 100});
+  DrawLineV({0.0, panOffset.y}, {areaScreenRect->width, panOffset.y}, {255, 255, 255, 100});
+  DrawLineV({panOffset.x, 0}, {panOffset.x, areaScreenRect->height}, {255, 255, 255, 100});
+
   for (const std::shared_ptr<Sketch::Point>& p: sketch->points) {
     Vector2 v = Vector2Add(Vector2Scale(p->pos, scale * zoom), panOffset);
     DrawCircleV(
-      v,
+      toScreenSpace(p->pos),
       4.0,
       color
     );
   }
+
+  drawConstraints();
+
+  error.setPos({ areaScreenRect->width - 12, 0.0  });
+  error.setText(std::format("Error: {}", sketch->totalError()));
+  error.draw();
 }
 
 void SketchViewer::receiveMousePos(Vector2 mousePos) {
@@ -1229,6 +1337,14 @@ void SketchViewer::receiveMouseDown(Vector2 mousePos) {
 void SketchViewer::receiveMouseUp(Vector2 mousePos) {
 }
 
+void SketchViewer::receiveMouseWheel(Vector2 mousePos, float movement) {
+  if (movement > 0.5f) {
+    zoom *= 1.1;
+  } else if (movement < -0.5f) {
+    zoom /= 1.1;
+  }
+}
+
 Vector2 SketchViewer::getSize() {
   return { areaScreenRect->width, areaScreenRect->height };
 }
@@ -1241,10 +1357,47 @@ void SketchViewer::setAreaPointers(
   areaScreenRect = screenRect;
   areaScreenPos = screenPos;
   areaTexture = texture;
+
+  panOffset = { areaScreenRect->width / 2.0f, areaScreenRect->height / 2.0f };
 }
 
 void SketchViewer::setSketch(std::shared_ptr<Sketch::NewSketch> sketch) {
   this->sketch = sketch;
+}
+
+Vector2 SketchViewer::toScreenSpace(Vector2 sketchPos) {
+    return Vector2Add(Vector2Scale(sketchPos, scale * zoom), panOffset);
+}
+
+void SketchViewer::drawConstraints() {
+  std::vector<int> drawnIds;
+
+  for (const auto& p1: sketch->points) {
+    for (const auto& [edge, other]: p1->v->edges) {
+      bool foundId = false;
+      for (int& id: drawnIds) {
+        if (id == edge->id) {
+          foundId = true;
+        }
+      }
+      if (!foundId) {
+        std::shared_ptr<Sketch::Point> p2 = sketch->findPointById(other);
+        Vector2 midpoint = Vector2Add(
+          p1->pos,
+          Vector2Scale(Vector2Subtract(p2->pos, p1->pos), 0.5f)
+        );
+        constraintIcons[edge->type]->setPos(
+          Vector2Subtract(
+            toScreenSpace(midpoint),
+            Vector2Scale(constraintIcons[edge->type]->getSize(), 0.5f)
+          )
+        );
+        constraintIcons[edge->type]->draw();
+        drawnIds.push_back(edge->id);
+      }
+
+    }
+  }
 }
 
 /* End of namespace */ }
