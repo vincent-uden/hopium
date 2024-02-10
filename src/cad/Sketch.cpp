@@ -8,6 +8,7 @@
 namespace Sketch {
 
 std::default_random_engine Point::e = std::default_random_engine();
+std::default_random_engine Line::e = std::default_random_engine();
 
 Point::Point(std::shared_ptr<GeometricElement> v) {
   this->v = v;
@@ -21,25 +22,91 @@ Point::Point(std::shared_ptr<GeometricElement> v) {
 Point::Point(const Point& other) {
   v = other.v;
   pos = other.pos;
+  fixed = other.fixed;
 }
 
 Point::~Point() {
+}
+
+void Point::update(Vector2 diff) {
+  pos.x += diff.x;
+  pos.y += diff.y;
+}
+
+Line::Line(std::shared_ptr<GeometricElement> v) {
+  this->v = v;
+  std::uniform_real_distribution<float> dis(0, 1);
+  k = dis(e);
+  m = dis(e);
+}
+
+Line::Line(const Line& other) {
+  v = other.v;
+  k = other.k;
+  m = other.m;
+  fixed = other.fixed;
+}
+
+Line::~Line() {
+}
+
+void Line::update(Vector2 diff) {
+  k += diff.x;
+  m += diff.y;
 }
 
 float error(const Point& p1, const Point& p2, const Constraint& c) {
   switch (c.type) {
   case ConstraintType::DISTANCE:
     return std::pow(Vector2Distance(p1.pos, p2.pos) - c.value, 2);
-  case ConstraintType::VERTICAL:
-    return std::pow(p1.pos.x - p2.pos.x, 2);
   case ConstraintType::HORIZONTAL:
     return std::pow(p1.pos.y - p2.pos.y, 2);
+  case ConstraintType::VERTICAL:
+    return std::pow(p1.pos.x - p2.pos.x, 2);
   default:
     return 0;
   }
 }
 
-std::pair<Vector2,Vector2> gradError(
+float error(const Point& p, const Line& l, const Constraint& c) {
+  switch (c.type) {
+  case ConstraintType::COINCIDENT:
+    return std::pow(p.pos.x * l.k + l.m - p.pos.y, 2);
+  case ConstraintType::DISTANCE:
+    return std::pow((l.k * p.pos.x + l.m - p.pos.y), 2)/(l.k * l.k + 1);
+  default:
+    return 0;
+  }
+}
+
+float error(const Line& l, const Point& p, const Constraint& c) {
+  return error(p, l, c);
+}
+
+float error(const Line& p1, const Line& p2, const Constraint& c) {
+  // TODO
+  return 0.0;
+}
+
+float error(SketchEntity* p1, SketchEntity* p2, Constraint* edge) {
+  float e = 0;
+  if (Point* e1 = dynamic_cast<Point*>(p1); e1 != nullptr) {
+    if (Point* e2 = dynamic_cast<Point*>(p2); e2!= nullptr) {
+      e = error(*e1, *e2, *edge);
+    } else if (Line* e2 = dynamic_cast<Line*>(p2); e2!= nullptr) {
+      e = error(*e1, *e2, *edge);
+    }
+  } else if (Line* e1 = dynamic_cast<Line*>(p1); e1 != nullptr) {
+    if (Point* e2 = dynamic_cast<Point*>(p2); e2!= nullptr) {
+      e = error(*e1, *e2, *edge);
+    } else if (Line* e2 = dynamic_cast<Line*>(p2); e2!= nullptr) {
+      e = error(*e1, *e2, *edge);
+    }
+  }
+  return e;
+}
+
+Vector2 gradError(
   const Point& p1,
   const Point& p2,
   const Constraint& c
@@ -47,26 +114,59 @@ std::pair<Vector2,Vector2> gradError(
   float dist = Vector2Distance(p1.pos, p2.pos);
   switch (c.type) {
   case ConstraintType::DISTANCE:
-    return std::make_pair(
-        (Vector2) { 2*(p1.pos.x-p2.pos.x)*(dist-c.value)/dist, 2*(p1.pos.y-p2.pos.y)*(dist-c.value)/dist },
-        (Vector2) { -2*(p1.pos.x-p2.pos.x)*(dist-c.value)/dist, -2*(p1.pos.y-p2.pos.y)*(dist-c.value)/dist }
-    );
+        return (Vector2) { 2*(p1.pos.x-p2.pos.x)*(dist-c.value)/dist, 2*(p1.pos.y-p2.pos.y)*(dist-c.value)/dist };
   case ConstraintType::VERTICAL:
-    return std::make_pair(
-        (Vector2) { 2*(p1.pos.x - p2.pos.x), 0 },
-        (Vector2) { -2*(p1.pos.x - p2.pos.x), 0 }
-    );
+        return (Vector2) { 2*(p1.pos.x - p2.pos.x), 0 };
   case ConstraintType::HORIZONTAL:
-    return std::make_pair(
-        (Vector2) { 0, 2*(p1.pos.y - p2.pos.y) },
-        (Vector2) { 0, -2*(p1.pos.y - p2.pos.y) }
-    );
+        return (Vector2) { 0, 2*(p1.pos.y - p2.pos.y) };
   default:
-    return std::make_pair(
-        (Vector2) {0, 0},
-        (Vector2) {0, 0}
-        );
+        return (Vector2) {0, 0};
   }
+}
+
+Vector2 gradError(const Point& p, const Line& l, const Constraint& c) {
+  switch (c.type) {
+  case ConstraintType::COINCIDENT:
+    return { 2*l.k*(p.pos.x*l.k + l.m - p.pos.y), -2*(p.pos.x*l.k + l.m - p.pos.y)};
+  case ConstraintType::DISTANCE:
+    return { 2*l.k*(l.k*p.pos.x + l.m - p.pos.y)/(l.k*l.k + 1), -2*(l.k*p.pos.x + l.m - p.pos.y)/(l.k*l.k + 1) };
+  default:
+    return { 0, 0 };
+  }
+}
+
+Vector2 gradError( const Line& l, const Point& p, const Constraint& c) {
+  switch (c.type) {
+  case ConstraintType::COINCIDENT:
+    return { 2*p.pos.x*(p.pos.x*l.k + l.m - p.pos.y), 2*(p.pos.x*l.k + l.m - p.pos.y) };
+  case ConstraintType::DISTANCE:
+    return { static_cast<float>(2*(l.k*p.pos.x+l.m-p.pos.y)*(l.k*(p.pos.y-l.k)+p.pos.x)/std::pow(l.k*l.k + 1, 2)), 2*(l.k*p.pos.x+l.m-p.pos.y)/(l.k*l.k + 1)};
+  default:
+    return { 0, 0 };
+  }
+}
+
+Vector2 gradError( const Line& p1, const Line& p2, const Constraint& c) {
+  // TODO
+  return { 0, 0 };
+}
+
+Vector2 gradError(SketchEntity* p1, SketchEntity* p2, Constraint* edge) {
+  Vector2 diff = {0, 0};
+  if (Point* e1 = dynamic_cast<Point*>(p1); e1 != nullptr) {
+    if (Point* e2 = dynamic_cast<Point*>(p2); e2!= nullptr) {
+      diff = gradError(*e1, *e2, *edge);
+    } else if (Line* e2 = dynamic_cast<Line*>(p2); e2!= nullptr) {
+      diff = gradError(*e1, *e2, *edge);
+    }
+  } else if (Line* e1 = dynamic_cast<Line*>(p1); e1 != nullptr) {
+    if (Point* e2 = dynamic_cast<Point*>(p2); e2!= nullptr) {
+      diff = gradError(*e1, *e2, *edge);
+    } else if (Line* e2 = dynamic_cast<Line*>(p2); e2!= nullptr) {
+      diff = gradError(*e1, *e2, *edge);
+    }
+  }
+  return diff;
 }
 
 Realisation::Realisation() {
@@ -96,34 +196,30 @@ float Realisation::sgdStep() {
   }
 
   int total_constraints = 0;
-  for (int b = 0; b < BATCH_SIZE; ++b) {
-    for (size_t i = 0; i < points.size(); ++i) {
-      const Point& p = points[i];
-      for (size_t j = i + 1; j < points.size(); ++j) {
-        const Point& other = points[j];
-        if (p.v->isConnected(other.v) && std::rand() % 2 == 0) {
-          float e = error(p, other, *p.v->getConnection(other.v).get());
-          err += e;
-          std::pair<Vector2, Vector2> grads = gradError(
-            p,
-            other,
-            *p.v->getConnection(other.v).get()
-          );
-          step[i].x -= grads.first.x / BATCH_SIZE;
-          step[i].y -= grads.first.y / BATCH_SIZE;
-          ++total_constraints;
-        }
+  int i = 0;
+  for (const auto& p1: points) {
+    for (const auto& [edge, other]: p1.v->edges) {
+        Point p2 = *findPointById(other);
+          if (p1.v->isConnected(other) && std::rand() % 2 == 0) {
+            float e = error(p1, p2, *edge);
+            err += e;
+            Vector2 grads = gradError(p1, p2, *edge);
+            step[i].x -= grads.x;
+            step[i].y -= grads.y;
+            ++total_constraints;
+          }
       }
-    }
+    ++i;
   }
   err /= total_constraints;
 
-  size_t i = 0;
+  i = 0;
   for (auto& p: points) {
     p.pos.x += step[i].x * stepSize;
     p.pos.y += step[i].y * stepSize;
     ++i;
   }
+  err /= total_constraints;
 
   return err;
 }
@@ -368,7 +464,7 @@ NewSketch::NewSketch() {
 NewSketch::~NewSketch() {
 }
 
-std::shared_ptr<Point> NewSketch::findPointById(std::shared_ptr<GeometricElement> v) {
+std::shared_ptr<SketchEntity> NewSketch::findEntityById(std::shared_ptr<GeometricElement> v) {
   for (const auto& p: points) {
     if (p->v->id == v->id) {
       return p;
@@ -378,12 +474,46 @@ std::shared_ptr<Point> NewSketch::findPointById(std::shared_ptr<GeometricElement
   return nullptr;
 }
 
+float NewSketch::sgdStep() {
+  std::vector<Vector2> step;
+  float err = 0.0f;
+  for (const auto& p: points) {
+    step.push_back({0.0f, 0.0f});
+  }
+
+  int total_constraints = 0;
+  int i = 0;
+  for (const auto& p1: points) {
+    for (const auto& [edge, other]: p1->v->edges) {
+        std::shared_ptr<SketchEntity> p2 = findEntityById(other);
+          if (p1->v->isConnected(other) && std::rand() % 2 == 0 && !p1->fixed) {
+            float e = error(p1.get(), p2.get(), edge.get());
+            err += e;
+            Vector2 grads = gradError(p1.get(), p2.get(), edge.get());
+            step[i].x -= grads.x;
+            step[i].y -= grads.y;
+            ++total_constraints;
+          }
+      }
+    ++i;
+  }
+  err /= total_constraints;
+
+  i = 0;
+  for (auto& p: points) {
+    p->update(Vector2Scale(step[i], stepSize));
+    ++i;
+  }
+
+  return err;
+}
+
 float NewSketch::totalError() {
   float total = 0.0f;
   for (const auto& p: points) {
     for (const auto& [edge, other] : p->v->edges) {
-      const auto p2 = findPointById(other);
-      total += error(*p.get(), *p2.get(), *edge.get());
+      const auto p2 = findEntityById(other);
+      total += error(p.get(), p2.get(), edge.get());
     }
   }
 
@@ -404,8 +534,8 @@ void NewSketch::connect(
   edges.push_back(c);
 }
 
-void NewSketch::deleteVertex(std::shared_ptr<Point> a) {
-  std::erase_if(points, [a](std::shared_ptr<Point> b) { return a->v->id == b->v->id; });
+void NewSketch::deleteEntity(std::shared_ptr<SketchEntity> a) {
+  std::erase_if(points, [a](std::shared_ptr<SketchEntity> b) { return a->v->id == b->v->id; });
   for (const auto& [edge, other] : a->v->edges) {
     other->deleteEdge(a->v);
     std::erase_if(edges, [edge](std::shared_ptr<Constraint> c) { return c == edge; });

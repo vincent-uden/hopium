@@ -1262,7 +1262,6 @@ SketchViewer::SketchViewer() {
   perpendicular->setBgColor({ 0, 0, 0, 0 });
   std::shared_ptr<Icon> vertical = std::make_shared<Icon>();
   vertical->setImgPath("../assets/icons/Vertical.png");
-  std::cout << "VERTICAL: " << &vertical->texture << std::endl;
   vertical->setHoverTooltip("Vertical");
   vertical->setBgColor({ 0, 0, 0, 0 });
   std::shared_ptr<Icon> horizontal = std::make_shared<Icon>();
@@ -1301,17 +1300,15 @@ void SketchViewer::setPos(Vector2 pos) {
 }
 
 void SketchViewer::draw() {
-  Color color = GREEN;
+  if (IsKeyDown(KEY_ENTER)) {
+    sketch->sgdStep();
+  }
+
   DrawLineV({0.0, panOffset.y}, {areaScreenRect->width, panOffset.y}, {255, 255, 255, 100});
   DrawLineV({panOffset.x, 0}, {panOffset.x, areaScreenRect->height}, {255, 255, 255, 100});
 
-  for (const std::shared_ptr<Sketch::Point>& p: sketch->points) {
-    Vector2 v = Vector2Add(Vector2Scale(p->pos, scale * zoom), panOffset);
-    DrawCircleV(
-      toScreenSpace(p->pos),
-      4.0,
-      color
-    );
+  for (const std::shared_ptr<Sketch::SketchEntity>& e: sketch->points) {
+    drawEntity(e);
   }
 
   drawConstraints();
@@ -1381,23 +1378,34 @@ void SketchViewer::drawConstraints() {
         }
       }
       if (!foundId) {
-        std::shared_ptr<Sketch::Point> p2 = sketch->findPointById(other);
-        Vector2 midpoint = Vector2Add(
-          p1->pos,
-          Vector2Scale(Vector2Subtract(p2->pos, p1->pos), 0.5f)
-        );
-        constraintIcons[edge->type]->setPos(
-          Vector2Subtract(
-            toScreenSpace(midpoint),
-            Vector2Scale(constraintIcons[edge->type]->getSize(), 0.5f)
-          )
-        );
-        constraintIcons[edge->type]->draw();
+        std::shared_ptr<Sketch::SketchEntity> p2 = sketch->findEntityById(other);
+        // TODO
         drawnIds.push_back(edge->id);
       }
 
     }
   }
 }
+
+void SketchViewer::drawEntity(std::shared_ptr<Sketch::Point> p) {
+    Vector2 v = Vector2Add(Vector2Scale(p->pos, scale * zoom), panOffset);
+    DrawCircleV(
+      toScreenSpace(p->pos),
+      4.0,
+      GREEN
+    );
+}
+
+void SketchViewer::drawEntity(std::shared_ptr<Sketch::Line> line) {
+}
+
+void SketchViewer::drawEntity(std::shared_ptr<Sketch::SketchEntity> entity) {
+  if (std::shared_ptr<Sketch::Point> e1 = std::dynamic_pointer_cast<Sketch::Point>(entity); e1) {
+    drawEntity(e1);
+  } else if (std::shared_ptr<Sketch::Line> e1 = std::dynamic_pointer_cast<Sketch::Line>(entity); e1) {
+    drawEntity(e1);
+  }
+}
+
 
 /* End of namespace */ }

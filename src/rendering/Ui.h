@@ -374,6 +374,9 @@ public:
 private:
   Vector2 toScreenSpace(Vector2 sketchPos);
   void drawConstraints();
+  void drawEntity(std::shared_ptr<Sketch::Point> point);
+  void drawEntity(std::shared_ptr<Sketch::Line> line);
+  void drawEntity(std::shared_ptr<Sketch::SketchEntity> entity);
 
   Vector2 pos;
   Vector2 lastMousePos;

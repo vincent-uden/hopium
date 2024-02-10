@@ -7,15 +7,15 @@
 #include <queue>
 
 enum class ConstraintType {
+  ANGLE,
   COINCIDENT,
-  EQUAL,
-  PARALLEL,
-  PERPENDICULAR,
-  MIDPOINT,
   COLINEAR,
   DISTANCE,
-  ANGLE,
+  EQUAL,
   HORIZONTAL,
+  MIDPOINT,
+  PARALLEL,
+  PERPENDICULAR,
   VERTICAL,
   VIRTUAL,
 };

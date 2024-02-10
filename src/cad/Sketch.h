@@ -13,25 +13,53 @@
 
 namespace Sketch {
 
-class Point {
+class SketchEntity {
+public:
+  virtual void update(Vector2 diff) = 0;
+
+  bool fixed = false;
+  std::shared_ptr<GeometricElement> v;
+};
+
+class Point: public SketchEntity {
 public:
   Point(std::shared_ptr<GeometricElement> v);
   Point(const Point& other);
   ~Point();
 
+  void update(Vector2 diff) override;
+
   Vector2 pos;
-  std::shared_ptr<GeometricElement> v;
+
+private:
+  static std::default_random_engine e;
+};
+
+class Line: public SketchEntity {
+public:
+  Line(std::shared_ptr<GeometricElement> v);
+  Line(const Line& other);
+  ~Line();
+
+  void update(Vector2 diff) override;
+
+  float k;
+  float m;
 
 private:
   static std::default_random_engine e;
 };
 
 float error(const Point& p1, const Point& p2, const Constraint& c);
-std::pair<Vector2,Vector2> gradError(
-  const Point& p1,
-  const Point& p2,
-  const Constraint& c
-);
+float error(const Point& p1, const Line& p2, const Constraint& c);
+float error(const Line& p1, const Point& p2, const Constraint& c);
+float error(const Line& p1, const Line& p2, const Constraint& c);
+float error(SketchEntity* e1, SketchEntity* e2, const Constraint* c);
+Vector2 gradError( const Point& p1, const Point& p2, const Constraint& c);
+Vector2 gradError( const Point& p1, const Line& p2, const Constraint& c);
+Vector2 gradError( const Line& p1, const Point& p2, const Constraint& c);
+Vector2 gradError( const Line& p1, const Line& p2, const Constraint& c);
+Vector2 gradError(SketchEntity* e1, SketchEntity* e2, const Constraint* c);
 
 class Realisation {
 public:
@@ -89,7 +117,8 @@ public:
   NewSketch();
   ~NewSketch();
 
-  std::shared_ptr<Point> findPointById(std::shared_ptr<GeometricElement> v);
+  std::shared_ptr<SketchEntity> findEntityById(std::shared_ptr<GeometricElement> v);
+  float sgdStep();
   float totalError();
   void addPoint(std::shared_ptr<Point> p);
   void connect(
@@ -97,11 +126,13 @@ public:
     std::shared_ptr<Point> b,
     std::shared_ptr<Constraint> c
   );
-  void deleteVertex(std::shared_ptr<Point> a);
+  void deleteEntity(std::shared_ptr<SketchEntity> a);
 
-  std::vector<std::shared_ptr<Point>> points;
+  std::vector<std::shared_ptr<SketchEntity>> points;
 private:
   std::vector<std::shared_ptr<Constraint>> edges;
+
+  float stepSize = 0.02;
 };
 
 }

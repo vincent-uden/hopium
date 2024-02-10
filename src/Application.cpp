@@ -172,14 +172,24 @@ void Application::buildSketch() {
   state->paramSketch = std::make_shared<Sketch::NewSketch>();
   std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
   std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
+  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
   std::shared_ptr<Sketch::Point> pa = std::make_shared<Sketch::Point>(a);
+  pa->fixed = true;
   std::shared_ptr<Sketch::Point> pb = std::make_shared<Sketch::Point>(b);
+  std::shared_ptr<Sketch::Point> pc = std::make_shared<Sketch::Point>(c);
   pa->pos = { 0.0, 0.0 };
   pb->pos = { 0.2, 1.0 };
+  pc->pos = { 1.0, 0.2 };
   state->paramSketch->addPoint(pa);
   state->paramSketch->addPoint(pb);
+  state->paramSketch->addPoint(pc);
   std::shared_ptr<Constraint> ab  = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
+  std::shared_ptr<Constraint> ac  = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "ac");
+  std::shared_ptr<Constraint> ac2  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ac2");
+  ac2->value = 5.0;
   state->paramSketch->connect(pa, pb, ab);
+  state->paramSketch->connect(pa, pc, ac);
+  state->paramSketch->connect(pa, pc, ac2);
 }
 
 void Application::processEvent(enableSketchMode event) {
