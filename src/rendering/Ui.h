@@ -373,6 +373,8 @@ public:
 
 private:
   Vector2 toScreenSpace(Vector2 sketchPos);
+  Vector2 toSketchSpace(Vector2 pos);
+
   void drawConstraints();
   void drawEntity(std::shared_ptr<Sketch::Point> point);
   void drawEntity(std::shared_ptr<Sketch::Line> line);

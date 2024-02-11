@@ -73,7 +73,7 @@ float error(const Point& p, const Line& l, const Constraint& c) {
   case ConstraintType::COINCIDENT:
     return std::pow(p.pos.x * l.k + l.m - p.pos.y, 2);
   case ConstraintType::DISTANCE:
-    return std::pow((l.k * p.pos.x + l.m - p.pos.y), 2)/(l.k * l.k + 1);
+    return std::pow((l.k * p.pos.x + l.m - p.pos.y)/std::sqrt(l.k * l.k + 1) - c.value, 2);
   default:
     return 0;
   }
@@ -129,7 +129,10 @@ Vector2 gradError(const Point& p, const Line& l, const Constraint& c) {
   case ConstraintType::COINCIDENT:
     return { 2*l.k*(p.pos.x*l.k + l.m - p.pos.y), -2*(p.pos.x*l.k + l.m - p.pos.y)};
   case ConstraintType::DISTANCE:
-    return { 2*l.k*(l.k*p.pos.x + l.m - p.pos.y)/(l.k*l.k + 1), -2*(l.k*p.pos.x + l.m - p.pos.y)/(l.k*l.k + 1) };
+    return {
+      (2*l.k*(c.value*(-std::sqrt(l.k * l.k + 1)) + l.k*p.pos.x + l.m - p.pos.y))/(l.k*l.k + 1.0f),
+      (2*(c.value * std::sqrt(l.k * l.k + 1) - l.k * p.pos.x - l.m + p.pos.y))/(l.k * l.k + 1.0f)
+    };
   default:
     return { 0, 0 };
   }
@@ -140,7 +143,10 @@ Vector2 gradError( const Line& l, const Point& p, const Constraint& c) {
   case ConstraintType::COINCIDENT:
     return { 2*p.pos.x*(p.pos.x*l.k + l.m - p.pos.y), 2*(p.pos.x*l.k + l.m - p.pos.y) };
   case ConstraintType::DISTANCE:
-    return { static_cast<float>(2*(l.k*p.pos.x+l.m-p.pos.y)*(l.k*(p.pos.y-l.k)+p.pos.x)/std::pow(l.k*l.k + 1, 2)), 2*(l.k*p.pos.x+l.m-p.pos.y)/(l.k*l.k + 1)};
+    return {
+      (2*(l.k*(p.pos.y - l.m)+p.pos.x)*(c.value*(-std::sqrt(l.k*l.k + 1)) + l.k * p.pos.x + l.m - p.pos.y))/(l.k*l.k + 1.0f),
+      (2*(c.value*(-std::sqrt(l.k*l.k + 1)) + l.k*p.pos.x + l.m - p.pos.y))/(l.k*l.k + 1.0f),
+    };
   default:
     return { 0, 0 };
   }
@@ -524,9 +530,13 @@ void NewSketch::addPoint(std::shared_ptr<Point> p) {
   points.push_back(p);
 }
 
+void NewSketch::addLine(std::shared_ptr<Line> l) {
+  points.push_back(l);
+}
+
 void NewSketch::connect(
-  std::shared_ptr<Point> a,
-  std::shared_ptr<Point> b,
+  std::shared_ptr<SketchEntity> a,
+  std::shared_ptr<SketchEntity> b,
   std::shared_ptr<Constraint> c
 ) {
   a->v->edges.push_back(std::make_pair(c, b->v));

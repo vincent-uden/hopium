@@ -1366,6 +1366,10 @@ Vector2 SketchViewer::toScreenSpace(Vector2 sketchPos) {
     return Vector2Add(Vector2Scale(sketchPos, scale * zoom), panOffset);
 }
 
+Vector2 SketchViewer::toSketchSpace(Vector2 pos) {
+  return Vector2Scale(Vector2Subtract(pos, panOffset), 1.0/(scale * zoom));
+}
+
 void SketchViewer::drawConstraints() {
   std::vector<int> drawnIds;
 
@@ -1397,6 +1401,14 @@ void SketchViewer::drawEntity(std::shared_ptr<Sketch::Point> p) {
 }
 
 void SketchViewer::drawEntity(std::shared_ptr<Sketch::Line> line) {
+  Vector2 fullSize = { areaScreenRect->width, areaScreenRect->height};
+  Vector2 start = toSketchSpace({0,0});
+  Vector2 end = toSketchSpace(fullSize);
+  start.y = line->k * start.x + line->m;
+  end.y = line->k * end.x + line->m;
+  start = toScreenSpace(start);
+  end = toScreenSpace(end);
+  DrawLineV(start, end, RED);
 }
 
 void SketchViewer::drawEntity(std::shared_ptr<Sketch::SketchEntity> entity) {
@@ -1406,6 +1418,5 @@ void SketchViewer::drawEntity(std::shared_ptr<Sketch::SketchEntity> entity) {
     drawEntity(e1);
   }
 }
-
 
 /* End of namespace */ }

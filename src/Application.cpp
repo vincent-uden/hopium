@@ -186,10 +186,34 @@ void Application::buildSketch() {
   std::shared_ptr<Constraint> ab  = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
   std::shared_ptr<Constraint> ac  = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "ac");
   std::shared_ptr<Constraint> ac2  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ac2");
+  std::shared_ptr<Constraint> ab2  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab2");
   ac2->value = 5.0;
+  ab2->value = 3.0;
   state->paramSketch->connect(pa, pb, ab);
+  state->paramSketch->connect(pa, pb, ab2);
   state->paramSketch->connect(pa, pc, ac);
   state->paramSketch->connect(pa, pc, ac2);
+
+  std::shared_ptr<GeometricElement> d = std::make_shared<GeometricElement>(GeometricType::LINE, "d");
+  std::shared_ptr<Sketch::Line> pd = std::make_shared<Sketch::Line>(d);
+  pd->k = 1.0;
+  pd->m = 0.0;
+  state->paramSketch->addLine(pd);
+  std::shared_ptr<Constraint> ad  = std::make_shared<Constraint>(ConstraintType::COINCIDENT, "ad");
+  std::shared_ptr<Constraint> cd  = std::make_shared<Constraint>(ConstraintType::COINCIDENT, "cd");
+  state->paramSketch->connect(pa, pd, ad);
+  state->paramSketch->connect(pc, pd, cd);
+
+  std::shared_ptr<GeometricElement> e = std::make_shared<GeometricElement>(GeometricType::LINE, "e");
+  std::shared_ptr<Sketch::Line> pe = std::make_shared<Sketch::Line>(e);
+  pd->k = -10.0;
+  pd->m = 5.0;
+  state->paramSketch->addLine(pe);
+  std::shared_ptr<Constraint> ce  = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ce");
+  ce->value = 3.0;
+  std::shared_ptr<Constraint> be  = std::make_shared<Constraint>(ConstraintType::COINCIDENT, "be");
+  state->paramSketch->connect(pc, pe, ce);
+  state->paramSketch->connect(pb, pe, be);
 }
 
 void Application::processEvent(enableSketchMode event) {

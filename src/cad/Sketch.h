@@ -121,9 +121,10 @@ public:
   float sgdStep();
   float totalError();
   void addPoint(std::shared_ptr<Point> p);
+  void addLine(std::shared_ptr<Line> l);
   void connect(
-    std::shared_ptr<Point> a,
-    std::shared_ptr<Point> b,
+    std::shared_ptr<SketchEntity> a,
+    std::shared_ptr<SketchEntity> b,
     std::shared_ptr<Constraint> c
   );
   void deleteEntity(std::shared_ptr<SketchEntity> a);
