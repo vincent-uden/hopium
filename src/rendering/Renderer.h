@@ -14,6 +14,13 @@
 #include <json.hpp>
 
 #include "../ApplicationState.h"
+#include "./ui/Icon.h"
+#include "./ui/ToolList.h"
+#include "./ui/Viewport.h"
+#include "./ui/Row.h"
+#include "./ui/STreeViewer.h"
+#include "./ui/SketchViewer.h"
+#include "./ui/DropDown.h"
 #include "Colorscheme.h"
 #include "ShaderStore.h"
 #include "Ui.h"

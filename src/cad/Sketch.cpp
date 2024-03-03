@@ -371,24 +371,8 @@ std::optional<std::shared_ptr<Realisation>> Sketch::solve() {
     for (size_t j = 0; j < 10000; ++j) {
       err = solutionOrder[i].second.sgdStep();
     }
-    // TODO: Recombination does not seem to work very well. Individual errors are small. Combined its really big
-    std::cout << "Final error: " << err << std::endl;
-    std::cout << "x,y" << std::endl;
-    for (const auto& p : solutionOrder[i].second.points) {
-      std::cout << p.pos.x << "," << p.pos.y << std::endl;
-    }
-    for (const auto& p : solutionOrder[0].second.points) {
-      std::cout << p.v->label << std::endl;
-    }
   }
 
-  std::cout << "x,y" << std::endl;
-  for (const auto& p : solutionOrder[0].second.points) {
-    std::cout << p.pos.x << "," << p.pos.y << std::endl;
-  }
-  for (const auto& p : solutionOrder[0].second.points) {
-    std::cout << p.v->label << std::endl;
-  }
   if (err < tolerance) {
     return std::make_shared<Realisation>(
       solutionOrder[0].second

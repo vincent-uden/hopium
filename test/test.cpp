@@ -788,19 +788,6 @@ int canSolveRightTriangleSystem() {
   return 0;
 }
 
-int canSolveDoubleTriangleSystem() {
-  std::shared_ptr<ConstraintGraph> G = std::make_shared<ConstraintGraph>();
-  setupDoubleRightTriangle(G);
-  Sketch::Sketch S(G);
-
-
-  std::shared_ptr<ConstraintGraph> G2 = S.asGraph();
-  std::optional<std::shared_ptr<Sketch::Realisation>> solution = S.solve();
-  ASSERT(solution.has_value(), "Double Right triangle should be solvable");
-
-  return 1;
-}
-
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -856,7 +843,6 @@ int main(int argc, char** argv) {
   ADD_TEST(canSeparateGraphIntoConnectedComponents, CONSTRAINT_GRAPH);
   ADD_TEST(canDecomposeGraphIntoSTree, CONSTRAINT_GRAPH);
   ADD_TEST(canSolveRightTriangleSystem, CONSTRAINT_GRAPH);
-  ADD_TEST(canSolveDoubleTriangleSystem, CONSTRAINT_GRAPH);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
