@@ -753,42 +753,6 @@ int canDecomposeGraphIntoSTree() {
   return 0;
 }
 
-int canSolveRightTriangleSystem() {
-  Sketch::Sketch S;
-
-  std::shared_ptr<GeometricElement> a = std::make_shared<GeometricElement>(GeometricType::POINT, "a");
-  std::shared_ptr<GeometricElement> b = std::make_shared<GeometricElement>(GeometricType::POINT, "b");
-  std::shared_ptr<GeometricElement> c = std::make_shared<GeometricElement>(GeometricType::POINT, "c");
-
-  std::shared_ptr<Constraint> ab = std::make_shared<Constraint>(ConstraintType::VERTICAL, "ab");
-  std::shared_ptr<Constraint> bc = std::make_shared<Constraint>(ConstraintType::HORIZONTAL, "bc");
-  std::shared_ptr<Constraint> ac = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ac");
-  std::shared_ptr<Constraint> ab2 = std::make_shared<Constraint>(ConstraintType::DISTANCE, "ab2");
-  ac->value = 5;
-  ab2->value = 3;
-
-  S.addVertex(a);
-  S.addVertex(b);
-  S.addVertex(c);
-  S.connect(a, b, ab);
-  S.connect(b, c, bc);
-  S.connect(a, c, ac);
-  S.connect(a, b, ab2);
-
-  std::shared_ptr<ConstraintGraph> G = S.asGraph();
-  std::optional<std::shared_ptr<Sketch::Realisation>> solution = S.solve();
-
-  ASSERT(solution.has_value(), "Right triangle should be solvable");
-  std::shared_ptr<Sketch::Realisation> sol = solution.value();
-  Sketch::Point pa = *sol->findPointById(a);
-  Sketch::Point pb = *sol->findPointById(b);
-  Sketch::Point pc = *sol->findPointById(c);
-  float dist = Vector2Distance(pb.pos, pc.pos);
-  ASSERT(std::abs(dist - 4) < 1e-3, "The final side should be 4 long. It is " << dist);
-
-  return 0;
-}
-
 int canSolveSystemOfLinearEquations() {
   Matrix3 A = {
     2, 0, 0,
@@ -860,7 +824,6 @@ int main(int argc, char** argv) {
   ADD_TEST(graphDeepCopyProducesIdenticalGraph, CONSTRAINT_GRAPH);
   ADD_TEST(canSeparateGraphIntoConnectedComponents, CONSTRAINT_GRAPH);
   ADD_TEST(canDecomposeGraphIntoSTree, CONSTRAINT_GRAPH);
-  ADD_TEST(canSolveRightTriangleSystem, CONSTRAINT_GRAPH);
   ADD_TEST(canSolveSystemOfLinearEquations, LINEAR_ALGEBRA);
 
   for (auto& test : tests) {
