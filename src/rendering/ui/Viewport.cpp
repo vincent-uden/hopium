@@ -28,6 +28,9 @@ void Viewport::draw() {
   DrawLine3D(g3, g0, ApplicationState::getInstance()->holdingRotate ? GREEN : RED);
 
   // DrawLine3D(lastRay.position, Vector3Add(lastRay.position, Vector3Scale(lastRay.direction, lastDist)), BLUE);
+  DrawLine3D(origin, xAxis, RED);
+  DrawLine3D(origin, yAxis, GREEN);
+  DrawLine3D(origin, zAxis, BLUE);
 
   if (scene) {
     for (size_t i = 0; i < scene->nBodies(); ++i) {
@@ -79,12 +82,15 @@ void Viewport::receiveMousePos(Vector2 mousePos) {
   RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
   lastDist = groundHitInfo.distance;
   if (groundHitInfo.hit) {
+    /*
     std::optional<size_t> maybeId = ApplicationState::getInstance()
       ->occtScene->idContainingPoint(
         groundHitInfo.point.x, groundHitInfo.point.y, groundHitInfo.point.z
       );
     if (maybeId.has_value()) {
-      hoveredId = maybeId.value();
+    */
+    if (false) {
+      //hoveredId = maybeId.value();
     } else  {
       hoveredId = -1;
     }
@@ -114,7 +120,7 @@ void Viewport::receiveMouseDown(Vector2 mousePos) {
   lastDist = groundHitInfo.distance;
 
   if ((groundHitInfo.hit && groundHitInfo.distance < collision.distance)) {
-    EventQueue::getInstance()->postEvent(groundPlaneHit {
+    EventQueue::getInstance()->postEvent(sketchPlaneHit {
         groundHitInfo.point.x,
         groundHitInfo.point.y,
         groundHitInfo.point.z,

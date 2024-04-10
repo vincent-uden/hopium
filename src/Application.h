@@ -44,7 +44,7 @@ private:
   void processEvent(splitPaneHorizontally event);
   void processEvent(splitPaneVertically event);
   void processEvent(collapseBoundary event);
-  void processEvent(groundPlaneHit event);
+  void processEvent(sketchPlaneHit event);
   void processEvent(dumpShapes event);
   void processEvent(increaseZoom event);
   void processEvent(decreaseZoom event);

@@ -21,7 +21,7 @@ struct splitPaneHorizontally { Vector2 mousePos; };
 struct splitPaneVertically { Vector2 mousePos; };
 struct collapseBoundary { Vector2 mousePos; };
 // Is subject to change in the future. Think about how hit's should be handled.
-struct groundPlaneHit { double x, y, z; Ray ray; };
+struct sketchPlaneHit { double x, y, z; Ray ray; };
 struct dumpShapes {};
 struct increaseZoom {};
 struct decreaseZoom {};
@@ -41,7 +41,7 @@ using AppEvent = std::variant<
   splitPaneVertically,
   collapseBoundary,
   stopRotate,
-  groundPlaneHit,
+  sketchPlaneHit,
   dumpShapes,
   increaseZoom,
   decreaseZoom,
@@ -61,7 +61,7 @@ const AppEvent APP_EVENTS[] = {
   splitPaneVertically {},
   collapseBoundary {},
   stopRotate {},
-  groundPlaneHit {},
+  sketchPlaneHit {},
   dumpShapes {},
   increaseZoom {},
   decreaseZoom {},

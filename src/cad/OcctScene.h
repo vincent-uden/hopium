@@ -22,45 +22,56 @@
 #include <TopoDS_Wire.hxx>
 #include <gp_Pnt.hxx>
 
+#include "Sketch.h"
 #include "raylib.h"
 
 #include "../rendering/Scene.h"
 
 
-class OcctScene {
-public:
-  OcctScene();
-  ~OcctScene();
+struct SketchData {
+  std::shared_ptr<Sketch::NewSketch> sketch;
+  Vector3 planeNormal;
+  Vector3 planeX;
+  Vector3 planeY;
+  int id;
+};
 
-  void createPoint(double x, double y, double z);
-  void createLine(gp_Pnt& p1, gp_Pnt& p2, double snapThreshold);
-  void extrude(size_t id, double extent);
-  void dumpShapes();
+struct Matrix3 {
+  float x11;
+  float x12;
+  float x13;
+  float x21;
+  float x22;
+  float x23;
+  float x31;
+  float x32;
+  float x33;
+};
+
+float determinant(const Matrix3& mat);
+Vector3 solve(const Matrix3& A, const Vector3& b);
+
+class ParametricScene {
+public:
+  ParametricScene();
+  ~ParametricScene();
 
   // This API is mega-subject to change.
   std::vector<std::shared_ptr<RasterVertex>> rasterizePoints();
   std::vector<std::shared_ptr<RasterShape>> rasterizeShapes();
-  std::pair<gp_Pnt, gp_Pnt> getEdgePoints(const TopoDS_Edge& edge);
-  std::optional<size_t> idContainingPoint(double x, double y, double z);
+
+  void createPoint(int sketchId, Vector3 pos);
+  void dumpShapes();
 
 private:
-  std::vector<gp_Pnt> points;
-  std::vector<size_t> ids;
+  SketchData* findSketch(int id);
 
-  std::vector<std::shared_ptr<RasterShape>> createRasterShape(const size_t& id, const TopoDS_Edge& shape);
-  std::vector<std::shared_ptr<RasterShape>> createRasterShape(const size_t& id, const TopoDS_Wire& shape);
-  std::vector<std::shared_ptr<RasterShape>> createRasterShape(const size_t& id, const TopoDS_Face& shape);
-  std::vector<std::shared_ptr<RasterShape>> createRasterShape(const size_t& id, const TopoDS_Solid& shape);
-  std::vector<std::shared_ptr<RasterShape>> createRasterShape(const size_t& id, const TopoDS_Shape& shape);
+  Vector2 toSketchSpace(int sketchId, Vector3 worldPos);
+  Vector3 toWorldSpace(Vector3 normal, Vector2 sketchPos);
 
-  std::string shapeType(const TopAbs_ShapeEnum& shapeType);
-
-  bool isWireCyclic(const TopoDS_Wire& wire);
-
-  size_t nextId = 0;
-  // Should probably have a vector of TopoDS_Shape objects
-
-  std::vector<std::pair<size_t, TopoDS_Shape>> shapes;
+  int nextSketchId = 0;
+  int nextGeometryId = 0;
+  std::vector<SketchData> sketches;
 };
 
 #endif

@@ -58,8 +58,8 @@ json EventQueue::serializeHistory() {
   for (const AppEvent& e: history) {
     json data;
     data["type"] = e.index();
-    if (std::holds_alternative<groundPlaneHit>(e)) {
-      groundPlaneHit hit = std::get<groundPlaneHit>(e);
+    if (std::holds_alternative<sketchPlaneHit>(e)) {
+      sketchPlaneHit hit = std::get<sketchPlaneHit>(e);
       data["data"]["x"] = hit.x;
       data["data"]["y"] = hit.y; data["data"]["z"] = hit.z;
       data["data"]["ray"]["position"]["x"] = hit.ray.position.x;
@@ -85,8 +85,8 @@ void EventQueue::deserializeHistory(json state) {
   for (const json& e: state["history"]) {
     size_t index = e["type"];
     AppEvent event = APP_EVENTS[index];
-    if (std::holds_alternative<groundPlaneHit>(event)) {
-      groundPlaneHit hit = std::get<groundPlaneHit>(event);
+    if (std::holds_alternative<sketchPlaneHit>(event)) {
+      sketchPlaneHit hit = std::get<sketchPlaneHit>(event);
       hit.x = e["data"]["x"];
       hit.y = e["data"]["y"];
       hit.z = e["data"]["z"];

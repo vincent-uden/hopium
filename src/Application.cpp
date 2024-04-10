@@ -303,9 +303,16 @@ void Application::processEvent(exitProgram event) {
   shouldExit = true;
 }
 
-void Application::processEvent(groundPlaneHit event) {
+void Application::processEvent(sketchPlaneHit event) {
   if (state->modeStack.isActive(state->point)) {
-    state->occtScene->createPoint(event.x, event.y, event.z);
+    state->occtScene->createPoint(
+      state->editingSketchId,
+      Vector3 {
+        static_cast<float>(event.x),
+        static_cast<float>(event.y),
+        static_cast<float>(event.z)
+      }
+    );
     state->scene->setPoints(state->occtScene->rasterizePoints());
   } else if (state->modeStack.isActive(state->line)) {
     std::optional<std::shared_ptr<RasterVertex>> p = state->scene->queryVertex(event.ray, state->selectionThreshold);
@@ -318,12 +325,13 @@ void Application::processEvent(groundPlaneHit event) {
       state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
     } else {
       state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
-      state->occtScene->createLine(state->activePoints[0], state->activePoints[1], 1e-5);
+      //state->occtScene->createLine(state->activePoints[0], state->activePoints[1], 1e-5);
       state->scene->setShapes(state->occtScene->rasterizeShapes());
       state->activePoints.clear();
       EventQueue::getInstance()->postEvent(toggleLineMode {});
     }
   } else if (state->modeStack.isActive(state->extrude)) {
+    /*
     std::optional<size_t> maybeId = ApplicationState::getInstance()
       ->occtScene->idContainingPoint(event.x, event.y, event.z);
 
@@ -331,6 +339,7 @@ void Application::processEvent(groundPlaneHit event) {
       state->occtScene->extrude(maybeId.value(), 0.5);
       state->scene->setShapes(state->occtScene->rasterizeShapes());
     }
+    */
   }
 }
 

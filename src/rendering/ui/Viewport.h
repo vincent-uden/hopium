@@ -46,6 +46,12 @@ private:
   Vector3 g2 = {  20.0f, 0.0f,  20.0f };
   Vector3 g3 = {  20.0f, 0.0f, -20.0f };
 
+  // Coordinate Axes
+  Vector3 origin = { 0.0f, 0.0f, 0.0f };
+  Vector3 xAxis = { 1.0f, 0.0f, 0.0f };
+  Vector3 yAxis = { 0.0f, 1.0f, 0.0f };
+  Vector3 zAxis = { 0.0f, 0.0f, 1.0f };
+
   Vector2 lastMousePos = { 0, 0 };
   double cameraSensetivity = 0.01;
   double cameraRadius = 34.64;

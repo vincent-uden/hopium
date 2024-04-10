@@ -21,7 +21,7 @@ public:
   std::shared_ptr<Sketch::NewSketch> paramSketch = std::make_shared<Sketch::NewSketch>();
   std::shared_ptr<ShaderStore> shaderStore = std::make_shared<ShaderStore>();
   std::shared_ptr<Scene> scene = std::shared_ptr<Scene>(new Scene(shaderStore));;
-  std::shared_ptr<OcctScene> occtScene = std::shared_ptr<OcctScene>(new OcctScene());;
+  std::shared_ptr<ParametricScene> occtScene = std::shared_ptr<ParametricScene>(new ParametricScene());;
 
   bool holdingRotate = false;
   bool sketchModeActive = false;
@@ -42,6 +42,9 @@ public:
   double zoom = 1.0;
 
   std::chrono::time_point<std::chrono::system_clock> currentTime;
+
+  // TODO: Start at -1, only active once sketch is edited
+  int editingSketchId = 0;
 
 private:
   ApplicationState();

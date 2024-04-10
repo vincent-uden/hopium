@@ -32,6 +32,7 @@ enum TestGroup {
   GEOMETRY,
   HISTORY,
   CONSTRAINT_GRAPH,
+  LINEAR_ALGEBRA,
 };
 
 typedef struct {
@@ -472,7 +473,7 @@ int modeStackManipulatesCorrectly() {
 }
 
 int wireFixProducesWorkingWire() {
-  OcctScene scene;
+  ParametricScene scene;
 
   gp_Pnt p1(0.0, 0.0, 0.0);
   gp_Pnt p2(0.1, 0.0, 0.0);
@@ -527,9 +528,9 @@ int serializeAndDeserializeEventHistoryProducesUnity() {
 
   queue.postEvent(enableSketchMode {});
   queue.postEvent(togglePointMode {});
-  queue.postEvent(groundPlaneHit { 1.0, 0.0, 0.0, Ray { Vector3 { 1.0, 0.0, 0.0 }, Vector3 { 2.0, 0.0, 0.0 } }});
-  queue.postEvent(groundPlaneHit { 0.0, 2.0, 0.0, Ray { Vector3 { -1.0, 0.0, 0.0 }, Vector3 { 1.0, 0.0, 0.0 } }});
-  queue.postEvent(groundPlaneHit { 0.0, 0.0, 3.0, Ray { Vector3 { 2.0, 0.0, 0.0 }, Vector3 { -1.0, 0.0, 0.0 } }});
+  queue.postEvent(sketchPlaneHit { 1.0, 0.0, 0.0, Ray { Vector3 { 1.0, 0.0, 0.0 }, Vector3 { 2.0, 0.0, 0.0 } }});
+  queue.postEvent(sketchPlaneHit { 0.0, 2.0, 0.0, Ray { Vector3 { -1.0, 0.0, 0.0 }, Vector3 { 1.0, 0.0, 0.0 } }});
+  queue.postEvent(sketchPlaneHit { 0.0, 0.0, 3.0, Ray { Vector3 { 2.0, 0.0, 0.0 }, Vector3 { -1.0, 0.0, 0.0 } }});
 
   std::vector<AppEvent> beforeSerialization = queue.getHistory();
   size_t histLen = beforeSerialization.size();
@@ -545,9 +546,9 @@ int serializeAndDeserializeEventHistoryProducesUnity() {
   for (size_t i = 0; i < beforeSerialization.size(); i++) {
     ASSERT(beforeSerialization[i].index() == afterSerialization[i].index(), "The events should be the same");
 
-    if (std::holds_alternative<groundPlaneHit>(beforeSerialization[i])) {
-      groundPlaneHit hit1 = std::get<groundPlaneHit>(beforeSerialization[i]);
-      groundPlaneHit hit2 = std::get<groundPlaneHit>(afterSerialization[i]);
+    if (std::holds_alternative<sketchPlaneHit>(beforeSerialization[i])) {
+      sketchPlaneHit hit1 = std::get<sketchPlaneHit>(beforeSerialization[i]);
+      sketchPlaneHit hit2 = std::get<sketchPlaneHit>(afterSerialization[i]);
 
       ASSERT(
         hit1.x == hit2.x && hit1.y == hit2.y && hit1.z == hit2.z &&
@@ -788,6 +789,21 @@ int canSolveRightTriangleSystem() {
   return 0;
 }
 
+int canSolveSystemOfLinearEquations() {
+  Matrix3 A = {
+    2, 0, 0,
+    0, 2, 0,
+    0, 0, 2
+  };
+  Vector3 b = {
+    -1, 1, 1
+  };
+  Vector3 x = solve(A, b);
+  ASSERT(Vector3Equals(x, {-0.5, 0.5, 0.5}), "x_hat and x should be equal " << x.x << " " << x.y << " " << x.z);
+
+  return 0;
+}
+
 typedef struct {
   std::optional<TestGroup> group;
 } CliArgs ;
@@ -803,6 +819,8 @@ std::optional<TestGroup> group(std::string name) {
     return std::optional(TestGroup::HISTORY);
   } else if (name == "CONSTRAINT_GRAPH") {
     return std::optional(TestGroup::CONSTRAINT_GRAPH);
+  } else if (name == "LINEAR_ALGEBRA") {
+    return std::optional(TestGroup::LINEAR_ALGEBRA);
   }
 
   return std::nullopt;
@@ -843,6 +861,7 @@ int main(int argc, char** argv) {
   ADD_TEST(canSeparateGraphIntoConnectedComponents, CONSTRAINT_GRAPH);
   ADD_TEST(canDecomposeGraphIntoSTree, CONSTRAINT_GRAPH);
   ADD_TEST(canSolveRightTriangleSystem, CONSTRAINT_GRAPH);
+  ADD_TEST(canSolveSystemOfLinearEquations, LINEAR_ALGEBRA);
 
   for (auto& test : tests) {
     test.name = prettifyFunctionName(test.name);
