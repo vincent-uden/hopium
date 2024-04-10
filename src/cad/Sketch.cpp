@@ -182,7 +182,7 @@ NewSketch::~NewSketch() {
 }
 
 std::shared_ptr<SketchEntity> NewSketch::findEntityById(std::shared_ptr<GeometricElement> v) {
-  for (const auto& p: points) {
+  for (const auto& p: entities) {
     if (p->v->id == v->id) {
       return p;
     }
@@ -191,16 +191,40 @@ std::shared_ptr<SketchEntity> NewSketch::findEntityById(std::shared_ptr<Geometri
   return nullptr;
 }
 
+std::shared_ptr<SketchEntity> NewSketch::findEntityByPosition(Vector2 pos, float threshold) {
+  Point fakePoint(nullptr);
+  fakePoint.pos = pos;
+
+  Constraint fakeC(ConstraintType::DISTANCE);
+  fakeC.value = 0.0;
+
+  std::shared_ptr<SketchEntity> closest = nullptr;
+  float closestDist = INFINITY;
+
+  for (const auto& p: entities) {
+    float dist = error(&fakePoint, p.get(), &fakeC);
+    if (dist < closestDist) {
+      closest = p;
+      closestDist = dist;
+    }
+  }
+  if (closestDist > threshold) {
+    closest = nullptr;
+  }
+
+  return closest;
+}
+
 float NewSketch::sgdStep() {
   std::vector<Vector2> step;
   float err = 0.0f;
-  for (const auto& p: points) {
+  for (const auto& p: entities) {
     step.push_back({0.0f, 0.0f});
   }
 
   int total_constraints = 0;
   int i = 0;
-  for (const auto& p1: points) {
+  for (const auto& p1: entities) {
     for (const auto& [edge, other]: p1->v->edges) {
         std::shared_ptr<SketchEntity> p2 = findEntityById(other);
           if (p1->v->isConnected(other) && std::rand() % 2 == 0 && !p1->fixed) {
@@ -217,7 +241,7 @@ float NewSketch::sgdStep() {
   err /= total_constraints;
 
   i = 0;
-  for (auto& p: points) {
+  for (auto& p: entities) {
     p->update(Vector2Scale(step[i], stepSize));
     ++i;
   }
@@ -227,7 +251,7 @@ float NewSketch::sgdStep() {
 
 float NewSketch::totalError() {
   float total = 0.0f;
-  for (const auto& p: points) {
+  for (const auto& p: entities) {
     for (const auto& [edge, other] : p->v->edges) {
       const auto p2 = findEntityById(other);
       total += error(p.get(), p2.get(), edge.get());
@@ -238,11 +262,11 @@ float NewSketch::totalError() {
 }
 
 void NewSketch::addPoint(std::shared_ptr<Point> p) {
-  points.push_back(p);
+  entities.push_back(p);
 }
 
 void NewSketch::addLine(std::shared_ptr<Line> l) {
-  points.push_back(l);
+  entities.push_back(l);
 }
 
 void NewSketch::connect(
@@ -256,7 +280,7 @@ void NewSketch::connect(
 }
 
 void NewSketch::deleteEntity(std::shared_ptr<SketchEntity> a) {
-  std::erase_if(points, [a](std::shared_ptr<SketchEntity> b) { return a->v->id == b->v->id; });
+  std::erase_if(entities, [a](std::shared_ptr<SketchEntity> b) { return a->v->id == b->v->id; });
   for (const auto& [edge, other] : a->v->edges) {
     other->deleteEdge(a->v);
     std::erase_if(edges, [edge](std::shared_ptr<Constraint> c) { return c == edge; });

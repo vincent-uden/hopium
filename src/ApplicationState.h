@@ -16,6 +16,8 @@ public:
   static ApplicationState* getInstance();
   ~ApplicationState();
 
+  bool active(std::shared_ptr<Sketch::SketchEntity> a);
+
   std::shared_ptr<ConstraintGraph> graph = std::shared_ptr<ConstraintGraph>(new ConstraintGraph());;
   std::shared_ptr<STree> stree = std::shared_ptr<STree>(new STree());
   std::shared_ptr<Sketch::NewSketch> paramSketch = std::make_shared<Sketch::NewSketch>();
@@ -37,6 +39,7 @@ public:
   // Name subject to change. Active doesn't really descibe the usage well. This
   // is for actions requiring multiple points such as drawing a line or arc.
   std::vector<gp_Pnt> activePoints;
+  std::vector<std::shared_ptr<Sketch::SketchEntity>> activeEntities;
 
   double selectionThreshold = 0.6;
   double zoom = 1.0;

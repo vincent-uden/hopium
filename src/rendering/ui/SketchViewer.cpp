@@ -83,7 +83,7 @@ void SketchViewer::draw() {
   DrawLineV({0.0, panOffset.y}, {areaScreenRect->width, panOffset.y}, {255, 255, 255, 100});
   DrawLineV({panOffset.x, 0}, {panOffset.x, areaScreenRect->height}, {255, 255, 255, 100});
 
-  for (const std::shared_ptr<Sketch::SketchEntity>& e: sketch->points) {
+  for (const std::shared_ptr<Sketch::SketchEntity>& e: sketch->entities) {
     drawEntity(e);
   }
 
@@ -105,6 +105,8 @@ void SketchViewer::receiveMousePos(Vector2 mousePos) {
 }
 
 void SketchViewer::receiveMouseDown(Vector2 mousePos) {
+  mousePos = toSketchSpace(mousePos);
+  EventQueue::getInstance()->postEvent(sketchClick { mousePos.x, mousePos.y, zoom * scale});
 }
 
 void SketchViewer::receiveMouseUp(Vector2 mousePos) {
@@ -149,7 +151,7 @@ Vector2 SketchViewer::toSketchSpace(Vector2 pos) {
 void SketchViewer::drawConstraints() {
   std::vector<int> drawnIds;
 
-  for (const auto& p1: sketch->points) {
+  for (const auto& p1: sketch->entities) {
     for (const auto& [edge, other]: p1->v->edges) {
       bool foundId = false;
       for (int& id: drawnIds) {
@@ -168,12 +170,16 @@ void SketchViewer::drawConstraints() {
 }
 
 void SketchViewer::drawEntity(std::shared_ptr<Sketch::Point> p) {
-    Vector2 v = Vector2Add(Vector2Scale(p->pos, scale * zoom), panOffset);
-    DrawCircleV(
-      toScreenSpace(p->pos),
-      4.0,
-      GREEN
-    );
+  Color c = GREEN;
+  if (ApplicationState::getInstance()->active(p)) {
+    c = YELLOW;
+  }
+  Vector2 v = Vector2Add(Vector2Scale(p->pos, scale * zoom), panOffset);
+  DrawCircleV(
+    toScreenSpace(p->pos),
+    4.0,
+    c
+  );
 }
 
 void SketchViewer::drawEntity(std::shared_ptr<Sketch::Line> line) {
@@ -184,7 +190,11 @@ void SketchViewer::drawEntity(std::shared_ptr<Sketch::Line> line) {
   end.y = line->k * end.x + line->m;
   start = toScreenSpace(start);
   end = toScreenSpace(end);
-  DrawLineV(start, end, RED);
+  Color c = RED;
+  if (ApplicationState::getInstance()->active(line)) {
+    c = YELLOW;
+  }
+  DrawLineV(start, end, c);
 }
 
 void SketchViewer::drawEntity(std::shared_ptr<Sketch::SketchEntity> entity) {

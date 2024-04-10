@@ -343,6 +343,63 @@ void Application::processEvent(sketchPlaneHit event) {
   }
 }
 
+void Application::processEvent(sketchClick event) {
+  Vector2 mousePos(event.x, event.y);
+  if (state->modeStack.isActive(state->point)) {
+    std::shared_ptr<GeometricElement> e
+      = std::make_shared<GeometricElement>(GeometricType::POINT, "");
+    std::shared_ptr<Sketch::Point> p = std::make_shared<Sketch::Point>(e);
+    p->pos = mousePos;
+    state->paramSketch->addPoint(p);
+  }
+
+  if (state->modeStack.isInnerMostMode(state->sketch)) {
+    std::shared_ptr<Sketch::SketchEntity> clicked =
+      state->paramSketch->findEntityByPosition(mousePos, std::pow(20.0 / event.zoomScale, 2.0));
+    if (clicked) {
+      state->activeEntities.push_back(clicked);
+    } else {
+      state->activeEntities.clear();
+    }
+  }
+}
+
+void Application::processEvent(sketchConstrain event) {
+  std::shared_ptr<Constraint> c = std::make_shared<Constraint>(event.type);
+  switch (event.type) {
+    case ConstraintType::ANGLE:
+      break;
+    case ConstraintType::COINCIDENT:
+      break;
+    case ConstraintType::COLINEAR:
+      break;
+    case ConstraintType::DISTANCE:
+      break;
+    case ConstraintType::EQUAL:
+      break;
+    case ConstraintType::HORIZONTAL:
+      if (state->activeEntities.size() == 2) {
+        state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
+        state->activeEntities.clear();
+      }
+      break;
+    case ConstraintType::MIDPOINT:
+      break;
+    case ConstraintType::PARALLEL:
+      break;
+    case ConstraintType::PERPENDICULAR:
+      break;
+    case ConstraintType::VERTICAL:
+      if (state->activeEntities.size() == 2) {
+        state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
+        state->activeEntities.clear();
+      }
+      break;
+    case ConstraintType::VIRTUAL:
+      break;
+  }
+}
+
 void Application::processEvent(increaseZoom event) {
   state->zoom *= 1.25;
 }

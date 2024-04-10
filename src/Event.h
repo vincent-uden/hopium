@@ -4,6 +4,8 @@
 #include "raylib.h"
 #include "json.hpp"
 
+#include "cad/ConstraintGraph.h"
+
 #include <variant>
 #include <queue>
 #include <iostream>
@@ -22,6 +24,9 @@ struct splitPaneVertically { Vector2 mousePos; };
 struct collapseBoundary { Vector2 mousePos; };
 // Is subject to change in the future. Think about how hit's should be handled.
 struct sketchPlaneHit { double x, y, z; Ray ray; };
+// Sketch view specific events
+struct sketchClick { double x, y, zoomScale; };
+struct sketchConstrain { ConstraintType type; };
 struct dumpShapes {};
 struct increaseZoom {};
 struct decreaseZoom {};
@@ -42,6 +47,8 @@ using AppEvent = std::variant<
   collapseBoundary,
   stopRotate,
   sketchPlaneHit,
+  sketchClick,
+  sketchConstrain,
   dumpShapes,
   increaseZoom,
   decreaseZoom,
@@ -62,6 +69,8 @@ const AppEvent APP_EVENTS[] = {
   collapseBoundary {},
   stopRotate {},
   sketchPlaneHit {},
+  sketchClick {},
+  sketchConstrain {},
   dumpShapes {},
   increaseZoom {},
   decreaseZoom {},
@@ -77,6 +86,8 @@ const AppEvent NON_SERIALIZABLE[] = {
   dumpShapes {},
   increaseZoom {},
   decreaseZoom {},
+  sketchClick {},
+  sketchConstrain {},
   exitProgram {}
 };
 

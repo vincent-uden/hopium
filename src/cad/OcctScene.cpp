@@ -56,7 +56,7 @@ std::vector<std::shared_ptr<RasterVertex>> ParametricScene::rasterizePoints() {
   std::vector<std::shared_ptr<RasterVertex>> out;
 
   for (auto& sketchData: sketches) {
-    for (auto& p: sketchData.sketch->points) {
+    for (auto& p: sketchData.sketch->entities) {
       std::shared_ptr<Sketch::Point> point = std::dynamic_pointer_cast<Sketch::Point>(p);
       out.push_back(std::make_shared<RasterVertex>(point->pos.x, point->pos.y, 0));
     }
@@ -89,7 +89,7 @@ void ParametricScene::createPoint(int sketchId, Vector3 pos) {
 void ParametricScene::dumpShapes() {
   std::cout << "- Parametric Shapes -" << std::endl;
   for (auto& sketchData: sketches) {
-    for (auto& p: sketchData.sketch->points) {
+    for (auto& p: sketchData.sketch->entities) {
       std::cout << "Point: " << p->v->label << std::endl;
     }
   }

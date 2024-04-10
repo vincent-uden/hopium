@@ -15,3 +15,8 @@ ApplicationState::ApplicationState() {
 
 ApplicationState::~ApplicationState() {
 }
+
+
+bool ApplicationState::active(std::shared_ptr<Sketch::SketchEntity> a) {
+  return std::find(activeEntities.begin(), activeEntities.end(), a) != activeEntities.end();
+}

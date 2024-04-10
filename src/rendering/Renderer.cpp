@@ -489,9 +489,15 @@ void Area::buildConstraintSelection() {
   std::shared_ptr<Ui::Icon> vertical = std::make_shared<Ui::Icon>();
   vertical->setImgPath("../assets/icons/Vertical.png");
   vertical->setHoverTooltip("Vertical");
+  vertical->setOnClick([](Ui::Ui* p){
+      EventQueue::getInstance()->postEvent(sketchConstrain {ConstraintType::VERTICAL});
+  });
   std::shared_ptr<Ui::Icon> horizontal = std::make_shared<Ui::Icon>();
   horizontal->setImgPath("../assets/icons/Horizontal.png");
   horizontal->setHoverTooltip("Horizontal");
+  horizontal->setOnClick([](Ui::Ui* p){
+      EventQueue::getInstance()->postEvent(sketchConstrain {ConstraintType::HORIZONTAL});
+  });
 
   std::shared_ptr<Ui::Row> constraintRow = std::make_shared<Ui::Row>();
   constraintRow->addChild(coincident);

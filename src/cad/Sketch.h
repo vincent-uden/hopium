@@ -67,6 +67,7 @@ public:
   ~NewSketch();
 
   std::shared_ptr<SketchEntity> findEntityById(std::shared_ptr<GeometricElement> v);
+  std::shared_ptr<SketchEntity> findEntityByPosition(Vector2 pos, float threshold);
   float sgdStep();
   float totalError();
   void addPoint(std::shared_ptr<Point> p);
@@ -78,7 +79,7 @@ public:
   );
   void deleteEntity(std::shared_ptr<SketchEntity> a);
 
-  std::vector<std::shared_ptr<SketchEntity>> points;
+  std::vector<std::shared_ptr<SketchEntity>> entities;
 private:
   std::vector<std::shared_ptr<Constraint>> edges;
 
