@@ -14,6 +14,7 @@
 #include "modes/LineMode.h"
 #include "modes/PointMode.h"
 #include "modes/SketchMode.h"
+#include "modes/TLineMode.h"
 #include "rendering/Renderer.h"
 #include "rendering/Scene.h"
 
@@ -38,6 +39,7 @@ private:
   void processEvent(popMode event);
   void processEvent(togglePointMode event);
   void processEvent(toggleLineMode event);
+  void processEvent(toggleTLineMode event);
   void processEvent(toggleExtrudeMode event);
   void processEvent(startRotate event);
   void processEvent(stopRotate event);

@@ -16,6 +16,7 @@ struct toggleSketchMode {};
 struct popMode {};
 struct togglePointMode {};
 struct toggleLineMode {};
+struct toggleTLineMode {};
 struct toggleExtrudeMode {};
 struct startRotate {};
 struct stopRotate {};
@@ -40,6 +41,7 @@ using AppEvent = std::variant<
   popMode,
   togglePointMode,
   toggleLineMode,
+  toggleTLineMode,
   toggleExtrudeMode,
   startRotate,
   splitPaneHorizontally,
@@ -62,6 +64,7 @@ const AppEvent APP_EVENTS[] = {
   popMode {},
   togglePointMode {},
   toggleLineMode {},
+  toggleTLineMode {},
   toggleExtrudeMode {},
   startRotate {},
   splitPaneHorizontally {},

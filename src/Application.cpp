@@ -41,7 +41,6 @@ Application::Application() {
 
   createBottle();
   buildGraph2();
-  buildSketch();
   std::srand(1337);
 
   int count = GetMonitorCount();
@@ -60,6 +59,7 @@ Application::Application() {
   state->sketch = std::shared_ptr<Mode>(new SketchMode());
   state->point = std::shared_ptr<Mode>(new PointMode());
   state->line = std::shared_ptr<Mode>(new LineMode());
+  state->tline = std::shared_ptr<Mode>(new TLineMode());
   state->extrude = std::shared_ptr<Mode>(new ExtrudeMode());
 
 
@@ -264,6 +264,16 @@ void Application::processEvent(toggleLineMode event) {
   }
 }
 
+void Application::processEvent(toggleTLineMode event) {
+  if (state->modeStack.isActive(state->tline)) {
+    state->modeStack.exit(state->tline);
+  } else {
+    if (state->modeStack.isInnerMostMode(state->sketch)) {
+      state->modeStack.push(state->tline);
+    }
+  }
+}
+
 void Application::processEvent(toggleExtrudeMode event) {
   if (state->modeStack.isActive(state->extrude)) {
     state->modeStack.exit(state->extrude);
@@ -345,17 +355,66 @@ void Application::processEvent(sketchPlaneHit event) {
 
 void Application::processEvent(sketchClick event) {
   Vector2 mousePos(event.x, event.y);
+  std::shared_ptr<Sketch::SketchEntity> clicked =
+    state->paramSketch->findEntityByPosition(mousePos, std::pow(20.0 / event.zoomScale, 2.0));
+
+  // TODO: Move this out somehow
+  //       Strategy pattern?
+  //       Are the modes a strategy pattern?
   if (state->modeStack.isActive(state->point)) {
     std::shared_ptr<GeometricElement> e
       = std::make_shared<GeometricElement>(GeometricType::POINT, "");
     std::shared_ptr<Sketch::Point> p = std::make_shared<Sketch::Point>(e);
     p->pos = mousePos;
     state->paramSketch->addPoint(p);
+  } else if (state->modeStack.isActive(state->line)) {
+    state->activeCoordinates.push_back(mousePos);
+    if (state->activeCoordinates.size() == 2) {
+      std::shared_ptr<GeometricElement> e =
+        std::make_shared<GeometricElement>(GeometricType::LINE, "");
+      std::shared_ptr<Sketch::Line> l = std::make_shared<Sketch::Line>(e);
+
+      Vector2 c0 = state->activeCoordinates[0];
+      Vector2 c1 = state->activeCoordinates[1];
+      l->k = (c1.y-c0.y)/(c1.x-c0.x);
+      l->m = -c0.x * l->k + c0.y;
+      state->paramSketch->addLine(l);
+      state->activeCoordinates.clear();
+      EventQueue::getInstance()->postEvent(popMode {});
+    }
+  } else if (state->modeStack.isActive(state->tline)) {
+    state->activeCoordinates.push_back(mousePos);
+    if (state->activeCoordinates.size() == 2) {
+      std::shared_ptr<GeometricElement> eStart
+        = std::make_shared<GeometricElement>(GeometricType::POINT, "");
+      std::shared_ptr<GeometricElement> eEnd
+        = std::make_shared<GeometricElement>(GeometricType::POINT, "");
+      std::shared_ptr<GeometricElement> eLine
+        = std::make_shared<GeometricElement>(GeometricType::LINE, "");
+      std::shared_ptr<Sketch::Point> start = std::make_shared<Sketch::Point>(eStart);
+      std::shared_ptr<Sketch::Point> end = std::make_shared<Sketch::Point>(eEnd);
+      std::shared_ptr<Sketch::Line> line = std::make_shared<Sketch::Line>(eLine);
+      Vector2 c0 = state->activeCoordinates[0];
+      Vector2 c1 = state->activeCoordinates[1];
+      start->pos = c0;
+      start->draw = false;
+      end->pos = c1;
+      end->draw = false;
+      line->k = (c1.y-c0.y)/(c1.x-c0.x);
+      line->m = -c0.x * line->k + c0.y;
+      line->draw = false;
+      std::shared_ptr<Sketch::TrimmedLine> tLine =
+        std::make_shared<Sketch::TrimmedLine>(start, end, line);
+      state->paramSketch->addPoint(start);
+      state->paramSketch->addPoint(end);
+      state->paramSketch->addLine(line);
+      state->paramSketch->addTrimmedLine(tLine);
+      state->activeCoordinates.clear();
+      EventQueue::getInstance()->postEvent(popMode {});
+    }
   }
 
   if (state->modeStack.isInnerMostMode(state->sketch)) {
-    std::shared_ptr<Sketch::SketchEntity> clicked =
-      state->paramSketch->findEntityByPosition(mousePos, std::pow(20.0 / event.zoomScale, 2.0));
     if (clicked) {
       state->activeEntities.push_back(clicked);
     } else {
@@ -370,6 +429,11 @@ void Application::processEvent(sketchConstrain event) {
     case ConstraintType::ANGLE:
       break;
     case ConstraintType::COINCIDENT:
+      if (state->activeEntities.size() == 2) {
+        state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
+        state->paramSketch->solve();
+        state->activeEntities.clear();
+      }
       break;
     case ConstraintType::COLINEAR:
       break;
@@ -380,6 +444,7 @@ void Application::processEvent(sketchConstrain event) {
     case ConstraintType::HORIZONTAL:
       if (state->activeEntities.size() == 2) {
         state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
+        state->paramSketch->solve();
         state->activeEntities.clear();
       }
       break;
@@ -392,6 +457,7 @@ void Application::processEvent(sketchConstrain event) {
     case ConstraintType::VERTICAL:
       if (state->activeEntities.size() == 2) {
         state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
+        state->paramSketch->solve();
         state->activeEntities.clear();
       }
       break;

@@ -1,4 +1,5 @@
 #include "SketchViewer.h"
+#include "raylib.h"
 
 namespace Ui {
 
@@ -85,6 +86,9 @@ void SketchViewer::draw() {
 
   for (const std::shared_ptr<Sketch::SketchEntity>& e: sketch->entities) {
     drawEntity(e);
+  }
+  for (const std::shared_ptr<Sketch::GuidedEntity>& e: sketch->guidedEntities) {
+    drawGuidedEntity(e);
   }
 
   drawConstraints();
@@ -174,7 +178,7 @@ void SketchViewer::drawEntity(std::shared_ptr<Sketch::Point> p) {
   if (ApplicationState::getInstance()->active(p)) {
     c = YELLOW;
   }
-  Vector2 v = Vector2Add(Vector2Scale(p->pos, scale * zoom), panOffset);
+  Vector2 v = toScreenSpace(p->pos);
   DrawCircleV(
     toScreenSpace(p->pos),
     4.0,
@@ -198,10 +202,32 @@ void SketchViewer::drawEntity(std::shared_ptr<Sketch::Line> line) {
 }
 
 void SketchViewer::drawEntity(std::shared_ptr<Sketch::SketchEntity> entity) {
-  if (std::shared_ptr<Sketch::Point> e1 = std::dynamic_pointer_cast<Sketch::Point>(entity); e1) {
-    drawEntity(e1);
-  } else if (std::shared_ptr<Sketch::Line> e1 = std::dynamic_pointer_cast<Sketch::Line>(entity); e1) {
-    drawEntity(e1);
+  if (entity->draw) {
+    if (std::shared_ptr<Sketch::Point> e1 = std::dynamic_pointer_cast<Sketch::Point>(entity); e1) {
+      drawEntity(e1);
+    } else if (std::shared_ptr<Sketch::Line> e1 = std::dynamic_pointer_cast<Sketch::Line>(entity); e1) {
+      drawEntity(e1);
+    }
+  }
+}
+
+void SketchViewer::drawGuidedEntity(std::shared_ptr<Sketch::TrimmedLine> entity) {
+  Vector2 pStart = toScreenSpace(entity->start->pos);
+  Vector2 pEnd = toScreenSpace(entity->end->pos);
+
+  drawEntity(entity->start);
+  drawEntity(entity->end);
+
+  Color c = GREEN;
+  if (ApplicationState::getInstance()->active(entity->line)) {
+    c = YELLOW;
+  }
+  DrawLineEx(pStart, pEnd, 2.0, c);
+}
+
+void SketchViewer::drawGuidedEntity(std::shared_ptr<Sketch::GuidedEntity> entity) {
+  if (std::shared_ptr<Sketch::TrimmedLine> e1 = std::dynamic_pointer_cast<Sketch::TrimmedLine>(entity); e1) {
+    drawGuidedEntity(e1);
   }
 }
 

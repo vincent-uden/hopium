@@ -55,8 +55,29 @@ void Line::update(Vector2 diff) {
   m += diff.y;
 }
 
+TrimmedLine::TrimmedLine(
+  std::shared_ptr<Point> p1,
+  std::shared_ptr<Point> p2,
+  std::shared_ptr<Line> line
+) {
+  start = p1;
+  end = p2;
+  this->line = line;
+}
+
+TrimmedLine::TrimmedLine(const TrimmedLine& other) {
+  this->start = other.start;
+  this->end = other.end;
+  this->line = other.line;
+}
+
+TrimmedLine::~TrimmedLine() {
+}
+
 float error(const Point& p1, const Point& p2, const Constraint& c) {
   switch (c.type) {
+  case ConstraintType::COINCIDENT:
+    return std::pow(Vector2Distance(p1.pos, p2.pos), 2);
   case ConstraintType::DISTANCE:
     return std::pow(Vector2Distance(p1.pos, p2.pos) - c.value, 2);
   case ConstraintType::HORIZONTAL:
@@ -113,6 +134,8 @@ Vector2 gradError(
 ) {
   float dist = Vector2Distance(p1.pos, p2.pos);
   switch (c.type) {
+  case ConstraintType::COINCIDENT:
+        return (Vector2) { 2*(p1.pos.x-p2.pos.x), 2*(p1.pos.y-p2.pos.y) };
   case ConstraintType::DISTANCE:
         return (Vector2) { 2*(p1.pos.x-p2.pos.x)*(dist-c.value)/dist, 2*(p1.pos.y-p2.pos.y)*(dist-c.value)/dist };
   case ConstraintType::VERTICAL:
@@ -269,6 +292,10 @@ void NewSketch::addLine(std::shared_ptr<Line> l) {
   entities.push_back(l);
 }
 
+void NewSketch::addTrimmedLine(std::shared_ptr<TrimmedLine> l) {
+  guidedEntities.push_back(l);
+}
+
 void NewSketch::connect(
   std::shared_ptr<SketchEntity> a,
   std::shared_ptr<SketchEntity> b,
@@ -284,6 +311,15 @@ void NewSketch::deleteEntity(std::shared_ptr<SketchEntity> a) {
   for (const auto& [edge, other] : a->v->edges) {
     other->deleteEdge(a->v);
     std::erase_if(edges, [edge](std::shared_ptr<Constraint> c) { return c == edge; });
+  }
+}
+
+void NewSketch::solve() {
+  float error = INFINITY;
+  int i = 0;
+  while (error > 1e-6 && i < 10000) {
+    sgdStep();
+    error = totalError();
   }
 }
 

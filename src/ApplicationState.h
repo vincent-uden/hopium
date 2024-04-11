@@ -34,12 +34,14 @@ public:
   std::shared_ptr<Mode> sketch;
   std::shared_ptr<Mode> point;
   std::shared_ptr<Mode> line;
+  std::shared_ptr<Mode> tline;
   std::shared_ptr<Mode> extrude;
 
   // Name subject to change. Active doesn't really descibe the usage well. This
   // is for actions requiring multiple points such as drawing a line or arc.
   std::vector<gp_Pnt> activePoints;
   std::vector<std::shared_ptr<Sketch::SketchEntity>> activeEntities;
+  std::vector<Vector2> activeCoordinates;
 
   double selectionThreshold = 0.6;
   double zoom = 1.0;

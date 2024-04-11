@@ -6,6 +6,7 @@ ToolList::ToolList() {
   btnNames.push_back("Sketch");
   btnNames.push_back("Point");
   btnNames.push_back("Line");
+  btnNames.push_back("TLine");
   btnNames.push_back("Extrude");
   pos = { 0, 0 };
 
@@ -51,6 +52,11 @@ ToolList::ToolList() {
       }
   });
   btnBgs[3]->setOnClick([](Ui* p) {
+      if (ApplicationState::getInstance()->sketchModeActive) {
+        EventQueue::getInstance()->postEvent(toggleTLineMode {});
+      }
+  });
+  btnBgs[4]->setOnClick([](Ui* p) {
       if (ApplicationState::getInstance()->sketchModeActive) {
         EventQueue::getInstance()->postEvent(toggleExtrudeMode {});
       }
@@ -106,6 +112,13 @@ void ToolList::draw() {
         }
         break;
       case 3:
+        if (state->modeStack.isActive(state->tline)) {
+          lbl->setColor(colorscheme->active);
+        } else {
+          lbl->setColor(colorscheme->onBackground);
+        }
+        break;
+      case 4:
         if (state->modeStack.isActive(state->extrude)) {
           lbl->setColor(colorscheme->active);
         } else {

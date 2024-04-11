@@ -19,6 +19,7 @@ public:
 
   bool fixed = false;
   std::shared_ptr<GeometricElement> v;
+  bool draw = true;
 };
 
 class Point: public SketchEntity {
@@ -50,6 +51,27 @@ private:
   static std::default_random_engine e;
 };
 
+// Cannot be adjusted themselves. Are instead guided by underlying entities
+class GuidedEntity {
+public:
+  virtual ~GuidedEntity() = default;
+};
+
+class TrimmedLine: public GuidedEntity {
+public:
+  TrimmedLine(
+    std::shared_ptr<Point> p1,
+    std::shared_ptr<Point> p2,
+    std::shared_ptr<Line> line
+  );
+  TrimmedLine(const TrimmedLine& other);
+  ~TrimmedLine() override;
+
+  std::shared_ptr<Point> start;
+  std::shared_ptr<Point> end;
+  std::shared_ptr<Line> line;
+};
+
 float error(const Point& p1, const Point& p2, const Constraint& c);
 float error(const Point& p1, const Line& p2, const Constraint& c);
 float error(const Line& p1, const Point& p2, const Constraint& c);
@@ -72,14 +94,17 @@ public:
   float totalError();
   void addPoint(std::shared_ptr<Point> p);
   void addLine(std::shared_ptr<Line> l);
+  void addTrimmedLine(std::shared_ptr<TrimmedLine> l);
   void connect(
     std::shared_ptr<SketchEntity> a,
     std::shared_ptr<SketchEntity> b,
     std::shared_ptr<Constraint> c
   );
   void deleteEntity(std::shared_ptr<SketchEntity> a);
+  void solve();
 
   std::vector<std::shared_ptr<SketchEntity>> entities;
+  std::vector<std::shared_ptr<GuidedEntity>> guidedEntities;
 private:
   std::vector<std::shared_ptr<Constraint>> edges;
 

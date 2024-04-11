@@ -38,6 +38,8 @@ private:
   void drawEntity(std::shared_ptr<Sketch::Point> point);
   void drawEntity(std::shared_ptr<Sketch::Line> line);
   void drawEntity(std::shared_ptr<Sketch::SketchEntity> entity);
+  void drawGuidedEntity(std::shared_ptr<Sketch::TrimmedLine> entity);
+  void drawGuidedEntity(std::shared_ptr<Sketch::GuidedEntity> entity);
 
   Vector2 pos;
   Vector2 lastMousePos;

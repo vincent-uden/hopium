@@ -471,6 +471,9 @@ void Area::buildConstraintSelection() {
   std::shared_ptr<Ui::Icon> coincident = std::make_shared<Ui::Icon>();
   coincident->setImgPath("../assets/icons/Coincident.png");
   coincident->setHoverTooltip("Coincident");
+  coincident->setOnClick([](Ui::Ui* p){
+      EventQueue::getInstance()->postEvent(sketchConstrain {ConstraintType::COINCIDENT});
+  });
   std::shared_ptr<Ui::Icon> colinear = std::make_shared<Ui::Icon>();
   colinear->setImgPath("../assets/icons/Colinear.png");
   colinear->setHoverTooltip("Colinear");
