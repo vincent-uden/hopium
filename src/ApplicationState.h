@@ -26,6 +26,7 @@ public:
   std::shared_ptr<ParametricScene> occtScene = std::shared_ptr<ParametricScene>(new ParametricScene());;
 
   bool holdingRotate = false;
+ // TODO: Remove this in favour of checking the mode stack?
   bool sketchModeActive = false;
 
   ModeStack modeStack;

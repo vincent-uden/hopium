@@ -27,6 +27,7 @@ typedef struct {
 // TODO: Modes should probably be able to recieve application events.
 class Mode {
 public:
+  virtual bool processEvent(AppEvent event)=0;
   virtual bool keyPress(KeyPress key)=0;
   virtual bool keyRelease(KeyPress key)=0;
   virtual bool mousePress(MouseKeyPress button)=0;
@@ -38,6 +39,7 @@ public:
   ModeStack();
   ~ModeStack();
 
+  void processEvent(AppEvent event);
   void exit(std::shared_ptr<Mode> mode);
   void update();
   void push(std::shared_ptr<Mode> mode);

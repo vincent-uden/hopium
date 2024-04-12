@@ -27,6 +27,7 @@ void Application::update() {
   while (!eventQueue.empty()) {
     AppEvent event = eventQueue.pop();
     std::visit([this](auto&& arg){ processEvent(arg); }, event);
+    state->modeStack.processEvent(event);
   }
 
   renderer.draw();
@@ -217,261 +218,67 @@ void Application::buildSketch() {
 }
 
 void Application::processEvent(enableSketchMode event) {
-  state->modeStack.push(state->sketch);
-  state->sketchModeActive = true;
 }
 
 void Application::processEvent(disableSketchMode event) {
-  state->modeStack.exit(state->sketch);
-  state->sketchModeActive = false;
 }
 
 void Application::processEvent(toggleSketchMode event) {
-  if (state->modeStack.isActive(state->sketch)) {
-    state->modeStack.exit(state->sketch);
-    state->sketchModeActive = false;
-  } else {
-    state->modeStack.push(state->sketch);
-    state->sketchModeActive = true;
-  }
 }
 
 void Application::processEvent(popMode event) {
-  if (state->modeStack.size() > 1) {
-    state->modeStack.pop();
-  }
-
-  state->sketchModeActive = state->modeStack.isActive(state->sketch);
 }
 
 void Application::processEvent(togglePointMode event) {
-  if (state->modeStack.isActive(state->point)) {
-    state->modeStack.exit(state->point);
-  } else {
-    if (state->modeStack.isInnerMostMode(state->sketch)) {
-      state->modeStack.push(state->point);
-    }
-  }
 }
 
 void Application::processEvent(toggleLineMode event) {
-  if (state->modeStack.isActive(state->line)) {
-    state->modeStack.exit(state->line);
-  } else {
-    if (state->modeStack.isInnerMostMode(state->sketch)) {
-      state->modeStack.push(state->line);
-    }
-  }
 }
 
 void Application::processEvent(toggleTLineMode event) {
-  if (state->modeStack.isActive(state->tline)) {
-    state->modeStack.exit(state->tline);
-  } else {
-    if (state->modeStack.isInnerMostMode(state->sketch)) {
-      state->modeStack.push(state->tline);
-    }
-  }
 }
 
 void Application::processEvent(toggleExtrudeMode event) {
-  if (state->modeStack.isActive(state->extrude)) {
-    state->modeStack.exit(state->extrude);
-  } else {
-    if (state->modeStack.isInnerMostMode(state->sketch)) {
-      state->modeStack.push(state->extrude);
-    }
-  }
 }
 
 void Application::processEvent(startRotate event) {
-  state->holdingRotate = true;
 }
 
 void Application::processEvent(stopRotate event) {
-  state->holdingRotate = false;
 }
 
 void Application::processEvent(splitPaneHorizontally event) {
-  renderer.splitPaneHorizontal(event.mousePos);
+    renderer.splitPaneHorizontal(event.mousePos);
 }
 
 void Application::processEvent(splitPaneVertically event) {
-  renderer.splitPaneVertical(event.mousePos);
+    renderer.splitPaneVertical(event.mousePos);
 }
 
 void Application::processEvent(collapseBoundary event) {
-  renderer.collapseBoundary(event.mousePos);
+    renderer.collapseBoundary(event.mousePos);
 }
 
 void Application::processEvent(dumpShapes event) {
-  state->occtScene->dumpShapes();
 }
 
 void Application::processEvent(exitProgram event) {
-  std::cout << "EXITING" << std::endl;
   shouldExit = true;
 }
 
 void Application::processEvent(sketchPlaneHit event) {
-  if (state->modeStack.isActive(state->point)) {
-    state->occtScene->createPoint(
-      state->editingSketchId,
-      Vector3 {
-        static_cast<float>(event.x),
-        static_cast<float>(event.y),
-        static_cast<float>(event.z)
-      }
-    );
-    state->scene->setPoints(state->occtScene->rasterizePoints());
-  } else if (state->modeStack.isActive(state->line)) {
-    std::optional<std::shared_ptr<RasterVertex>> p = state->scene->queryVertex(event.ray, state->selectionThreshold);
-    if (p.has_value()) {
-      event.x = p.value()->x;
-      event.y = p.value()->y;
-      event.z = p.value()->z;
-    }
-    if (state->activePoints.size() < 1) {
-      state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
-    } else {
-      state->activePoints.push_back(gp_Pnt(event.x, event.y, event.z));
-      //state->occtScene->createLine(state->activePoints[0], state->activePoints[1], 1e-5);
-      state->scene->setShapes(state->occtScene->rasterizeShapes());
-      state->activePoints.clear();
-      EventQueue::getInstance()->postEvent(toggleLineMode {});
-    }
-  } else if (state->modeStack.isActive(state->extrude)) {
-    /*
-    std::optional<size_t> maybeId = ApplicationState::getInstance()
-      ->occtScene->idContainingPoint(event.x, event.y, event.z);
-
-    if (maybeId.has_value()) {
-      state->occtScene->extrude(maybeId.value(), 0.5);
-      state->scene->setShapes(state->occtScene->rasterizeShapes());
-    }
-    */
-  }
 }
 
 void Application::processEvent(sketchClick event) {
-  Vector2 mousePos(event.x, event.y);
-  std::shared_ptr<Sketch::SketchEntity> clicked =
-    state->paramSketch->findEntityByPosition(mousePos, std::pow(20.0 / event.zoomScale, 2.0));
-
-  // TODO: Move this out somehow
-  //       Strategy pattern?
-  //       Are the modes a strategy pattern?
-  if (state->modeStack.isActive(state->point)) {
-    std::shared_ptr<GeometricElement> e
-      = std::make_shared<GeometricElement>(GeometricType::POINT, "");
-    std::shared_ptr<Sketch::Point> p = std::make_shared<Sketch::Point>(e);
-    p->pos = mousePos;
-    state->paramSketch->addPoint(p);
-  } else if (state->modeStack.isActive(state->line)) {
-    state->activeCoordinates.push_back(mousePos);
-    if (state->activeCoordinates.size() == 2) {
-      std::shared_ptr<GeometricElement> e =
-        std::make_shared<GeometricElement>(GeometricType::LINE, "");
-      std::shared_ptr<Sketch::Line> l = std::make_shared<Sketch::Line>(e);
-
-      Vector2 c0 = state->activeCoordinates[0];
-      Vector2 c1 = state->activeCoordinates[1];
-      l->k = (c1.y-c0.y)/(c1.x-c0.x);
-      l->m = -c0.x * l->k + c0.y;
-      state->paramSketch->addLine(l);
-      state->activeCoordinates.clear();
-      EventQueue::getInstance()->postEvent(popMode {});
-    }
-  } else if (state->modeStack.isActive(state->tline)) {
-    state->activeCoordinates.push_back(mousePos);
-    if (state->activeCoordinates.size() == 2) {
-      std::shared_ptr<GeometricElement> eStart
-        = std::make_shared<GeometricElement>(GeometricType::POINT, "");
-      std::shared_ptr<GeometricElement> eEnd
-        = std::make_shared<GeometricElement>(GeometricType::POINT, "");
-      std::shared_ptr<GeometricElement> eLine
-        = std::make_shared<GeometricElement>(GeometricType::LINE, "");
-      std::shared_ptr<Sketch::Point> start = std::make_shared<Sketch::Point>(eStart);
-      std::shared_ptr<Sketch::Point> end = std::make_shared<Sketch::Point>(eEnd);
-      std::shared_ptr<Sketch::Line> line = std::make_shared<Sketch::Line>(eLine);
-      Vector2 c0 = state->activeCoordinates[0];
-      Vector2 c1 = state->activeCoordinates[1];
-      start->pos = c0;
-      start->draw = false;
-      end->pos = c1;
-      end->draw = false;
-      line->k = (c1.y-c0.y)/(c1.x-c0.x);
-      line->m = -c0.x * line->k + c0.y;
-      line->draw = false;
-      std::shared_ptr<Sketch::TrimmedLine> tLine =
-        std::make_shared<Sketch::TrimmedLine>(start, end, line);
-      state->paramSketch->addPoint(start);
-      state->paramSketch->addPoint(end);
-      state->paramSketch->addLine(line);
-      state->paramSketch->addTrimmedLine(tLine);
-      state->activeCoordinates.clear();
-      EventQueue::getInstance()->postEvent(popMode {});
-    }
-  }
-
-  if (state->modeStack.isInnerMostMode(state->sketch)) {
-    if (clicked) {
-      state->activeEntities.push_back(clicked);
-    } else {
-      state->activeEntities.clear();
-    }
-  }
 }
 
 void Application::processEvent(sketchConstrain event) {
-  std::shared_ptr<Constraint> c = std::make_shared<Constraint>(event.type);
-  switch (event.type) {
-    case ConstraintType::ANGLE:
-      break;
-    case ConstraintType::COINCIDENT:
-      if (state->activeEntities.size() == 2) {
-        state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
-        state->paramSketch->solve();
-        state->activeEntities.clear();
-      }
-      break;
-    case ConstraintType::COLINEAR:
-      break;
-    case ConstraintType::DISTANCE:
-      break;
-    case ConstraintType::EQUAL:
-      break;
-    case ConstraintType::HORIZONTAL:
-      if (state->activeEntities.size() == 2) {
-        state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
-        state->paramSketch->solve();
-        state->activeEntities.clear();
-      }
-      break;
-    case ConstraintType::MIDPOINT:
-      break;
-    case ConstraintType::PARALLEL:
-      break;
-    case ConstraintType::PERPENDICULAR:
-      break;
-    case ConstraintType::VERTICAL:
-      if (state->activeEntities.size() == 2) {
-        state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
-        state->paramSketch->solve();
-        state->activeEntities.clear();
-      }
-      break;
-    case ConstraintType::VIRTUAL:
-      break;
-  }
 }
 
 void Application::processEvent(increaseZoom event) {
-  state->zoom *= 1.25;
 }
 
 void Application::processEvent(decreaseZoom event) {
-  state->zoom /= 1.25;
 }
 
 Application::~Application() {

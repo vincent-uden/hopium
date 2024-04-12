@@ -124,6 +124,14 @@ ModeStack::ModeStack() {
 ModeStack::~ModeStack() {
 }
 
+void ModeStack::processEvent(AppEvent event) {
+    for (auto& mode : std::views::reverse(modes)) {
+      if (mode->processEvent(event)) {
+        break;
+      }
+    }
+}
+
 void ModeStack::exit(std::shared_ptr<Mode> mode) {
   if (isActive(mode)) {
     for (auto it = modes.rbegin(); it != modes.rend(); ++it) {
