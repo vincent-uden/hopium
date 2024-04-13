@@ -9,6 +9,7 @@
 #include "System.h"
 #include "cad/OcctScene.h"
 #include "cad/OcctTest.h"
+#include "modes/DimensionMode.h"
 #include "modes/ExtrudeMode.h"
 #include "modes/GlobalMode.h"
 #include "modes/LineMode.h"
@@ -41,6 +42,7 @@ private:
   void processEvent(toggleLineMode event);
   void processEvent(toggleTLineMode event);
   void processEvent(toggleExtrudeMode event);
+  void processEvent(toggleDimensionMode event);
   void processEvent(startRotate event);
   void processEvent(stopRotate event);
   void processEvent(splitPaneHorizontally event);

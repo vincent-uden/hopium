@@ -37,6 +37,7 @@ public:
   std::shared_ptr<Mode> line;
   std::shared_ptr<Mode> tline;
   std::shared_ptr<Mode> extrude;
+  std::shared_ptr<Mode> dimension;
 
   // Name subject to change. Active doesn't really descibe the usage well. This
   // is for actions requiring multiple points such as drawing a line or arc.
@@ -51,6 +52,9 @@ public:
 
   // TODO: Start at -1, only active once sketch is edited
   int editingSketchId = 0;
+
+  std::string pendingDimension = "200.0 mm";
+  int pendingDimCursor = 2;
 
 private:
   ApplicationState();

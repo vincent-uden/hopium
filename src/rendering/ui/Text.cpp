@@ -37,13 +37,13 @@ void Text::draw() {
   case LEFT:
     break;
   case CENTER:
-    pos.x -= size.x / 2.f;
+    drawPos.x -= size.x / 2.f;
     break;
   case RIGHT:
-    pos.x -= size.x;
+    drawPos.x -= size.x;
     break;
   }
-  DrawTextEx(colorscheme->font, text.c_str(), pos, 20, 1, color);
+  DrawTextEx(colorscheme->font, text.c_str(), drawPos, 20, 1, color);
 }
 
 void Text::receiveMousePos(Vector2 mousePos) {

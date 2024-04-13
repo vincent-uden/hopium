@@ -62,6 +62,7 @@ Application::Application() {
   state->line = std::shared_ptr<Mode>(new LineMode());
   state->tline = std::shared_ptr<Mode>(new TLineMode());
   state->extrude = std::shared_ptr<Mode>(new ExtrudeMode());
+  state->dimension = std::shared_ptr<Mode>(new DimensionMode());
 
 
   if (fileExists(scenePath)) {
@@ -239,6 +240,9 @@ void Application::processEvent(toggleTLineMode event) {
 }
 
 void Application::processEvent(toggleExtrudeMode event) {
+}
+
+void Application::processEvent(toggleDimensionMode event) {
 }
 
 void Application::processEvent(startRotate event) {

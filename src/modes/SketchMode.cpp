@@ -24,6 +24,9 @@ bool SketchMode::processEvent(AppEvent event) {
   } else if (toggleExtrudeMode* e = std::get_if<toggleExtrudeMode>(&event)) {
     state->modeStack.push(state->extrude);
     return true;
+  } else if (toggleDimensionMode* e = std::get_if<toggleDimensionMode>(&event)) {
+    state->modeStack.push(state->dimension);
+    return true;
   } else if (sketchClick* e = std::get_if<sketchClick>(&event)) {
     Vector2 mousePos(e->x, e->y);
     std::shared_ptr<Sketch::SketchEntity> clicked =
@@ -95,6 +98,9 @@ bool SketchMode::keyPress(KeyPress key) {
     break;
   case KEY_E:
     EventQueue::getInstance()->postEvent(toggleExtrudeMode {});
+    break;
+  case KEY_D:
+    EventQueue::getInstance()->postEvent(toggleDimensionMode {});
     break;
   default:
     consumed = false;

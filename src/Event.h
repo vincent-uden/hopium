@@ -18,6 +18,7 @@ struct togglePointMode {};
 struct toggleLineMode {};
 struct toggleTLineMode {};
 struct toggleExtrudeMode {};
+struct toggleDimensionMode {};
 struct startRotate {};
 struct stopRotate {};
 struct splitPaneHorizontally { Vector2 mousePos; };
@@ -43,6 +44,7 @@ using AppEvent = std::variant<
   toggleLineMode,
   toggleTLineMode,
   toggleExtrudeMode,
+  toggleDimensionMode,
   startRotate,
   splitPaneHorizontally,
   splitPaneVertically,

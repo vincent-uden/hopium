@@ -24,6 +24,8 @@ typedef struct {
   bool rAlt;
 } MouseKeyPress;
 
+char keyPressToChar(KeyPress k);
+
 // TODO: Modes should probably be able to recieve application events.
 class Mode {
 public:

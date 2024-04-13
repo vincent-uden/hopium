@@ -13,6 +13,11 @@ SketchViewer::SketchViewer() {
   error.setColor(WHITE);
   error.setPos(pos);
 
+  pendingDim.setAlignment(TextAlignment::LEFT);
+  pendingDim.setColor(WHITE);
+  pendingDim.setText("20.0 mm");
+  pendingDim.setCursor(4);
+
   std::shared_ptr<Icon> coincident = std::make_shared<Icon>();
   coincident->setImgPath("../assets/icons/Coincident.png");
   coincident->setHoverTooltip("Coincident");
@@ -96,6 +101,16 @@ void SketchViewer::draw() {
   error.setPos({ areaScreenRect->width - 12, 0.0  });
   error.setText(std::format("Error: {}", sketch->totalError()));
   error.draw();
+  ApplicationState* state = ApplicationState::getInstance();
+  if (state->modeStack.isInnerMostMode(state->dimension)) {
+    pendingDim.setColor(GREEN);
+  } else {
+    pendingDim.setColor(WHITE);
+  }
+  pendingDim.setPos({ 40.0, areaScreenRect->height - 40.0f });
+  pendingDim.setCursor(state->pendingDimCursor);
+  pendingDim.setText(state->pendingDimension);
+  pendingDim.draw();
 }
 
 void SketchViewer::receiveMousePos(Vector2 mousePos) {

@@ -1,5 +1,28 @@
 #include "Mode.h"
 
+char keyPressToChar(KeyPress k) {
+  char out = 0;
+
+  if (k.key >= 32 && k.key <= 54) {
+    // Numbers and symbols
+    out = k.key;
+  } else if (k.key >= 65 && k.key <= 90) {
+    // Alphabetic keys
+    out = k.key;
+    if (k.shift) {
+      out = toupper(out);
+    }
+  } else if (k.key >= 91 && k.key <= 60) {
+    // More numbers and symbols
+    out = k.key;
+  } else if (k.key >= 123 && k.key <= 127) {
+    // Even more numbers and symbols
+    out = k.key;
+  }
+
+  return out;
+}
+
 ModeStack::ModeStack() {
     allKeys.push_back(KEY_NULL);
     allKeys.push_back(KEY_APOSTROPHE);
@@ -154,6 +177,9 @@ void ModeStack::update() {
 
   for (KeyboardKey key : allKeys) {
     if (IsKeyPressed(key)) {
+      if (key == KEY_ESCAPE) {
+        std::cout << "HELLLKJASLKDJASKL" << std::endl;
+      }
       KeyPress press = { key, shift, ctrl, lAlt, rAlt };
 
       for (auto& mode : std::views::reverse(modes)) {

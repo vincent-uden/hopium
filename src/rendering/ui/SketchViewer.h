@@ -8,6 +8,7 @@
 #include "../../cad/Sketch.h"
 #include "Icon.h"
 #include "Text.h"
+#include "TextInput.h"
 
 #include <raylib.h>
 
@@ -54,6 +55,7 @@ private:
   RenderTexture* areaTexture = nullptr;
 
   Text error;
+  TextInput pendingDim;
   std::map<ConstraintType, std::shared_ptr<Icon>> constraintIcons;
 };
 
