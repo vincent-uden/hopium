@@ -29,6 +29,7 @@ struct sketchPlaneHit { double x, y, z; Ray ray; };
 // Sketch view specific events
 struct sketchClick { double x, y, zoomScale; };
 struct sketchConstrain { ConstraintType type; };
+struct confirmDimension {};
 struct dumpShapes {};
 struct increaseZoom {};
 struct decreaseZoom {};
@@ -53,6 +54,7 @@ using AppEvent = std::variant<
   sketchPlaneHit,
   sketchClick,
   sketchConstrain,
+  confirmDimension,
   dumpShapes,
   increaseZoom,
   decreaseZoom,
@@ -68,6 +70,7 @@ const AppEvent APP_EVENTS[] = {
   toggleLineMode {},
   toggleTLineMode {},
   toggleExtrudeMode {},
+  toggleDimensionMode {},
   startRotate {},
   splitPaneHorizontally {},
   splitPaneVertically {},
@@ -76,6 +79,7 @@ const AppEvent APP_EVENTS[] = {
   sketchPlaneHit {},
   sketchClick {},
   sketchConstrain {},
+  confirmDimension {},
   dumpShapes {},
   increaseZoom {},
   decreaseZoom {},

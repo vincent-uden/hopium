@@ -52,6 +52,9 @@ bool SketchMode::processEvent(AppEvent event) {
       case ConstraintType::COLINEAR:
         break;
       case ConstraintType::DISTANCE:
+        if (state->activeEntities.size() == 2) {
+          state->modeStack.push(state->dimension);
+        }
         break;
       case ConstraintType::EQUAL:
         break;
@@ -77,6 +80,21 @@ bool SketchMode::processEvent(AppEvent event) {
         break;
       case ConstraintType::VIRTUAL:
         break;
+    }
+  } else if (confirmDimension* e = std::get_if<confirmDimension>(&event)) {
+    if (state->activeEntities.size() == 2) {
+      std::shared_ptr<Constraint> c = std::make_shared<Constraint>(ConstraintType::DISTANCE);
+      float dist;
+      try {
+        dist = std::stof(state->pendingDimension);
+      } catch (std::invalid_argument e) {
+        dist = 1.0;
+      }
+      c->value = dist;
+      state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
+      state->paramSketch->solve();
+      state->activeEntities.clear();
+      state->modeStack.pop();
     }
   }
 

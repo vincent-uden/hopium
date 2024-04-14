@@ -20,18 +20,23 @@ bool DimensionMode::keyPress(KeyPress key) {
   bool consumed = true;
   ApplicationState* state = ApplicationState::getInstance();
 
-  switch (key.key) {
-  case KEY_ESCAPE:
+  if (key.key == KEY_BACKSPACE) {
+    if (state->pendingDimCursor > 0) {
+      state->pendingDimension.erase(std::next(state->pendingDimension.begin(), state->pendingDimCursor - 1));
+      state->pendingDimCursor--;
+    }
+  } else if (key.key == KEY_ESCAPE) {
     EventQueue::getInstance()->postEvent(popMode {});
-    break;
-  default:
-    consumed = false;
-  }
-
-  if (key.key == KEY_DELETE || key.key == KEY_BACKSPACE) {
-    state->pendingDimension.pop_back();
+  } else if (key.key == KEY_ENTER) {
+    // TODO: Input validation
+    EventQueue::getInstance()->postEvent(confirmDimension {});
+  } else if (key.key == KEY_DELETE)  {
+    if (state->pendingDimCursor < state->pendingDimension.size()) {
+      state->pendingDimension.erase(std::next(state->pendingDimension.begin(), state->pendingDimCursor));
+    }
   } else if (char c = keyPressToChar(key))  {
     state->pendingDimension.push_back(c);
+    state->pendingDimCursor++;
   } else if (key.key == KEY_LEFT) {
     state->pendingDimCursor = std::max(state->pendingDimCursor - 1, 0);
   } else if (key.key == KEY_RIGHT) {
@@ -39,6 +44,8 @@ bool DimensionMode::keyPress(KeyPress key) {
       state->pendingDimCursor + 1,
       static_cast<int>(state->pendingDimension.size())
     );
+  } else {
+    consumed = false;
   }
 
   return consumed;

@@ -73,6 +73,7 @@ Application::Application() {
       std::optional<AppEvent> nextEvent = eventQueue.getNextHistoryEvent();
       if (nextEvent.has_value()) {
         std::visit([this](auto&& arg){ processEvent(arg); }, nextEvent.value());
+        state->modeStack.processEvent(nextEvent.value());
       }
     }
     state->scene->setShapes(state->occtScene->rasterizeShapes());
@@ -277,6 +278,9 @@ void Application::processEvent(sketchClick event) {
 }
 
 void Application::processEvent(sketchConstrain event) {
+}
+
+void Application::processEvent(confirmDimension event) {
 }
 
 void Application::processEvent(increaseZoom event) {

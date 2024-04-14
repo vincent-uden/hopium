@@ -51,6 +51,7 @@ private:
   void processEvent(sketchPlaneHit event);
   void processEvent(sketchClick event);
   void processEvent(sketchConstrain event);
+  void processEvent(confirmDimension event);
   void processEvent(dumpShapes event);
   void processEvent(increaseZoom event);
   void processEvent(decreaseZoom event);

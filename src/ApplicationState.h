@@ -53,8 +53,8 @@ public:
   // TODO: Start at -1, only active once sketch is edited
   int editingSketchId = 0;
 
-  std::string pendingDimension = "200.0 mm";
-  int pendingDimCursor = 2;
+  std::string pendingDimension = "";
+  int pendingDimCursor = 0;
 
 private:
   ApplicationState();

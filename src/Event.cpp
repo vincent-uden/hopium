@@ -85,6 +85,7 @@ void EventQueue::deserializeHistory(json state) {
   for (const json& e: state["history"]) {
     size_t index = e["type"];
     AppEvent event = APP_EVENTS[index];
+    /* Old, bad code
     if (std::holds_alternative<sketchPlaneHit>(event)) {
       sketchPlaneHit hit = std::get<sketchPlaneHit>(event);
       hit.x = e["data"]["x"];
@@ -98,6 +99,7 @@ void EventQueue::deserializeHistory(json state) {
       hit.ray.direction.z = e["data"]["ray"]["direction"]["z"];
       event = hit;
     }
+    */
 
     history.push_back(event);
   }

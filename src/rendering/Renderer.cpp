@@ -501,6 +501,12 @@ void Area::buildConstraintSelection() {
   horizontal->setOnClick([](Ui::Ui* p){
       EventQueue::getInstance()->postEvent(sketchConstrain {ConstraintType::HORIZONTAL});
   });
+  std::shared_ptr<Ui::Icon> distance = std::make_shared<Ui::Icon>();
+  distance->setImgPath("../assets/icons/Distance.png");
+  distance->setHoverTooltip("Distance");
+  distance->setOnClick([](Ui::Ui* p){
+      EventQueue::getInstance()->postEvent(sketchConstrain {ConstraintType::DISTANCE});
+  });
 
   std::shared_ptr<Ui::Row> constraintRow = std::make_shared<Ui::Row>();
   constraintRow->addChild(coincident);
@@ -511,6 +517,7 @@ void Area::buildConstraintSelection() {
   constraintRow->addChild(perpendicular);
   constraintRow->addChild(vertical);
   constraintRow->addChild(horizontal);
+  constraintRow->addChild(distance);
 
   std::shared_ptr<Ui::Ui> ptr = std::static_pointer_cast<Ui::Ui>(constraintRow);
   ptr->move(Vector2 {4, 32});
