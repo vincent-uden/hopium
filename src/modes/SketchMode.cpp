@@ -1,4 +1,5 @@
 #include "SketchMode.h"
+#include "raylib.h"
 
 SketchMode::SketchMode() {
 }
@@ -30,12 +31,18 @@ bool SketchMode::processEvent(AppEvent event) {
   } else if (sketchClick* e = std::get_if<sketchClick>(&event)) {
     Vector2 mousePos(e->x, e->y);
     std::shared_ptr<Sketch::SketchEntity> clicked =
-      state->paramSketch->findEntityByPosition(mousePos, std::pow(20.0 / e->zoomScale, 2.0));
-    if (clicked) {
-      state->activeEntities.push_back(clicked);
-    } else {
-      state->activeEntities.clear();
-    }
+      state->paramSketch->findEntityByPosition(
+        mousePos,
+        std::pow(20.0 / e->zoomScale, 2.0)
+      );
+      if (IsKeyDown(KEY_LEFT_SHIFT) && clicked) {
+        state->activeEntities.push_back(clicked);
+      } else if (clicked) {
+        state->activeEntities.clear();
+        state->activeEntities.push_back(clicked);
+      } else {
+        state->activeEntities.clear();
+      }
     return true;
   } else if (sketchConstrain* e = std::get_if<sketchConstrain>(&event)) {
     std::shared_ptr<Constraint> c = std::make_shared<Constraint>(e->type);

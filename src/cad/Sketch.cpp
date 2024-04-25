@@ -10,6 +10,14 @@ namespace Sketch {
 std::default_random_engine Point::e = std::default_random_engine();
 std::default_random_engine Line::e = std::default_random_engine();
 
+bool SketchEntity::selectionOverrides(SketchEntity* other) {
+  if (other != nullptr) {
+    return selectionPriority() <= other->selectionPriority();
+  } else {
+    return true;
+  }
+}
+
 Point::Point(std::shared_ptr<GeometricElement> v) {
   this->v = v;
   std::uniform_real_distribution<float> dis(0, 1);
@@ -33,6 +41,10 @@ void Point::update(Vector2 diff) {
   pos.y += diff.y;
 }
 
+int Point::selectionPriority() {
+  return 1;
+}
+
 Line::Line(std::shared_ptr<GeometricElement> v) {
   this->v = v;
   std::uniform_real_distribution<float> dis(0, 1);
@@ -53,6 +65,10 @@ Line::~Line() {
 void Line::update(Vector2 diff) {
   k += diff.x;
   m += diff.y;
+}
+
+int Line::selectionPriority() {
+  return 2;
 }
 
 TrimmedLine::TrimmedLine(
@@ -214,7 +230,17 @@ std::shared_ptr<SketchEntity> NewSketch::findEntityById(std::shared_ptr<Geometri
   return nullptr;
 }
 
-std::shared_ptr<SketchEntity> NewSketch::findEntityByPosition(Vector2 pos, float threshold) {
+// Returns the closest entity to a given [pos] if it is at **most** [threshold]
+// distance from [pos]. Otherwise returns nullptr.
+//
+// Distance is defined using the distance constraint between the geometric
+// entity in question and a point, located at [pos]. In order to accomodate
+// user interaction, entities are picked according to a heirarchy. Otherwise
+// a point could **never** be closer to [pos] than a line.
+std::shared_ptr<SketchEntity> NewSketch::findEntityByPosition(
+  Vector2 pos,
+  float threshold
+) {
   Point fakePoint(nullptr);
   fakePoint.pos = pos;
 
@@ -226,7 +252,7 @@ std::shared_ptr<SketchEntity> NewSketch::findEntityByPosition(Vector2 pos, float
 
   for (const auto& p: entities) {
     float dist = error(&fakePoint, p.get(), &fakeC);
-    if (dist < closestDist) {
+    if (dist < closestDist && p->selectionOverrides(closest.get()) && dist < threshold) {
       closest = p;
       closestDist = dist;
     }

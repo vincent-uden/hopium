@@ -16,6 +16,8 @@ namespace Sketch {
 class SketchEntity {
 public:
   virtual void update(Vector2 diff) = 0;
+  virtual int selectionPriority() = 0;
+  bool selectionOverrides(SketchEntity* other);
 
   bool fixed = false;
   std::shared_ptr<GeometricElement> v;
@@ -29,6 +31,7 @@ public:
   ~Point();
 
   void update(Vector2 diff) override;
+  int selectionPriority() override;
 
   Vector2 pos;
 
@@ -43,6 +46,7 @@ public:
   ~Line();
 
   void update(Vector2 diff) override;
+  int selectionPriority() override;
 
   float k;
   float m;
