@@ -20,6 +20,7 @@ public:
   bool selectionOverrides(SketchEntity* other);
 
   bool fixed = false;
+  bool active = false;
   std::shared_ptr<GeometricElement> v;
   bool draw = true;
 };

@@ -17,6 +17,9 @@ public:
   ~ApplicationState();
 
   bool active(std::shared_ptr<Sketch::SketchEntity> a);
+  void addActive(std::shared_ptr<Sketch::SketchEntity> a);
+  void setActive(std::shared_ptr<Sketch::SketchEntity> a);
+  void clearActive();
 
   std::shared_ptr<ConstraintGraph> graph = std::shared_ptr<ConstraintGraph>(new ConstraintGraph());;
   std::shared_ptr<STree> stree = std::shared_ptr<STree>(new STree());

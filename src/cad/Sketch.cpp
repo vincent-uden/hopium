@@ -252,7 +252,7 @@ std::shared_ptr<SketchEntity> NewSketch::findEntityByPosition(
 
   for (const auto& p: entities) {
     float dist = error(&fakePoint, p.get(), &fakeC);
-    if (dist < closestDist && p->selectionOverrides(closest.get()) && dist < threshold) {
+    if (dist < closestDist && p->selectionOverrides(closest.get()) && dist < threshold && !p->active) {
       closest = p;
       closestDist = dist;
     }

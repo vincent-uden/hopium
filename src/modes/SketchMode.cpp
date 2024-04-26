@@ -36,12 +36,11 @@ bool SketchMode::processEvent(AppEvent event) {
         std::pow(20.0 / e->zoomScale, 2.0)
       );
       if (IsKeyDown(KEY_LEFT_SHIFT) && clicked) {
-        state->activeEntities.push_back(clicked);
+        state->addActive(clicked);
       } else if (clicked) {
-        state->activeEntities.clear();
-        state->activeEntities.push_back(clicked);
+        state->setActive(clicked);
       } else {
-        state->activeEntities.clear();
+        state->clearActive();
       }
     return true;
   } else if (sketchConstrain* e = std::get_if<sketchConstrain>(&event)) {
@@ -53,7 +52,7 @@ bool SketchMode::processEvent(AppEvent event) {
         if (state->activeEntities.size() == 2) {
           state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
           state->paramSketch->solve();
-          state->activeEntities.clear();
+          state->clearActive();
         }
         break;
       case ConstraintType::COLINEAR:
@@ -69,7 +68,7 @@ bool SketchMode::processEvent(AppEvent event) {
         if (state->activeEntities.size() == 2) {
           state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
           state->paramSketch->solve();
-          state->activeEntities.clear();
+          state->clearActive();
         }
         break;
       case ConstraintType::MIDPOINT:
@@ -100,7 +99,7 @@ bool SketchMode::processEvent(AppEvent event) {
       c->value = dist;
       state->paramSketch->connect(state->activeEntities[0], state->activeEntities[1], c);
       state->paramSketch->solve();
-      state->activeEntities.clear();
+      state->clearActive();
       state->modeStack.pop();
     }
   }
@@ -152,4 +151,3 @@ bool SketchMode::mousePress(MouseKeyPress button) {
 bool SketchMode::mouseRelease(MouseKeyPress button) {
   return false;
 }
-

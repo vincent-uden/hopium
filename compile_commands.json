@@ -1,398 +1,398 @@
 [
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/main.cpp.o -c /home/vincent/github/hopium/main.cpp",
-  "file": "/home/vincent/github/hopium/main.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/main.cpp.o -c /media/hdd/github/hopium/main.cpp",
+  "file": "/media/hdd/github/hopium/main.cpp",
   "output": "CMakeFiles/Lesson_04.dir/main.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/Application.cpp.o -c /home/vincent/github/hopium/src/Application.cpp",
-  "file": "/home/vincent/github/hopium/src/Application.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/Application.cpp.o -c /media/hdd/github/hopium/src/Application.cpp",
+  "file": "/media/hdd/github/hopium/src/Application.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/Application.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/ApplicationState.cpp.o -c /home/vincent/github/hopium/src/ApplicationState.cpp",
-  "file": "/home/vincent/github/hopium/src/ApplicationState.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/ApplicationState.cpp.o -c /media/hdd/github/hopium/src/ApplicationState.cpp",
+  "file": "/media/hdd/github/hopium/src/ApplicationState.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/ApplicationState.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/Event.cpp.o -c /home/vincent/github/hopium/src/Event.cpp",
-  "file": "/home/vincent/github/hopium/src/Event.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/Event.cpp.o -c /media/hdd/github/hopium/src/Event.cpp",
+  "file": "/media/hdd/github/hopium/src/Event.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/Event.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/Mode.cpp.o -c /home/vincent/github/hopium/src/Mode.cpp",
-  "file": "/home/vincent/github/hopium/src/Mode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/Mode.cpp.o -c /media/hdd/github/hopium/src/Mode.cpp",
+  "file": "/media/hdd/github/hopium/src/Mode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/Mode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/System.cpp.o -c /home/vincent/github/hopium/src/System.cpp",
-  "file": "/home/vincent/github/hopium/src/System.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/System.cpp.o -c /media/hdd/github/hopium/src/System.cpp",
+  "file": "/media/hdd/github/hopium/src/System.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/System.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/ConstraintGraph.cpp.o -c /home/vincent/github/hopium/src/cad/ConstraintGraph.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/ConstraintGraph.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/ConstraintGraph.cpp.o -c /media/hdd/github/hopium/src/cad/ConstraintGraph.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/ConstraintGraph.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/cad/ConstraintGraph.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/OcctScene.cpp.o -c /home/vincent/github/hopium/src/cad/OcctScene.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/OcctScene.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/OcctScene.cpp.o -c /media/hdd/github/hopium/src/cad/OcctScene.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/OcctScene.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/cad/OcctScene.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/OcctTest.cpp.o -c /home/vincent/github/hopium/src/cad/OcctTest.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/OcctTest.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/OcctTest.cpp.o -c /media/hdd/github/hopium/src/cad/OcctTest.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/OcctTest.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/cad/OcctTest.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/Sketch.cpp.o -c /home/vincent/github/hopium/src/cad/Sketch.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/Sketch.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/cad/Sketch.cpp.o -c /media/hdd/github/hopium/src/cad/Sketch.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/Sketch.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/cad/Sketch.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/DimensionMode.cpp.o -c /home/vincent/github/hopium/src/modes/DimensionMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/DimensionMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/DimensionMode.cpp.o -c /media/hdd/github/hopium/src/modes/DimensionMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/DimensionMode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/modes/DimensionMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/ExtrudeMode.cpp.o -c /home/vincent/github/hopium/src/modes/ExtrudeMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/ExtrudeMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/ExtrudeMode.cpp.o -c /media/hdd/github/hopium/src/modes/ExtrudeMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/ExtrudeMode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/modes/ExtrudeMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/GlobalMode.cpp.o -c /home/vincent/github/hopium/src/modes/GlobalMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/GlobalMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/GlobalMode.cpp.o -c /media/hdd/github/hopium/src/modes/GlobalMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/GlobalMode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/modes/GlobalMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/LineMode.cpp.o -c /home/vincent/github/hopium/src/modes/LineMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/LineMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/LineMode.cpp.o -c /media/hdd/github/hopium/src/modes/LineMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/LineMode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/modes/LineMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/PointMode.cpp.o -c /home/vincent/github/hopium/src/modes/PointMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/PointMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/PointMode.cpp.o -c /media/hdd/github/hopium/src/modes/PointMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/PointMode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/modes/PointMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/SketchMode.cpp.o -c /home/vincent/github/hopium/src/modes/SketchMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/SketchMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/SketchMode.cpp.o -c /media/hdd/github/hopium/src/modes/SketchMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/SketchMode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/modes/SketchMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/TLineMode.cpp.o -c /home/vincent/github/hopium/src/modes/TLineMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/TLineMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/modes/TLineMode.cpp.o -c /media/hdd/github/hopium/src/modes/TLineMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/TLineMode.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/modes/TLineMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Colorscheme.cpp.o -c /home/vincent/github/hopium/src/rendering/Colorscheme.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Colorscheme.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Colorscheme.cpp.o -c /media/hdd/github/hopium/src/rendering/Colorscheme.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Colorscheme.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/Colorscheme.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Renderer.cpp.o -c /home/vincent/github/hopium/src/rendering/Renderer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Renderer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Renderer.cpp.o -c /media/hdd/github/hopium/src/rendering/Renderer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Renderer.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/Renderer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Scene.cpp.o -c /home/vincent/github/hopium/src/rendering/Scene.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Scene.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Scene.cpp.o -c /media/hdd/github/hopium/src/rendering/Scene.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Scene.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/Scene.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ShaderStore.cpp.o -c /home/vincent/github/hopium/src/rendering/ShaderStore.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ShaderStore.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ShaderStore.cpp.o -c /media/hdd/github/hopium/src/rendering/ShaderStore.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ShaderStore.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ShaderStore.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Ui.cpp.o -c /home/vincent/github/hopium/src/rendering/Ui.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Ui.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/Ui.cpp.o -c /media/hdd/github/hopium/src/rendering/Ui.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Ui.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/Ui.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/DropDown.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/DropDown.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/DropDown.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/DropDown.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/DropDown.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/DropDown.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/DropDown.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/GraphViewer.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/GraphViewer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/GraphViewer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/GraphViewer.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/GraphViewer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/GraphViewer.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/GraphViewer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Icon.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Icon.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Icon.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Icon.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Icon.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Icon.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/Icon.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Rect.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Rect.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Rect.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Rect.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Rect.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Rect.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/Rect.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Row.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Row.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Row.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Row.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Row.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Row.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/Row.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/STreeViewer.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/STreeViewer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/STreeViewer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/STreeViewer.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/STreeViewer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/STreeViewer.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/STreeViewer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/SketchViewer.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/SketchViewer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/SketchViewer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/SketchViewer.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/SketchViewer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/SketchViewer.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/SketchViewer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Text.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Text.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Text.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Text.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Text.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Text.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/Text.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/TextInput.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/TextInput.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/TextInput.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/TextInput.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/TextInput.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/TextInput.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/TextInput.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/ToolList.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/ToolList.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/ToolList.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/ToolList.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/ToolList.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/ToolList.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/ToolList.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Viewport.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Viewport.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Viewport.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Wswitch -Werror -o CMakeFiles/Lesson_04.dir/src/rendering/ui/Viewport.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Viewport.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Viewport.cpp",
   "output": "CMakeFiles/Lesson_04.dir/src/rendering/ui/Viewport.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/test/test.cpp.o -c /home/vincent/github/hopium/test/test.cpp",
-  "file": "/home/vincent/github/hopium/test/test.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/test/test.cpp.o -c /media/hdd/github/hopium/test/test.cpp",
+  "file": "/media/hdd/github/hopium/test/test.cpp",
   "output": "CMakeFiles/test.dir/test/test.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/Application.cpp.o -c /home/vincent/github/hopium/src/Application.cpp",
-  "file": "/home/vincent/github/hopium/src/Application.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/Application.cpp.o -c /media/hdd/github/hopium/src/Application.cpp",
+  "file": "/media/hdd/github/hopium/src/Application.cpp",
   "output": "CMakeFiles/test.dir/src/Application.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/ApplicationState.cpp.o -c /home/vincent/github/hopium/src/ApplicationState.cpp",
-  "file": "/home/vincent/github/hopium/src/ApplicationState.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/ApplicationState.cpp.o -c /media/hdd/github/hopium/src/ApplicationState.cpp",
+  "file": "/media/hdd/github/hopium/src/ApplicationState.cpp",
   "output": "CMakeFiles/test.dir/src/ApplicationState.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/Event.cpp.o -c /home/vincent/github/hopium/src/Event.cpp",
-  "file": "/home/vincent/github/hopium/src/Event.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/Event.cpp.o -c /media/hdd/github/hopium/src/Event.cpp",
+  "file": "/media/hdd/github/hopium/src/Event.cpp",
   "output": "CMakeFiles/test.dir/src/Event.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/Mode.cpp.o -c /home/vincent/github/hopium/src/Mode.cpp",
-  "file": "/home/vincent/github/hopium/src/Mode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/Mode.cpp.o -c /media/hdd/github/hopium/src/Mode.cpp",
+  "file": "/media/hdd/github/hopium/src/Mode.cpp",
   "output": "CMakeFiles/test.dir/src/Mode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/System.cpp.o -c /home/vincent/github/hopium/src/System.cpp",
-  "file": "/home/vincent/github/hopium/src/System.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/System.cpp.o -c /media/hdd/github/hopium/src/System.cpp",
+  "file": "/media/hdd/github/hopium/src/System.cpp",
   "output": "CMakeFiles/test.dir/src/System.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/ConstraintGraph.cpp.o -c /home/vincent/github/hopium/src/cad/ConstraintGraph.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/ConstraintGraph.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/ConstraintGraph.cpp.o -c /media/hdd/github/hopium/src/cad/ConstraintGraph.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/ConstraintGraph.cpp",
   "output": "CMakeFiles/test.dir/src/cad/ConstraintGraph.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/OcctScene.cpp.o -c /home/vincent/github/hopium/src/cad/OcctScene.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/OcctScene.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/OcctScene.cpp.o -c /media/hdd/github/hopium/src/cad/OcctScene.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/OcctScene.cpp",
   "output": "CMakeFiles/test.dir/src/cad/OcctScene.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/OcctTest.cpp.o -c /home/vincent/github/hopium/src/cad/OcctTest.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/OcctTest.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/OcctTest.cpp.o -c /media/hdd/github/hopium/src/cad/OcctTest.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/OcctTest.cpp",
   "output": "CMakeFiles/test.dir/src/cad/OcctTest.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/Sketch.cpp.o -c /home/vincent/github/hopium/src/cad/Sketch.cpp",
-  "file": "/home/vincent/github/hopium/src/cad/Sketch.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/cad/Sketch.cpp.o -c /media/hdd/github/hopium/src/cad/Sketch.cpp",
+  "file": "/media/hdd/github/hopium/src/cad/Sketch.cpp",
   "output": "CMakeFiles/test.dir/src/cad/Sketch.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/DimensionMode.cpp.o -c /home/vincent/github/hopium/src/modes/DimensionMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/DimensionMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/DimensionMode.cpp.o -c /media/hdd/github/hopium/src/modes/DimensionMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/DimensionMode.cpp",
   "output": "CMakeFiles/test.dir/src/modes/DimensionMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/ExtrudeMode.cpp.o -c /home/vincent/github/hopium/src/modes/ExtrudeMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/ExtrudeMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/ExtrudeMode.cpp.o -c /media/hdd/github/hopium/src/modes/ExtrudeMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/ExtrudeMode.cpp",
   "output": "CMakeFiles/test.dir/src/modes/ExtrudeMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/GlobalMode.cpp.o -c /home/vincent/github/hopium/src/modes/GlobalMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/GlobalMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/GlobalMode.cpp.o -c /media/hdd/github/hopium/src/modes/GlobalMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/GlobalMode.cpp",
   "output": "CMakeFiles/test.dir/src/modes/GlobalMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/LineMode.cpp.o -c /home/vincent/github/hopium/src/modes/LineMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/LineMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/LineMode.cpp.o -c /media/hdd/github/hopium/src/modes/LineMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/LineMode.cpp",
   "output": "CMakeFiles/test.dir/src/modes/LineMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/PointMode.cpp.o -c /home/vincent/github/hopium/src/modes/PointMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/PointMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/PointMode.cpp.o -c /media/hdd/github/hopium/src/modes/PointMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/PointMode.cpp",
   "output": "CMakeFiles/test.dir/src/modes/PointMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/SketchMode.cpp.o -c /home/vincent/github/hopium/src/modes/SketchMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/SketchMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/SketchMode.cpp.o -c /media/hdd/github/hopium/src/modes/SketchMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/SketchMode.cpp",
   "output": "CMakeFiles/test.dir/src/modes/SketchMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/TLineMode.cpp.o -c /home/vincent/github/hopium/src/modes/TLineMode.cpp",
-  "file": "/home/vincent/github/hopium/src/modes/TLineMode.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/modes/TLineMode.cpp.o -c /media/hdd/github/hopium/src/modes/TLineMode.cpp",
+  "file": "/media/hdd/github/hopium/src/modes/TLineMode.cpp",
   "output": "CMakeFiles/test.dir/src/modes/TLineMode.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Colorscheme.cpp.o -c /home/vincent/github/hopium/src/rendering/Colorscheme.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Colorscheme.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Colorscheme.cpp.o -c /media/hdd/github/hopium/src/rendering/Colorscheme.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Colorscheme.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/Colorscheme.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Renderer.cpp.o -c /home/vincent/github/hopium/src/rendering/Renderer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Renderer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Renderer.cpp.o -c /media/hdd/github/hopium/src/rendering/Renderer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Renderer.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/Renderer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Scene.cpp.o -c /home/vincent/github/hopium/src/rendering/Scene.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Scene.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Scene.cpp.o -c /media/hdd/github/hopium/src/rendering/Scene.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Scene.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/Scene.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ShaderStore.cpp.o -c /home/vincent/github/hopium/src/rendering/ShaderStore.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ShaderStore.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ShaderStore.cpp.o -c /media/hdd/github/hopium/src/rendering/ShaderStore.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ShaderStore.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ShaderStore.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Ui.cpp.o -c /home/vincent/github/hopium/src/rendering/Ui.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/Ui.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/Ui.cpp.o -c /media/hdd/github/hopium/src/rendering/Ui.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/Ui.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/Ui.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/DropDown.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/DropDown.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/DropDown.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/DropDown.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/DropDown.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/DropDown.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/DropDown.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/GraphViewer.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/GraphViewer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/GraphViewer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/GraphViewer.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/GraphViewer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/GraphViewer.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/GraphViewer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Icon.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Icon.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Icon.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Icon.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Icon.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Icon.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/Icon.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Rect.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Rect.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Rect.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Rect.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Rect.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Rect.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/Rect.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Row.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Row.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Row.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Row.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Row.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Row.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/Row.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/STreeViewer.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/STreeViewer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/STreeViewer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/STreeViewer.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/STreeViewer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/STreeViewer.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/STreeViewer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/SketchViewer.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/SketchViewer.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/SketchViewer.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/SketchViewer.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/SketchViewer.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/SketchViewer.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/SketchViewer.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Text.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Text.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Text.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Text.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Text.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Text.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/Text.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/TextInput.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/TextInput.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/TextInput.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/TextInput.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/TextInput.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/TextInput.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/TextInput.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/ToolList.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/ToolList.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/ToolList.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/ToolList.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/ToolList.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/ToolList.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/ToolList.cpp.o"
 },
 {
-  "directory": "/home/vincent/github/hopium/build",
-  "command": "/usr/bin/c++  -I/home/vincent/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Viewport.cpp.o -c /home/vincent/github/hopium/src/rendering/ui/Viewport.cpp",
-  "file": "/home/vincent/github/hopium/src/rendering/ui/Viewport.cpp",
+  "directory": "/media/hdd/github/hopium/build",
+  "command": "/usr/bin/c++  -I/media/hdd/github/hopium/include -isystem /usr/include/opencascade -g -std=gnu++20 -Werror -o CMakeFiles/test.dir/src/rendering/ui/Viewport.cpp.o -c /media/hdd/github/hopium/src/rendering/ui/Viewport.cpp",
+  "file": "/media/hdd/github/hopium/src/rendering/ui/Viewport.cpp",
   "output": "CMakeFiles/test.dir/src/rendering/ui/Viewport.cpp.o"
 }
 ]
