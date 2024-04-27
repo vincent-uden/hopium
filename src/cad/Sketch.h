@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <random>
 #include <utility>
+#include <initializer_list>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -12,6 +13,9 @@
 
 
 namespace Sketch {
+
+// TODO: Move to some utils file
+Vector3 Vector3Add(std::initializer_list<Vector3> args);
 
 class SketchEntity {
 public:
@@ -93,8 +97,10 @@ public:
   NewSketch();
   ~NewSketch();
 
+  Vector3 to3d(Vector2 planarPos);
   std::shared_ptr<SketchEntity> findEntityById(std::shared_ptr<GeometricElement> v);
-  std::shared_ptr<SketchEntity> findEntityByPosition(Vector2 pos, float threshold);
+  std::shared_ptr<SketchEntity> findEntityByPositionGeneric(Vector2 pos, float threshold);
+  template<class T> std::shared_ptr<T> findEntityByPosition(Vector2 pos, float threshold);
   float sgdStep();
   float totalError();
   void addPoint(std::shared_ptr<Point> p);
@@ -110,6 +116,11 @@ public:
 
   std::vector<std::shared_ptr<SketchEntity>> entities;
   std::vector<std::shared_ptr<GuidedEntity>> guidedEntities;
+
+  Vector3 xHat;
+  Vector3 yHat;
+  Vector3 zHat;
+  float zOffset;
 private:
   std::vector<std::shared_ptr<Constraint>> edges;
 

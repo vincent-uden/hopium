@@ -10,6 +10,17 @@ namespace Sketch {
 std::default_random_engine Point::e = std::default_random_engine();
 std::default_random_engine Line::e = std::default_random_engine();
 
+Vector3 Vector3Add(std::initializer_list<Vector3> args) {
+  Vector3 out = { 0.0f, 0.0f, 0.0f };
+  for (const auto& v: args) {
+    out.x += v.x;
+    out.y += v.y;
+    out.z += v.z;
+
+  }
+  return out;
+}
+
 bool SketchEntity::selectionOverrides(SketchEntity* other) {
   if (other != nullptr) {
     return selectionPriority() <= other->selectionPriority();
@@ -215,12 +226,29 @@ Vector2 gradError(SketchEntity* p1, SketchEntity* p2, Constraint* edge) {
 }
 
 NewSketch::NewSketch() {
+  xHat = { -1.0f, 0.0f, 0.0f };
+  yHat = { 0.0f, 0.0f, 1.0f };
+  zHat = { 0.0f, 1.0f, 0.0f };
+  zOffset = 2.0f;
 }
 
 NewSketch::~NewSketch() {
 }
 
-std::shared_ptr<SketchEntity> NewSketch::findEntityById(std::shared_ptr<GeometricElement> v) {
+// Converts a position on the plane into a 3D position for use in the [Viewport]
+Vector3 NewSketch::to3d(Vector2 planarPos) {
+  Vector3 out = Vector3Add({
+    Vector3Zero(),
+    Vector3Scale(xHat, planarPos.x),
+    Vector3Scale(yHat, -planarPos.y),
+    Vector3Scale(zHat, zOffset)
+  });
+  return out;
+}
+
+std::shared_ptr<SketchEntity> NewSketch::findEntityById(
+  std::shared_ptr<GeometricElement> v
+) {
   for (const auto& p: entities) {
     if (p->v->id == v->id) {
       return p;
@@ -237,31 +265,45 @@ std::shared_ptr<SketchEntity> NewSketch::findEntityById(std::shared_ptr<Geometri
 // entity in question and a point, located at [pos]. In order to accomodate
 // user interaction, entities are picked according to a heirarchy. Otherwise
 // a point could **never** be closer to [pos] than a line.
-std::shared_ptr<SketchEntity> NewSketch::findEntityByPosition(
+std::shared_ptr<SketchEntity> NewSketch::findEntityByPositionGeneric(
   Vector2 pos,
   float threshold
 ) {
-  Point fakePoint(nullptr);
-  fakePoint.pos = pos;
+    return findEntityByPosition<SketchEntity>(pos, threshold);
+}
 
-  Constraint fakeC(ConstraintType::DISTANCE);
-  fakeC.value = 0.0;
+template <class T>
+std::shared_ptr<T> NewSketch::findEntityByPosition(
+  Vector2 pos, float threshold
+) {
+    Point fakePoint(nullptr);
+    fakePoint.pos = pos;
 
-  std::shared_ptr<SketchEntity> closest = nullptr;
-  float closestDist = INFINITY;
+    Constraint fakeC(ConstraintType::DISTANCE);
+    fakeC.value = 0.0;
 
-  for (const auto& p: entities) {
-    float dist = error(&fakePoint, p.get(), &fakeC);
-    if (dist < closestDist && p->selectionOverrides(closest.get()) && dist < threshold && !p->active) {
-      closest = p;
-      closestDist = dist;
+    std::shared_ptr<SketchEntity> closest = nullptr;
+    float closestDist = INFINITY;
+
+    for (const auto& p: entities) {
+      // Filter any entities not of type T
+      if (std::dynamic_pointer_cast<T>(p)) {
+        float dist = error(&fakePoint, p.get(), &fakeC);
+        if (
+          dist < closestDist &&
+          p->selectionOverrides(closest.get()) &&
+          dist < threshold && !p->active
+        ) {
+          closest = p;
+          closestDist = dist;
+        }
+      }
     }
-  }
-  if (closestDist > threshold) {
-    closest = nullptr;
-  }
+    if (closestDist > threshold) {
+      closest = nullptr;
+    }
 
-  return closest;
+    return closest;
 }
 
 float NewSketch::sgdStep() {
@@ -333,10 +375,15 @@ void NewSketch::connect(
 }
 
 void NewSketch::deleteEntity(std::shared_ptr<SketchEntity> a) {
-  std::erase_if(entities, [a](std::shared_ptr<SketchEntity> b) { return a->v->id == b->v->id; });
+  std::erase_if(
+    entities,
+    [a](std::shared_ptr<SketchEntity> b) { return a->v->id == b->v->id; }
+  );
   for (const auto& [edge, other] : a->v->edges) {
     other->deleteEdge(a->v);
-    std::erase_if(edges, [edge](std::shared_ptr<Constraint> c) { return c == edge; });
+    std::erase_if(
+      edges,
+      [edge](std::shared_ptr<Constraint> c) { return c == edge; });
   }
 }
 

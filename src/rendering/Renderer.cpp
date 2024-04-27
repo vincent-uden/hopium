@@ -449,6 +449,7 @@ void Area::buildViewport3D() {
 
   std::shared_ptr<Ui::Viewport> port = std::dynamic_pointer_cast<Ui::Viewport>(viewport);
   port->setScene(ApplicationState::getInstance()->scene);
+  port->setSketch(ApplicationState::getInstance()->paramSketch);
   port->setAreaPointers(&screenRect, &screenPos, &paneTexture);
 
   addUi(viewport);

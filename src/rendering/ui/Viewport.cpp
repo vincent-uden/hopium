@@ -1,4 +1,6 @@
 #include "Viewport.h"
+#include "raylib.h"
+#include <memory>
 
 namespace Ui {
 
@@ -56,6 +58,8 @@ void Viewport::draw() {
       }
     }
   }
+
+  drawSketch();
 
   EndMode3D();
 }
@@ -143,6 +147,10 @@ void Viewport::setScene(std::shared_ptr<Scene> scene) {
   this->scene = scene;
 }
 
+void Viewport::setSketch(std::shared_ptr<Sketch::NewSketch> sketch) {
+  this->sketch = sketch;
+}
+
 void Viewport::setAreaPointers(
   Rectangle* screenRect,
   Vector2* screenPos,
@@ -164,6 +172,41 @@ Ray Viewport::getNonOffsetMouseRay(Vector2 mousePos) {
   ray = GetMouseRay(Vector2Subtract(mousePos, offset), camera);
 
   return ray;
+}
+
+void Viewport::drawSketch() {
+  if (sketch) {
+    for (const auto& e: sketch->entities) {
+      if (std::shared_ptr<Sketch::Point> p = std::dynamic_pointer_cast<Sketch::Point>(e)) {
+        drawSketchEntity(p);
+      }
+      if (std::shared_ptr<Sketch::Line> l = std::dynamic_pointer_cast<Sketch::Line>(e)) {
+        drawSketchEntity(l);
+      }
+    }
+
+    for (const auto& e: sketch->guidedEntities) {
+      if (std::shared_ptr<Sketch::TrimmedLine> l = std::dynamic_pointer_cast<Sketch::TrimmedLine>(e)) {
+        drawSketchEntity(l);
+      }
+    }
+  }
+}
+
+void Viewport::drawSketchEntity(std::shared_ptr<Sketch::Point> p) {
+  DrawSphere(sketch->to3d(p->pos), 0.2, p->active ? YELLOW : GREEN);
+}
+
+void Viewport::drawSketchEntity(std::shared_ptr<Sketch::Line> l) {
+  // TODO: Draw infinite lines. Perhaps through endpoints REALLY far apart?
+}
+
+void Viewport::drawSketchEntity(std::shared_ptr<Sketch::TrimmedLine> l) {
+  DrawLine3D(
+    sketch->to3d(l->start->pos),
+    sketch->to3d(l->end->pos),
+    l->line->active ? YELLOW : GREEN
+  );
 }
 
 }

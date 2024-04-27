@@ -1,12 +1,14 @@
 #ifndef UDEN_UI_VIEWPORT
 #define UDEN_UI_VIEWPORT
 
+#include <memory>
 #include <string>
 #include <cfloat>
 
 #include  "../../ApplicationState.h"
-#include "../Ui.h"
+#include "../../cad/Sketch.h"
 #include "../Scene.h"
+#include "../Ui.h"
 
 #include <raylib.h>
 
@@ -27,14 +29,20 @@ public:
   Vector2 getSize() override;
 
   void setScene(std::shared_ptr<Scene> scene);
+  void setSketch(std::shared_ptr<Sketch::NewSketch> sketch);
   void setAreaPointers(Rectangle* screenRect, Vector2* screenPos, RenderTexture* texture);
 
   Camera3D camera = { 0 };
 private:
+  void drawSketch();
+  void drawSketchEntity(std::shared_ptr<Sketch::Point> p);
+  void drawSketchEntity(std::shared_ptr<Sketch::Line> l);
+  void drawSketchEntity(std::shared_ptr<Sketch::TrimmedLine> l);
 
   Ray getNonOffsetMouseRay(Vector2 mousePos);
 
   std::shared_ptr<Scene> scene;
+  std::shared_ptr<Sketch::NewSketch> sketch;
 
   Rectangle* areaSreenRect = nullptr;
   Vector2* areaScreenPos = nullptr;

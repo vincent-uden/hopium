@@ -31,7 +31,7 @@ bool SketchMode::processEvent(AppEvent event) {
   } else if (sketchClick* e = std::get_if<sketchClick>(&event)) {
     Vector2 mousePos(e->x, e->y);
     std::shared_ptr<Sketch::SketchEntity> clicked =
-      state->paramSketch->findEntityByPosition(
+      state->paramSketch->findEntityByPositionGeneric(
         mousePos,
         std::pow(20.0 / e->zoomScale, 2.0)
       );
