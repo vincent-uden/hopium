@@ -95,8 +95,6 @@ const AppEvent NON_SERIALIZABLE[] = {
   dumpShapes {},
   increaseZoom {},
   decreaseZoom {},
-  sketchClick {},
-  sketchConstrain {},
   exitProgram {}
 };
 

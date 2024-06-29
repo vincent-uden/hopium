@@ -229,7 +229,7 @@ NewSketch::NewSketch() {
   xHat = { -1.0f, 0.0f, 0.0f };
   yHat = { 0.0f, 0.0f, 1.0f };
   zHat = { 0.0f, 1.0f, 0.0f };
-  zOffset = 2.0f;
+  zOffset = 0.0f;
 }
 
 NewSketch::~NewSketch() {

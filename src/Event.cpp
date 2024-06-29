@@ -58,6 +58,7 @@ json EventQueue::serializeHistory() {
   for (const AppEvent& e: history) {
     json data;
     data["type"] = e.index();
+    // TODO(Vincent): Serialize sketchclick and others
     if (std::holds_alternative<sketchPlaneHit>(e)) {
       sketchPlaneHit hit = std::get<sketchPlaneHit>(e);
       data["data"]["x"] = hit.x;
