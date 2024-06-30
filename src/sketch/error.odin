@@ -95,6 +95,13 @@ error_ee :: proc(
   c: Constraint,
 ) -> f64 {
   // This is psychotic. Is there a better way to do this down cast? Perhaps using type id?
+  // We can move to a LUT approach when the switch becomes untennable as proposed by gingerBill
+  //
+  // Geometric_Entity_Kind :: enum {Point, Line}
+  // to_kind :: proc(e: Geometric_Entity) -> Geometric_Entity_Kind {
+  //  return ...
+  // }
+  // error_lut := [Geometric_Entity_Kind][Geometric_Entity_Kind]Error_Callback{...}
   switch e1 in e1^ {
   case Point:
     switch e2 in e2^ {
@@ -119,6 +126,8 @@ grad_error :: proc {
   grad_error_pp,
   grad_error_pl,
   grad_error_lp,
+  grad_error_ll,
+  grad_error_ee,
 }
 
 grad_error_pp :: proc(p1: ^Point, p2: ^Point, c: Constraint, lr: f64) {
@@ -172,6 +181,34 @@ grad_error_pl :: proc(p1: ^Point, l2: ^Line, c: Constraint, lr: f64) {
 
 grad_error_lp :: proc(l1: ^Line, p2: ^Point, c: Constraint, lr: f64) {
   grad_error_pl(p2, l1, c, lr)
+}
+
+grad_error_ll :: proc(l1: ^Line, l2: ^Line, c: Constraint, lr: f64) {
+  // TODO:
+}
+
+grad_error_ee :: proc(
+  e1: ^GeometricEntity,
+  e2: ^GeometricEntity,
+  c: Constraint,
+  lr: f64,
+) {
+  switch &e1_ in e1 {
+  case Point:
+    switch &e2_ in e2 {
+    case Point:
+      grad_error(&(e1.(Point)), &(e2.(Point)), c, lr)
+    case Line:
+      grad_error(&(e1.(Point)), &(e2.(Line)), c, lr)
+    }
+  case Line:
+    switch e2_ in e2 {
+    case Point:
+      grad_error(&(e1.(Line)), &(e2.(Point)), c, lr)
+    case Line:
+      grad_error(&(e1.(Line)), &(e2.(Line)), c, lr)
+    }
+  }
 }
 
 GraphConstraint :: struct {
