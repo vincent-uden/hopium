@@ -2,3 +2,8 @@ build
 .cache
 .ccls-cache
 compile_commands.json
+
+
+# Added by cargo
+
+/target
