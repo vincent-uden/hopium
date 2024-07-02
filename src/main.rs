@@ -2,6 +2,7 @@ use app::App;
 use raylib::{color::Color, drawing::RaylibDraw};
 
 mod app;
+#[allow(dead_code, unused_variables)]
 mod rendering;
 
 fn main() {
@@ -12,12 +13,6 @@ fn main() {
         .vsync()
         .build();
 
-    let mut app = App::new();
-
-    while !rl.window_should_close() && app.running {
-        let mut d = rl.begin_drawing(&thread);
-
-        d.clear_background(Color::GRAY);
-        d.draw_fps(10, 10);
-    }
+    let mut app = App::new(1600, 900, &mut rl, &thread);
+    app.run();
 }
