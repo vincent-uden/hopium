@@ -3,6 +3,8 @@ use raylib::{color::Color, drawing::RaylibDraw};
 
 mod app;
 #[allow(dead_code, unused_variables)]
+mod event;
+#[allow(dead_code, unused_variables)]
 mod rendering;
 
 fn main() {

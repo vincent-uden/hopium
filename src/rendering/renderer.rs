@@ -38,6 +38,19 @@ pub enum AreaType {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub struct AreaId(i64);
 
+impl AreaId {
+    pub fn increment(self) -> Self {
+        let AreaId(id) = self;
+        Self(id + 1)
+    }
+}
+
+impl Default for AreaId {
+    fn default() -> Self {
+        AreaId(-1)
+    }
+}
+
 #[derive(Debug)]
 pub struct Area {
     id: AreaId,
@@ -241,6 +254,19 @@ pub enum BoundaryOrientation {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub struct BoundaryId(i64);
 
+impl BoundaryId {
+    pub fn increment(self) -> Self {
+        let BoundaryId(id) = self;
+        Self(id + 1)
+    }
+}
+
+impl Default for BoundaryId {
+    fn default() -> Self {
+        BoundaryId(-1)
+    }
+}
+
 #[derive(Debug)]
 pub struct Boundary {
     id: BoundaryId,
@@ -254,6 +280,17 @@ pub struct Boundary {
 }
 
 impl Boundary {
+    pub fn new(id: BoundaryId, orientation: BoundaryOrientation) -> Self {
+        Self {
+            id,
+            orientation,
+            active: false,
+            thickness: 3,
+            side1: vec![],
+            side2: vec![],
+        }
+    }
+
     pub fn draw(&self, d: &mut RaylibDrawHandle, t: &RaylibThread) {
         AREA_MAP.with_borrow(|area_map| {
             let start_pos = area_map[&self.side2[0]].screen_pos.clone();
@@ -428,7 +465,12 @@ impl<'a> Renderer<'a> {
                 Area::new(
                     AreaType::Empty,
                     AreaId(0),
-                    Rectangle::new(0.0, 0.0, screen_w as f32, screen_h as f32),
+                    Rectangle {
+                        x: 0.0,
+                        y: 0.0,
+                        width: screen_w as f32,
+                        height: screen_h as f32,
+                    },
                     Vector2::default(),
                     rl.load_render_texture(t, screen_w as u32, screen_h as u32)
                         .unwrap(),
@@ -475,16 +517,110 @@ impl<'a> Renderer<'a> {
         }
     }
 
-    pub fn split_area_horizontal(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
-    }
+    fn split_area(&mut self, mouse_pos: Vector2<f64>, orientation: BoundaryOrientation) {
+        AREA_MAP.with_borrow_mut(|area_map| {
+            if let Some(to_split) = area_map.get_mut(&self.find_area(mouse_pos).unwrap_or_default())
+            {
+                let new_rect = match orientation {
+                    BoundaryOrientation::Horizontal => Rectangle {
+                        x: 0.0,
+                        y: 0.0,
+                        width: to_split.screen_rect.width / 2.0,
+                        height: to_split.screen_rect.height,
+                    },
+                    BoundaryOrientation::Vertical => Rectangle {
+                        x: 0.0,
+                        y: 0.0,
+                        width: to_split.screen_rect.width,
+                        height: to_split.screen_rect.height / 2.0,
+                    },
+                };
+                let new_pos = match orientation {
+                    BoundaryOrientation::Horizontal => Vector2::<f64>::new(
+                        to_split.screen_pos.x + to_split.screen_rect.width as f64 / 2.0,
+                        to_split.screen_pos.y,
+                    ),
+                    BoundaryOrientation::Vertical => Vector2::<f64>::new(
+                        to_split.screen_pos.x,
+                        to_split.screen_pos.y + to_split.screen_rect.height as f64 / 2.0,
+                    ),
+                };
+                let new_area = Area::new(
+                    AreaType::Empty,
+                    self.next_area_id,
+                    new_rect,
+                    new_pos,
+                    self.rl
+                        .load_render_texture(self.t, self.screen_w as u32, self.screen_h as u32)
+                        .unwrap(),
+                );
+                self.next_area_id = self.next_area_id.increment();
+                to_split.screen_rect.width /= 2.0;
 
-    pub fn split_area_vertical(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+                let mut bdry = Boundary::new(self.next_bdry_id, orientation);
+                self.next_bdry_id = self.next_bdry_id.increment();
+                bdry.side1.push(to_split.id);
+                bdry.side2.push(new_area.id);
+
+                BDRY_MAP.with_borrow_mut(|bdry_map| {
+                    if let Some(existing_bdry) =
+                        bdry_map.get_mut(&to_split.further_down_bdry_tree().unwrap_or_default())
+                    {
+                        existing_bdry.side1.retain(|id| *id != to_split.id);
+                        existing_bdry.side1.push(new_area.id);
+                    }
+                    bdry_map.insert(bdry.id, bdry);
+                });
+                area_map.insert(new_area.id, new_area);
+            }
+        });
     }
 
     pub fn collapse_boundary(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+        match self.find_boundary(mouse_pos, self.mouse_bdry_tol) {
+            Some(hovered) => {
+                BDRY_MAP.with_borrow_mut(|bdry_map| {
+                    let mut bdry = bdry_map.remove(&hovered).unwrap();
+                    if bdry.side2.len() != 1 {
+                        panic!("Cannot delete boundary with more than one child area");
+                    }
+                    bdry.collapse();
+                    AREA_MAP.with_borrow_mut(|area_map| area_map.remove(&bdry.side2[0]));
+                });
+            }
+            None => {}
+        }
+    }
+
+    fn find_boundary(&self, mouse_pos: Vector2<f64>, radius: f64) -> Option<BoundaryId> {
+        let mut out = None;
+        let mut closest_dist = f64::INFINITY;
+        BDRY_MAP.with_borrow(|bdry_map| {
+            for (id, bdry) in bdry_map.iter() {
+                let dist = bdry.distance_to_point(mouse_pos);
+                if dist < closest_dist {
+                    out = Some(id.clone());
+                    closest_dist = dist;
+                }
+            }
+        });
+        if closest_dist < radius {
+            out
+        } else {
+            None
+        }
+    }
+
+    fn find_area(&self, mouse_pos: Vector2<f64>) -> Option<AreaId> {
+        let mut out = None;
+        AREA_MAP.with_borrow(|area_map| {
+            for (id, area) in area_map.iter() {
+                if area.contains_point(mouse_pos) {
+                    out = Some(id.clone());
+                }
+            }
+        });
+        out
     }
 }
 
