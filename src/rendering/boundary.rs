@@ -6,6 +6,8 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::style;
+
 use super::{
     area::AreaId,
     renderer::{to_raylib, AREA_MAP, BDRY_MAP},
@@ -69,11 +71,12 @@ impl Boundary {
                     end_pos.y += self.extent();
                 }
             }
+            let s = style.read().unwrap();
             d.draw_line_ex(
                 to_raylib(start_pos),
                 to_raylib(end_pos),
                 self.thickness as f32,
-                Color::WHITE,
+                s.border_color,
             );
         });
     }

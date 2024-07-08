@@ -1,9 +1,10 @@
-use std::sync::Mutex;
+use std::sync::{Mutex, RwLock};
 
 use app::{App, State};
 use event::EventQueue;
 use lazy_static::lazy_static;
 use modes::ModeStack;
+use ui::style::Style;
 
 mod app;
 #[allow(dead_code, unused_variables)]
@@ -12,6 +13,8 @@ mod event;
 mod modes;
 #[allow(dead_code, unused_variables)]
 mod rendering;
+#[allow(dead_code, unused_variables)]
+mod ui;
 
 lazy_static! {
     static ref app_state: Mutex<State> = Mutex::new(State::new());
@@ -21,6 +24,9 @@ lazy_static! {
 }
 lazy_static! {
     static ref mode_stack: Mutex<ModeStack> = Mutex::new(ModeStack::new());
+}
+lazy_static! {
+    static ref style: RwLock<Style> = RwLock::new(Style::default());
 }
 
 fn main() {

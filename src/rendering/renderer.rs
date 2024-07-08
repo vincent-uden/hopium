@@ -21,6 +21,10 @@ pub fn to_raylib(x: Vector2<f64>) -> raylib::math::Vector2 {
     }
 }
 
+pub fn to_nalgebra(x: raylib::math::Vector2) -> Vector2<f64> {
+    Vector2::<f64>::new(x.x as f64, x.y as f64)
+}
+
 pub trait MouseEventHandler {
     fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool;
 
@@ -66,6 +70,7 @@ impl Renderer {
                     Vector2::default(),
                     rl.load_render_texture(t, screen_w as u32, screen_h as u32)
                         .unwrap(),
+                    rl,
                 ),
             );
         });
@@ -149,6 +154,7 @@ impl Renderer {
                     new_pos,
                     rl.load_render_texture(t, self.screen_w as u32, self.screen_h as u32)
                         .unwrap(),
+                    rl,
                 );
                 self.next_area_id = self.next_area_id.increment();
                 match orientation {

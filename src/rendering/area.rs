@@ -1,3 +1,4 @@
+use core::fmt;
 use std::collections::HashMap;
 
 use nalgebra::Vector2;
@@ -6,9 +7,14 @@ use raylib::{
     drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureModeExt},
     math::Rectangle,
     texture::{RaylibTexture2D, RenderTexture2D},
-    RaylibThread,
+    RaylibHandle, RaylibThread,
 };
 use serde::{Deserialize, Serialize};
+
+use crate::{
+    style,
+    ui::{self, text::TextAlignment, Ui},
+};
 
 use super::{
     boundary::{Boundary, BoundaryId, BoundaryOrientation},
@@ -47,7 +53,6 @@ impl Default for AreaId {
     }
 }
 
-#[derive(Debug)]
 pub struct Area {
     pub id: AreaId,
     pub area_type: AreaType,
@@ -56,6 +61,7 @@ pub struct Area {
     pub active: bool,
     pub anchor: RenderAnchor,
     pub texture: RenderTexture2D,
+    pub ui: Vec<Box<dyn Ui>>,
 }
 
 impl Area {
@@ -65,6 +71,7 @@ impl Area {
         screen_rect: Rectangle,
         screen_pos: Vector2<f64>,
         texture: RenderTexture2D,
+        rl: &mut RaylibHandle,
     ) -> Self {
         let mut out = Self {
             id,
@@ -74,6 +81,7 @@ impl Area {
             active: false,
             anchor: RenderAnchor::Left,
             texture,
+            ui: vec![],
         };
         match area_type {
             AreaType::Viewport3d => {
@@ -88,16 +96,37 @@ impl Area {
             AreaType::SketchViewer => {
                 out.build_sketch_viewer();
             }
-            _ => {}
+            AreaType::Empty => {
+                out.build_empty(rl);
+            }
         }
         out
     }
 
     pub fn draw(&mut self, d: &mut RaylibDrawHandle, t: &RaylibThread) {
+        let offset = Vector2::<f64>::new(
+            ((self.texture.width() as f32 - self.screen_rect.width) / 2.0) as f64,
+            ((self.texture.height() as f32 - self.screen_rect.height) / 2.0) as f64,
+        );
         {
             let mut td = d.begin_texture_mode(t, &mut self.texture);
-            td.clear_background(Color::GRAY);
-            // TODO: Translate and draw contained ui when it exists
+            let s = style.read().unwrap();
+            td.clear_background(s.bg_color);
+            for ui in &mut self.ui {
+                match self.area_type {
+                    AreaType::Empty | AreaType::Viewport3d => {
+                        ui.move_relative(-offset);
+                    }
+                    _ => {}
+                }
+                ui.draw(&mut td, t);
+                match self.area_type {
+                    AreaType::Empty | AreaType::Viewport3d => {
+                        ui.move_relative(offset);
+                    }
+                    _ => {}
+                }
+            }
         }
         let mut draw_rect = self.screen_rect;
         draw_rect.y = -draw_rect.height;
@@ -105,11 +134,11 @@ impl Area {
         match self.anchor {
             RenderAnchor::Left => {}
             RenderAnchor::Center => {
-                draw_rect.x = (self.texture.width() as f32 - self.screen_rect.width) / 2.0;
-                draw_rect.y = (self.texture.height() as f32 - self.screen_rect.height) / 2.0;
+                //draw_rect.x = (self.texture.width() as f32 - self.screen_rect.width) / 2.0;
+                //draw_rect.y = (self.texture.height() as f32 - self.screen_rect.height) / 2.0;
             }
             RenderAnchor::Right => {
-                draw_rect.x = self.texture.width() as f32 - self.screen_rect.width;
+                //draw_rect.x = self.texture.width() as f32 - self.screen_rect.width;
             }
         }
         draw_rect.x = draw_rect.x.round();
@@ -197,6 +226,35 @@ impl Area {
     }
     fn build_sketch_viewer(&mut self) {
         todo!()
+    }
+
+    fn build_empty(&mut self, rl: &mut RaylibHandle) {
+        let mut text = Box::new(ui::text::Text::new());
+        text.set_pos(Vector2::<f64>::new(
+            self.texture.width() as f64 / 2.0,
+            self.texture.height() as f64 / 2.0,
+        ));
+        text.align = TextAlignment::CENTER;
+        let AreaId(n) = self.id;
+        text.set_text(format!("{:?}", n), rl);
+        text.set_font_size(40.0, rl);
+        self.ui.push(text);
+        self.anchor = RenderAnchor::Center;
+    }
+}
+
+impl fmt::Debug for Area {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Area")
+            .field("id", &self.id)
+            .field("area_type", &self.area_type)
+            .field("screen_rect", &self.screen_rect)
+            .field("screen_pos", &self.screen_pos)
+            .field("active", &self.active)
+            .field("anchor", &self.anchor)
+            .field("texture", &self.texture)
+            .field("ui", &self.ui.len())
+            .finish()
     }
 }
 
