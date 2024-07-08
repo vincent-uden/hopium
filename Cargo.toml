@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+lazy_static = "1.5.0"
 nalgebra = { version = "0.33.0", features = ["serde-serialize"] }
 raylib = { version = "5.0", features = ["wayland", "nalgebra", "nalgebra_interop"] }
 serde = { version = "1.0.203", features = ["derive"] }
