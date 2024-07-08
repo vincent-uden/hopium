@@ -69,7 +69,8 @@ impl Renderer {
                 ),
             );
         });
-        let out = Self {
+
+        Self {
             screen_w,
             screen_h,
             mouse_bdry_tol: 5.0,
@@ -77,8 +78,7 @@ impl Renderer {
             grabbed: None,
             next_area_id: AreaId(1),
             next_bdry_id: BoundaryId(0),
-        };
-        out
+        }
     }
 
     pub fn draw(&mut self, rl: &mut RaylibHandle, t: &RaylibThread) {
@@ -116,16 +116,16 @@ impl Renderer {
     ) {
         AREA_MAP.with_borrow_mut(|area_map| {
             if let Some(to_split) =
-                area_map.get_mut(&self.find_area(mouse_pos, &area_map).unwrap_or_default())
+                area_map.get_mut(&self.find_area(mouse_pos, area_map).unwrap_or_default())
             {
                 let new_rect = match orientation {
-                    BoundaryOrientation::Horizontal => Rectangle {
+                    BoundaryOrientation::Vertical => Rectangle {
                         x: 0.0,
                         y: 0.0,
                         width: to_split.screen_rect.width / 2.0,
                         height: to_split.screen_rect.height,
                     },
-                    BoundaryOrientation::Vertical => Rectangle {
+                    BoundaryOrientation::Horizontal => Rectangle {
                         x: 0.0,
                         y: 0.0,
                         width: to_split.screen_rect.width,
@@ -133,11 +133,11 @@ impl Renderer {
                     },
                 };
                 let new_pos = match orientation {
-                    BoundaryOrientation::Horizontal => Vector2::<f64>::new(
+                    BoundaryOrientation::Vertical => Vector2::<f64>::new(
                         to_split.screen_pos.x + to_split.screen_rect.width as f64 / 2.0,
                         to_split.screen_pos.y,
                     ),
-                    BoundaryOrientation::Vertical => Vector2::<f64>::new(
+                    BoundaryOrientation::Horizontal => Vector2::<f64>::new(
                         to_split.screen_pos.x,
                         to_split.screen_pos.y + to_split.screen_rect.height as f64 / 2.0,
                     ),
@@ -151,7 +151,14 @@ impl Renderer {
                         .unwrap(),
                 );
                 self.next_area_id = self.next_area_id.increment();
-                to_split.screen_rect.width /= 2.0;
+                match orientation {
+                    BoundaryOrientation::Horizontal => {
+                        to_split.screen_rect.height /= 2.0;
+                    }
+                    BoundaryOrientation::Vertical => {
+                        to_split.screen_rect.width /= 2.0;
+                    }
+                }
 
                 let mut bdry = Boundary::new(self.next_bdry_id, orientation);
                 self.next_bdry_id = self.next_bdry_id.increment();
@@ -159,13 +166,13 @@ impl Renderer {
                 bdry.side2.push(new_area.id);
 
                 BDRY_MAP.with_borrow_mut(|bdry_map| {
-                    if let Some(existing_bdry) = bdry_map.get_mut(
-                        &to_split
-                            .further_down_bdry_tree(&bdry_map)
-                            .unwrap_or_default(),
-                    ) {
-                        existing_bdry.side1.retain(|id| *id != to_split.id);
-                        existing_bdry.side1.push(new_area.id);
+                    for id in to_split.further_down_bdry_tree(bdry_map) {
+                        if let Some(existing_bdry) = bdry_map.get_mut(&id) {
+                            if existing_bdry.orientation == bdry.orientation {
+                                existing_bdry.side1.retain(|id| *id != to_split.id);
+                            }
+                            existing_bdry.side1.push(new_area.id);
+                        }
                     }
                     bdry_map.insert(bdry.id, bdry);
                 });
@@ -175,18 +182,15 @@ impl Renderer {
     }
 
     pub fn collapse_boundary(&mut self, mouse_pos: Vector2<f64>) {
-        match self.find_boundary(mouse_pos, self.mouse_bdry_tol) {
-            Some(hovered) => {
-                BDRY_MAP.with_borrow_mut(|bdry_map| {
-                    let mut bdry = bdry_map.remove(&hovered).unwrap();
-                    if bdry.side2.len() != 1 {
-                        panic!("Cannot delete boundary with more than one child area");
-                    }
-                    bdry.collapse();
-                    AREA_MAP.with_borrow_mut(|area_map| area_map.remove(&bdry.side2[0]));
-                });
-            }
-            None => {}
+        if let Some(hovered) = self.find_boundary(mouse_pos, self.mouse_bdry_tol) {
+            BDRY_MAP.with_borrow_mut(|bdry_map| {
+                let mut bdry = bdry_map.remove(&hovered).unwrap();
+                if bdry.side2.len() != 1 {
+                    panic!("Cannot delete boundary with more than one child area");
+                }
+                bdry.collapse();
+                AREA_MAP.with_borrow_mut(|area_map| area_map.remove(&bdry.side2[0]));
+            });
         }
     }
 
@@ -197,7 +201,7 @@ impl Renderer {
             for (id, bdry) in bdry_map.iter() {
                 let dist = bdry.distance_to_point(mouse_pos);
                 if dist < closest_dist {
-                    out = Some(id.clone());
+                    out = Some(*id);
                     closest_dist = dist;
                 }
             }
@@ -217,10 +221,25 @@ impl Renderer {
         let mut out = None;
         for (id, area) in area_map.iter() {
             if area.contains_point(mouse_pos) {
-                out = Some(id.clone());
+                out = Some(*id);
             }
         }
         out
+    }
+
+    pub fn dump_layout(&self) {
+        println!("Areas");
+        AREA_MAP.with_borrow(|area_map| {
+            for area in area_map.values() {
+                println!("  {:#?}", area);
+            }
+        });
+        println!("Boundaries");
+        BDRY_MAP.with_borrow(|bdry_map| {
+            for bdry in bdry_map.values() {
+                println!("  {:#?}", bdry);
+            }
+        });
     }
 }
 

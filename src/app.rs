@@ -52,9 +52,8 @@ impl<'a> App<'a> {
                 let mut ms = mode_stack.lock().unwrap();
                 match maybe_event {
                     Some(event) => {
-                        if !ms.process_event(event) {
-                            self.process_event(event);
-                        }
+                        ms.process_event(event);
+                        self.process_event(event);
                     }
                     None => {
                         is_empty = true;
@@ -85,17 +84,18 @@ impl<'a> App<'a> {
 
     pub fn process_event(&mut self, event: Event) {
         match event {
-            Event::SplitPaneHorizontally { mouse_pos } => self.renderer.split_area(
-                mouse_pos,
-                BoundaryOrientation::Vertical,
-                &mut self.rl,
-                &self.t,
-            ),
+            Event::DumpLayout => {
+                self.renderer.dump_layout();
+            }
+            Event::SplitPaneHorizontally { mouse_pos } => {
+                self.renderer
+                    .split_area(mouse_pos, BoundaryOrientation::Vertical, self.rl, self.t)
+            }
             Event::SplitPaneVertically { mouse_pos } => self.renderer.split_area(
                 mouse_pos,
                 BoundaryOrientation::Horizontal,
-                &mut self.rl,
-                &self.t,
+                self.rl,
+                self.t,
             ),
             Event::CollapseBoundary { mouse_pos } => self.renderer.collapse_boundary(mouse_pos),
             _ => {}

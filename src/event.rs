@@ -26,6 +26,7 @@ pub enum Event {
     IncreaseZoom,
     DecreaseZoom,
     ExitProgram,
+    DumpLayout,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

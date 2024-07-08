@@ -99,7 +99,7 @@ impl Area {
             td.clear_background(Color::GRAY);
             // TODO: Translate and draw contained ui when it exists
         }
-        let mut draw_rect = self.screen_rect.clone();
+        let mut draw_rect = self.screen_rect;
         draw_rect.y = -draw_rect.height;
         draw_rect.height *= -1.0;
         match self.anchor {
@@ -176,11 +176,11 @@ impl Area {
     pub fn further_down_bdry_tree(
         &self,
         bdry_map: &HashMap<BoundaryId, Boundary>,
-    ) -> Option<BoundaryId> {
-        let mut out = None;
+    ) -> Vec<BoundaryId> {
+        let mut out = vec![];
         for (id, bdry) in bdry_map.iter() {
             if bdry.side1.contains(&self.id) {
-                out = Some(*id);
+                out.push(*id);
             }
         }
         out
@@ -204,12 +204,10 @@ impl MouseEventHandler for Area {
     fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool {
         if mouse_pos.x > self.screen_pos.x
             && mouse_pos.x < self.screen_pos.x + self.screen_rect.width as f64
+            && mouse_pos.y > self.screen_pos.y
+            && mouse_pos.y < self.screen_pos.y + self.screen_rect.height as f64
         {
-            if mouse_pos.y > self.screen_pos.y
-                && mouse_pos.y < self.screen_pos.y + self.screen_rect.height as f64
-            {
-                return true;
-            }
+            return true;
         }
         false
     }

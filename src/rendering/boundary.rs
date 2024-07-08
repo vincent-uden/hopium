@@ -59,8 +59,8 @@ impl Boundary {
 
     pub fn draw(&self, d: &mut RaylibDrawHandle, t: &RaylibThread) {
         AREA_MAP.with_borrow(|area_map| {
-            let start_pos = area_map[&self.side2[0]].screen_pos.clone();
-            let mut end_pos = start_pos.clone();
+            let start_pos = area_map[&self.side2[0]].screen_pos;
+            let mut end_pos = start_pos;
             match self.orientation {
                 BoundaryOrientation::Horizontal => {
                     end_pos.x += self.extent();
@@ -69,7 +69,6 @@ impl Boundary {
                     end_pos.y += self.extent();
                 }
             }
-            println!("Start: {:?} End: {:?}", &start_pos, &end_pos);
             d.draw_line_ex(
                 to_raylib(start_pos),
                 to_raylib(end_pos),
@@ -83,16 +82,30 @@ impl Boundary {
         let mut total = 0.0;
         AREA_MAP.with_borrow(|area_map| match self.orientation {
             BoundaryOrientation::Horizontal => {
+                let mut total1 = 0.0;
+                let mut total2 = 0.0;
                 for area_id in &self.side1 {
                     let area = &area_map[area_id];
-                    total += area.screen_rect.height;
+                    total1 += area.screen_rect.width;
                 }
+                for area_id in &self.side2 {
+                    let area = &area_map[area_id];
+                    total2 += area.screen_rect.width;
+                }
+                total = total1.max(total2);
             }
             BoundaryOrientation::Vertical => {
+                let mut total1 = 0.0;
+                let mut total2 = 0.0;
                 for area_id in &self.side1 {
                     let area = &area_map[area_id];
-                    total += area.screen_rect.height;
+                    total1 += area.screen_rect.height;
                 }
+                for area_id in &self.side2 {
+                    let area = &area_map[area_id];
+                    total2 += area.screen_rect.height;
+                }
+                total = total1.max(total2);
             }
         });
         total as f64
@@ -141,8 +154,8 @@ impl Boundary {
                 }
                 let to_delete = area_map.get(&self.side2[0]).unwrap();
                 BDRY_MAP.with_borrow_mut(|bdry_map| {
-                    if let Some(bdry_id) = to_delete.further_down_bdry_tree(&bdry_map) {
-                        let bdry = bdry_map.get_mut(&bdry_id).unwrap();
+                    if let Some(bdry_id) = to_delete.further_down_bdry_tree(bdry_map).first() {
+                        let bdry = bdry_map.get_mut(bdry_id).unwrap();
                         bdry.side1.push(self.side1[0]);
                     }
                 })
@@ -151,17 +164,11 @@ impl Boundary {
     }
 
     pub fn delete_area(&mut self, to_delete: &AreaId) {
-        match self.side1.iter().position(|x| *x == *to_delete) {
-            Some(i) => {
-                self.side1.remove(i);
-            }
-            None => {}
+        if let Some(i) = self.side1.iter().position(|x| *x == *to_delete) {
+            self.side1.remove(i);
         }
-        match self.side2.iter().position(|x| *x == *to_delete) {
-            Some(i) => {
-                self.side2.remove(i);
-            }
-            None => {}
+        if let Some(i) = self.side2.iter().position(|x| *x == *to_delete) {
+            self.side2.remove(i);
         }
     }
 
@@ -173,21 +180,21 @@ impl Boundary {
             match self.orientation {
                 BoundaryOrientation::Horizontal => {
                     for area_id in &self.side1 {
-                        let area = area_map.get_mut(&area_id).unwrap();
+                        let area = area_map.get_mut(area_id).unwrap();
                         area.screen_rect.height += diff.y as f32;
                     }
                     for area_id in &self.side2 {
-                        let area = area_map.get_mut(&area_id).unwrap();
+                        let area = area_map.get_mut(area_id).unwrap();
                         area.screen_rect.height -= diff.y as f32;
                     }
                 }
                 BoundaryOrientation::Vertical => {
                     for area_id in &self.side1 {
-                        let area = area_map.get_mut(&area_id).unwrap();
+                        let area = area_map.get_mut(area_id).unwrap();
                         area.screen_rect.width += diff.x as f32;
                     }
                     for area_id in &self.side2 {
-                        let area = area_map.get_mut(&area_id).unwrap();
+                        let area = area_map.get_mut(area_id).unwrap();
                         area.screen_rect.width -= diff.x as f32;
                     }
                 }
