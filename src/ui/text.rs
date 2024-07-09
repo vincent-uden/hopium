@@ -10,13 +10,13 @@ use crate::{
     STYLE,
 };
 
-use super::{Drawable, MouseEventHandler};
+use super::{Drawable, MouseEventHandler, UiId};
 
 #[derive(Debug)]
 pub enum TextAlignment {
-    LEFT,
-    CENTER,
-    RIGHT,
+    Left,
+    Center,
+    Right,
 }
 
 pub struct Text {
@@ -25,23 +25,25 @@ pub struct Text {
     pub align: TextAlignment,
     text: String,
     font_size: f32,
-    on_mouse_enter: Option<Box<dyn FnMut()>>,
-    on_mouse_exit: Option<Box<dyn FnMut()>>,
+    on_mouse_enter: Option<Box<dyn FnMut(UiId)>>,
+    on_mouse_exit: Option<Box<dyn FnMut(UiId)>>,
     hovered: bool,
+    id: UiId,
 }
 
 // TODO: Move off the default font
 impl Text {
-    pub fn new() -> Self {
+    pub fn new(id: UiId) -> Self {
         Self {
             pos: Vector2::<f64>::new(0.0, 0.0),
             size: Vector2::<f64>::new(0.0, 0.0),
-            align: TextAlignment::LEFT,
+            align: TextAlignment::Left,
             text: "".to_string(),
             font_size: 20.0,
             on_mouse_enter: None,
             on_mouse_exit: None,
             hovered: false,
+            id,
         }
     }
 
@@ -77,11 +79,11 @@ impl Drawable for Text {
     fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &raylib::RaylibThread) {
         let mut draw_pos = self.pos;
         match self.align {
-            TextAlignment::LEFT => {}
-            TextAlignment::CENTER => {
+            TextAlignment::Left => {}
+            TextAlignment::Center => {
                 draw_pos.x -= self.size.x / 2.0;
             }
-            TextAlignment::RIGHT => {
+            TextAlignment::Right => {
                 draw_pos.x -= self.size.x;
             }
         }
@@ -103,21 +105,25 @@ impl Drawable for Text {
 
 impl MouseEventHandler for Text {
     fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool {
-        todo!()
+        mouse_pos.x > self.pos.x
+            && mouse_pos.x < self.pos.x + self.size.x
+            && mouse_pos.y > self.pos.y
+            && mouse_pos.y < self.pos.y + self.size.y
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
+        let id = self.id.clone();
         if self.contains_point(mouse_pos) {
             if !self.hovered {
                 if let Some(f) = self.get_on_mouse_enter() {
-                    f();
+                    f(id);
                 }
             }
             self.hovered = true;
         } else {
             if self.hovered {
                 if let Some(f) = self.get_on_mouse_exit() {
-                    f();
+                    f(id);
                 }
             }
             self.hovered = false;
@@ -132,19 +138,19 @@ impl MouseEventHandler for Text {
         todo!()
     }
 
-    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<dyn FnMut()>> {
+    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<(dyn FnMut(UiId) + 'static)>> {
         self.on_mouse_enter.as_mut()
     }
 
-    fn set_on_mouse_enter(&mut self, f: Box<dyn FnMut()>) {
+    fn set_on_mouse_enter(&mut self, f: Box<(dyn FnMut(UiId) + 'static)>) {
         self.on_mouse_enter = Some(f);
     }
 
-    fn get_on_mouse_exit(&mut self) -> Option<&mut Box<dyn FnMut()>> {
+    fn get_on_mouse_exit(&mut self) -> Option<&mut Box<(dyn FnMut(UiId) + 'static)>> {
         self.on_mouse_exit.as_mut()
     }
 
-    fn set_on_mouse_exit(&mut self, f: Box<dyn FnMut()>) {
+    fn set_on_mouse_exit(&mut self, f: Box<dyn FnMut(UiId)>) {
         self.on_mouse_exit = Some(f);
     }
 }

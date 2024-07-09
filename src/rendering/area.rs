@@ -236,17 +236,16 @@ impl Area {
     }
 
     fn build_empty(&mut self, rl: &mut RaylibHandle) {
-        let mut text = Box::new(ui::text::Text::new());
-        text.set_pos(Vector2::<f64>::new(
-            self.texture.width() as f64 / 2.0,
-            self.texture.height() as f64 / 2.0,
-        ));
-        text.align = TextAlignment::CENTER;
-        let AreaId(n) = self.id;
-        text.set_text(format!("{:?}", n), rl);
-        text.set_font_size(40.0, rl);
-        //text.set_on_mouse_enter(Box::new(|| text.set_font_size(20.0, rl)));
         UI_MAP.with_borrow_mut(|ui_map| {
+            let mut text = Box::new(ui::text::Text::new(ui_map.next_id()));
+            text.set_pos(Vector2::<f64>::new(
+                self.texture.width() as f64 / 2.0,
+                self.texture.height() as f64 / 2.0,
+            ));
+            text.align = TextAlignment::Center;
+            let AreaId(n) = self.id;
+            text.set_text(format!("{:?}", n), rl);
+            text.set_font_size(40.0, rl);
             self.ui.push(ui_map.insert(text));
         });
         self.anchor = RenderAnchor::Center;

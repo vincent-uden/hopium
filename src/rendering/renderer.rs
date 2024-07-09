@@ -6,10 +6,9 @@ use raylib::{
     RaylibThread,
 };
 
-use crate::registry::RegId;
-use crate::registry::Registry;
 use crate::ui::MouseEventHandler;
 use crate::APP_STATE;
+use crate::{registry::Registry, ui::UiId};
 
 use super::{
     area::{Area, AreaId, AreaType},
@@ -95,6 +94,9 @@ impl Renderer {
         if rl.is_key_pressed(KeyboardKey::KEY_Q) {
             state.running = false;
         }
+
+        let mouse_pos = to_nalgebra(rl.get_mouse_position());
+        self.receive_mouse_pos(mouse_pos);
     }
 
     pub fn split_area(
@@ -286,9 +288,9 @@ impl MouseEventHandler for Renderer {
         });
     }
 
-    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<(dyn FnMut() + 'static)>> {
+    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<(dyn FnMut(UiId) + 'static)>> {
         None
     }
 
-    fn set_on_mouse_enter(&mut self, f: Box<dyn FnMut()>) {}
+    fn set_on_mouse_enter(&mut self, f: Box<(dyn FnMut(UiId) + 'static)>) {}
 }

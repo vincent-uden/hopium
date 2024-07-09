@@ -79,17 +79,3 @@ pub trait RegId {
     fn new() -> Self;
     fn increment(self) -> Self;
 }
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
-pub struct UiId(pub i64);
-
-impl RegId for UiId {
-    fn new() -> Self {
-        Self(0)
-    }
-
-    fn increment(self) -> Self {
-        let UiId(id) = self;
-        Self(id + 1)
-    }
-}

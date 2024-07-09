@@ -46,17 +46,17 @@ pub trait MouseEventHandler {
 
     fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {}
 
-    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<dyn FnMut()>> {
+    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<dyn FnMut(UiId)>> {
         None
     }
 
-    fn set_on_mouse_enter(&mut self, f: Box<dyn FnMut()>) {}
+    fn set_on_mouse_enter(&mut self, f: Box<dyn FnMut(UiId)>) {}
 
-    fn get_on_mouse_exit(&mut self) -> Option<&mut Box<dyn FnMut()>> {
+    fn get_on_mouse_exit(&mut self) -> Option<&mut Box<dyn FnMut(UiId)>> {
         None
     }
 
-    fn set_on_mouse_exit(&mut self, f: Box<dyn FnMut()>) {}
+    fn set_on_mouse_exit(&mut self, f: Box<dyn FnMut(UiId)>) {}
 }
 
 pub trait Ui: Drawable + MouseEventHandler {}
