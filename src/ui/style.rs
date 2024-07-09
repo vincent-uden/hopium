@@ -11,7 +11,7 @@ pub struct Style {
 impl Default for Style {
     fn default() -> Self {
         Self {
-            bg_color: Color::new(31, 31, 31, 255),
+            bg_color: Color::new(51, 51, 51, 255),
             border_color: Color::new(15, 15, 15, 255),
             text_2xl: 40.0,
         }

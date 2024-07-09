@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
 
 use nalgebra::Vector2;
 use raylib::{
@@ -7,10 +6,10 @@ use raylib::{
     RaylibThread,
 };
 
-use crate::{
-    ui::{MouseEventHandler, RegId, Registry},
-    APP_STATE,
-};
+use crate::registry::RegId;
+use crate::registry::Registry;
+use crate::ui::MouseEventHandler;
+use crate::APP_STATE;
 
 use super::{
     area::{Area, AreaId, AreaType},
@@ -44,24 +43,21 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(screen_w: i32, screen_h: i32, rl: &mut RaylibHandle, t: &RaylibThread) -> Self {
-        AREA_MAP.with(|areas| {
-            areas.borrow_mut().insert(
-                AreaId(0),
-                Area::new(
-                    AreaType::Empty,
-                    AreaId(0),
-                    Rectangle {
-                        x: 0.0,
-                        y: 0.0,
-                        width: screen_w as f32,
-                        height: screen_h as f32,
-                    },
-                    Vector2::default(),
-                    rl.load_render_texture(t, screen_w as u32, screen_h as u32)
-                        .unwrap(),
-                    rl,
-                ),
-            );
+        AREA_MAP.with_borrow_mut(|areas| {
+            areas.insert(Area::new(
+                AreaType::Empty,
+                areas.next_id(),
+                Rectangle {
+                    x: 0.0,
+                    y: 0.0,
+                    width: screen_w as f32,
+                    height: screen_h as f32,
+                },
+                Vector2::default(),
+                rl.load_render_texture(t, screen_w as u32, screen_h as u32)
+                    .unwrap(),
+                rl,
+            ));
         });
 
         Self {
@@ -109,6 +105,7 @@ impl Renderer {
         t: &RaylibThread,
     ) {
         AREA_MAP.with_borrow_mut(|area_map| {
+            let next_area_id = area_map.next_id();
             if let Some(to_split) =
                 area_map.get_mut(&self.find_area(mouse_pos, area_map).unwrap_or_default())
             {
@@ -138,14 +135,13 @@ impl Renderer {
                 };
                 let new_area = Area::new(
                     AreaType::Empty,
-                    self.next_area_id,
+                    next_area_id,
                     new_rect,
                     new_pos,
                     rl.load_render_texture(t, self.screen_w as u32, self.screen_h as u32)
                         .unwrap(),
                     rl,
                 );
-                self.next_area_id = self.next_area_id.increment();
                 match orientation {
                     BoundaryOrientation::Horizontal => {
                         to_split.screen_rect.height /= 2.0;
@@ -156,7 +152,6 @@ impl Renderer {
                 }
 
                 let mut bdry = Boundary::new(self.next_bdry_id, orientation);
-                self.next_bdry_id = self.next_bdry_id.increment();
                 bdry.side1.push(to_split.id);
                 bdry.side2.push(new_area.id);
 
@@ -169,9 +164,9 @@ impl Renderer {
                             existing_bdry.side1.push(new_area.id);
                         }
                     }
-                    bdry_map.insert(bdry.id, bdry);
+                    bdry_map.insert(bdry);
                 });
-                area_map.insert(new_area.id, new_area);
+                area_map.insert(new_area);
             }
         });
     }

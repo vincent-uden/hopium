@@ -1,5 +1,4 @@
 use core::fmt;
-use std::collections::HashMap;
 
 use nalgebra::Vector2;
 use raylib::{
@@ -11,12 +10,9 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    ui::{
-        self, text::TextAlignment, Drawable, MouseEventHandler, RegId, Registry, Ui, UiId, UI_MAP,
-    },
-    STYLE,
-};
+use crate::registry::Registry;
+use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, UiId, UI_MAP};
+use crate::{registry::RegId, STYLE};
 
 use super::{
     boundary::{Boundary, BoundaryId, BoundaryOrientation},
@@ -250,6 +246,9 @@ impl Area {
         text.set_text(format!("{:?}", n), rl);
         text.set_font_size(40.0, rl);
         //text.set_on_mouse_enter(Box::new(|| text.set_font_size(20.0, rl)));
+        UI_MAP.with_borrow_mut(|ui_map| {
+            self.ui.push(ui_map.insert(text));
+        });
         self.anchor = RenderAnchor::Center;
     }
 }

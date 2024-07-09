@@ -1,12 +1,4 @@
-use std::{
-    cell::RefCell,
-    collections::{
-        hash_map::{Iter, Values, ValuesMut},
-        HashMap,
-    },
-    hash::Hash,
-    ops::{Index, IndexMut},
-};
+use std::{cell::RefCell, hash::Hash};
 
 use nalgebra::Vector2;
 use raylib::{
@@ -14,79 +6,11 @@ use raylib::{
     RaylibThread,
 };
 
+use crate::registry::{RegId, Registry};
+
 pub mod rect;
 pub mod style;
 pub mod text;
-
-pub struct Registry<K: RegId + Eq + Hash, V> {
-    map: HashMap<K, V>,
-    next_id: K,
-}
-
-impl<K: RegId + Eq + Hash, V> Registry<K, V> {
-    pub fn new() -> Self {
-        Self {
-            map: HashMap::new(),
-            next_id: K::new(),
-        }
-    }
-
-    #[inline(always)]
-    pub fn insert(&mut self, k: K, v: V) {
-        self.map.insert(k, v);
-    }
-
-    #[inline(always)]
-    pub fn clear(&mut self) {
-        self.map.clear();
-    }
-
-    #[inline(always)]
-    pub fn values(&self) -> Values<K, V> {
-        self.map.values()
-    }
-
-    #[inline(always)]
-    pub fn values_mut(&mut self) -> ValuesMut<K, V> {
-        self.map.values_mut()
-    }
-
-    #[inline(always)]
-    pub fn iter(&self) -> Iter<'_, K, V> {
-        self.map.iter()
-    }
-
-    #[inline(always)]
-    pub fn get_mut(&mut self, k: &K) -> Option<&mut V> {
-        self.map.get_mut(k)
-    }
-
-    #[inline(always)]
-    pub fn remove(&mut self, k: &K) -> Option<V> {
-        self.map.remove(k)
-    }
-}
-
-impl<K: RegId + Eq + Hash, V> Index<K> for Registry<K, V> {
-    type Output = V;
-
-    #[inline(always)]
-    fn index(&self, index: K) -> &Self::Output {
-        &self.map[&index]
-    }
-}
-
-impl<K: RegId + Eq + Hash, V> IndexMut<K> for Registry<K, V> {
-    #[inline(always)]
-    fn index_mut(&mut self, index: K) -> &mut Self::Output {
-        self.map.get_mut(&index).unwrap()
-    }
-}
-
-pub trait RegId {
-    fn new() -> Self;
-    fn increment(self) -> Self;
-}
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub struct UiId(pub i64);

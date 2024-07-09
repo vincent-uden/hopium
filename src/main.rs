@@ -1,19 +1,18 @@
-use std::{
-    collections::{HashMap, HashSet},
-    sync::{Mutex, RwLock},
-};
+use std::sync::{Mutex, RwLock};
 
 use app::{App, State};
 use event::EventQueue;
 use lazy_static::lazy_static;
 use modes::ModeStack;
-use ui::{style::Style, Ui, UiId};
+use ui::style::Style;
 
 mod app;
 #[allow(dead_code, unused_variables)]
 mod event;
 #[allow(dead_code, unused_variables)]
 mod modes;
+#[allow(dead_code, unused_variables)]
+mod registry;
 #[allow(dead_code, unused_variables)]
 mod rendering;
 #[allow(dead_code, unused_variables)]

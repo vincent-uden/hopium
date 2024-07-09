@@ -1,12 +1,11 @@
 use nalgebra::Vector2;
 use raylib::{
-    color::Color,
     drawing::{RaylibDraw, RaylibDrawHandle},
     RaylibThread,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{ui::RegId, STYLE};
+use crate::{registry::RegId, STYLE};
 
 use super::{
     area::AreaId,
