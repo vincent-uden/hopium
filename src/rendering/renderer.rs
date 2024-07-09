@@ -7,7 +7,10 @@ use raylib::{
     RaylibThread,
 };
 
-use crate::app_state;
+use crate::{
+    ui::{MouseEventHandler, RegId, Registry},
+    APP_STATE,
+};
 
 use super::{
     area::{Area, AreaId, AreaType},
@@ -25,22 +28,8 @@ pub fn to_nalgebra(x: raylib::math::Vector2) -> Vector2<f64> {
     Vector2::<f64>::new(x.x as f64, x.y as f64)
 }
 
-pub trait MouseEventHandler {
-    fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool;
-
-    fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>);
-
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>);
-
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>);
-
-    fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64);
-
-    // TODO: Set mouse event listeners
-}
-
-thread_local!(pub static AREA_MAP: RefCell<HashMap<AreaId, Area>> = RefCell::new(HashMap::new()));
-thread_local!(pub static BDRY_MAP: RefCell<HashMap<BoundaryId, Boundary>> = RefCell::new(HashMap::new()));
+thread_local!(pub static AREA_MAP: RefCell<Registry<AreaId, Area>> = RefCell::new(Registry::new()));
+thread_local!(pub static BDRY_MAP: RefCell<Registry<BoundaryId, Boundary>> = RefCell::new(Registry::new()));
 
 #[derive(Debug)]
 pub struct Renderer {
@@ -106,7 +95,7 @@ impl Renderer {
     }
 
     pub fn update(&mut self, rl: &mut RaylibHandle) {
-        let mut state = app_state.lock().unwrap();
+        let mut state = APP_STATE.lock().unwrap();
         if rl.is_key_pressed(KeyboardKey::KEY_Q) {
             state.running = false;
         }
@@ -222,7 +211,7 @@ impl Renderer {
     fn find_area(
         &self,
         mouse_pos: Vector2<f64>,
-        area_map: &HashMap<AreaId, Area>,
+        area_map: &Registry<AreaId, Area>,
     ) -> Option<AreaId> {
         let mut out = None;
         for (id, area) in area_map.iter() {
@@ -251,22 +240,60 @@ impl Renderer {
 
 impl MouseEventHandler for Renderer {
     fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool {
-        todo!()
+        true
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+        self.mouse_pos = mouse_pos;
+        AREA_MAP.with_borrow_mut(|area_map| {
+            for area in area_map.values_mut() {
+                area.receive_mouse_pos(mouse_pos);
+            }
+        });
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+        match self.grabbed {
+            Some(_) => {}
+            None => match self.find_boundary(mouse_pos, self.mouse_bdry_tol) {
+                Some(hovered) => {
+                    self.grabbed = Some(hovered);
+                }
+                None => {
+                    AREA_MAP.with_borrow_mut(|area_map| {
+                        for area in area_map.values_mut() {
+                            area.receive_mouse_down(mouse_pos);
+                        }
+                    });
+                }
+            },
+        }
     }
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+        match self.grabbed {
+            Some(_) => self.grabbed = None,
+            None => {
+                AREA_MAP.with_borrow_mut(|area_map| {
+                    for area in area_map.values_mut() {
+                        area.receive_mouse_up(mouse_pos);
+                    }
+                });
+            }
+        }
     }
 
     fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {
-        todo!()
+        AREA_MAP.with_borrow_mut(|area_map| {
+            for area in area_map.values_mut() {
+                area.receive_mouse_wheel(mouse_pos, movement);
+            }
+        });
     }
+
+    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<(dyn FnMut() + 'static)>> {
+        None
+    }
+
+    fn set_on_mouse_enter(&mut self, f: Box<dyn FnMut()>) {}
 }

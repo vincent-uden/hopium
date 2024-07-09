@@ -1,14 +1,13 @@
 use raylib::{RaylibHandle, RaylibThread};
 
 use crate::{
-    app_state,
     event::Event,
-    event_queue, mode_stack,
     modes::global::GlobalMode,
     rendering::{
         boundary::BoundaryOrientation,
         renderer::{Renderer, AREA_MAP, BDRY_MAP},
     },
+    APP_STATE, EVENT_QUEUE, MODE_STACK,
 };
 
 #[derive(Debug)]
@@ -37,7 +36,7 @@ impl<'a> App<'a> {
         self.renderer.draw(self.rl, self.t);
 
         {
-            let mut ms = mode_stack.lock().unwrap();
+            let mut ms = MODE_STACK.lock().unwrap();
             ms.update(self.rl);
         }
 
@@ -45,11 +44,11 @@ impl<'a> App<'a> {
         while !is_empty {
             let maybe_event;
             {
-                let mut eq = event_queue.lock().unwrap();
+                let mut eq = EVENT_QUEUE.lock().unwrap();
                 maybe_event = eq.pop();
             }
             {
-                let mut ms = mode_stack.lock().unwrap();
+                let mut ms = MODE_STACK.lock().unwrap();
                 match maybe_event {
                     Some(event) => {
                         ms.process_event(event);
@@ -66,7 +65,7 @@ impl<'a> App<'a> {
     pub fn run(&mut self) {
         let global_mode = Box::new(GlobalMode::new());
         {
-            let mut ms = mode_stack.lock().unwrap();
+            let mut ms = MODE_STACK.lock().unwrap();
             ms.push(global_mode);
         }
 
@@ -74,7 +73,7 @@ impl<'a> App<'a> {
         while running {
             self.update();
             {
-                running = app_state.lock().unwrap().running;
+                running = APP_STATE.lock().unwrap().running;
             }
         }
         // These need to be cleared manually before renderer.rl is dropped, otherwise we segfault

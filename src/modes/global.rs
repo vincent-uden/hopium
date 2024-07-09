@@ -1,7 +1,7 @@
 use nalgebra::Vector2;
 use raylib::{ffi::KeyboardKey, RaylibHandle};
 
-use crate::{event::Event, event_queue};
+use crate::{event::Event, EVENT_QUEUE};
 
 use super::{Mode, ModeId};
 
@@ -25,7 +25,7 @@ impl Mode for GlobalMode {
 
     fn key_press(&mut self, key: &super::KeyPress, rl: &mut RaylibHandle) -> bool {
         let mut consumed = true;
-        let mut eq = event_queue.lock().unwrap();
+        let mut eq = EVENT_QUEUE.lock().unwrap();
         match key.key {
             KeyboardKey::KEY_H => eq.post_event(Event::SplitPaneHorizontally {
                 mouse_pos: Vector2::<f64>::new(rl.get_mouse_x() as f64, rl.get_mouse_y() as f64),

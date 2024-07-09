@@ -12,13 +12,15 @@ use raylib::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    style,
-    ui::{self, text::TextAlignment, Ui},
+    ui::{
+        self, text::TextAlignment, Drawable, MouseEventHandler, RegId, Registry, Ui, UiId, UI_MAP,
+    },
+    STYLE,
 };
 
 use super::{
     boundary::{Boundary, BoundaryId, BoundaryOrientation},
-    renderer::{to_raylib, MouseEventHandler, BDRY_MAP},
+    renderer::{to_raylib, BDRY_MAP},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -40,8 +42,12 @@ pub enum AreaType {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub struct AreaId(pub i64);
 
-impl AreaId {
-    pub fn increment(self) -> Self {
+impl RegId for AreaId {
+    fn new() -> Self {
+        Self(0)
+    }
+
+    fn increment(self) -> Self {
         let AreaId(id) = self;
         Self(id + 1)
     }
@@ -61,7 +67,8 @@ pub struct Area {
     pub active: bool,
     pub anchor: RenderAnchor,
     pub texture: RenderTexture2D,
-    pub ui: Vec<Box<dyn Ui>>,
+    pub ui: Vec<UiId>,
+    hovered: bool,
 }
 
 impl Area {
@@ -82,6 +89,7 @@ impl Area {
             anchor: RenderAnchor::Left,
             texture,
             ui: vec![],
+            hovered: false,
         };
         match area_type {
             AreaType::Viewport3d => {
@@ -110,23 +118,26 @@ impl Area {
         );
         {
             let mut td = d.begin_texture_mode(t, &mut self.texture);
-            let s = style.read().unwrap();
+            let s = STYLE.read().unwrap();
             td.clear_background(s.bg_color);
-            for ui in &mut self.ui {
-                match self.area_type {
-                    AreaType::Empty | AreaType::Viewport3d => {
-                        ui.move_relative(-offset);
+            UI_MAP.with_borrow_mut(|ui_map| {
+                for id in &self.ui {
+                    let ui = &mut ui_map[*id];
+                    match self.area_type {
+                        AreaType::Empty | AreaType::Viewport3d => {
+                            ui.move_relative(-offset);
+                        }
+                        _ => {}
                     }
-                    _ => {}
-                }
-                ui.draw(&mut td, t);
-                match self.area_type {
-                    AreaType::Empty | AreaType::Viewport3d => {
-                        ui.move_relative(offset);
+                    ui.draw(&mut td, t);
+                    match self.area_type {
+                        AreaType::Empty | AreaType::Viewport3d => {
+                            ui.move_relative(offset);
+                        }
+                        _ => {}
                     }
-                    _ => {}
                 }
-            }
+            });
         }
         let mut draw_rect = self.screen_rect;
         draw_rect.y = -draw_rect.height;
@@ -164,7 +175,7 @@ impl Area {
     pub fn is_left_of(&self, bdry_id: &BoundaryId) -> bool {
         let mut is_true = true;
         BDRY_MAP.with_borrow(|bdry_map| {
-            let bdry = &bdry_map[bdry_id];
+            let bdry = &bdry_map[*bdry_id];
             is_true =
                 bdry.orientation == BoundaryOrientation::Vertical && bdry.side1.contains(&self.id);
         });
@@ -174,7 +185,7 @@ impl Area {
     pub fn is_right_of(&self, bdry_id: &BoundaryId) -> bool {
         let mut is_true = true;
         BDRY_MAP.with_borrow(|bdry_map| {
-            let bdry = &bdry_map[bdry_id];
+            let bdry = &bdry_map[*bdry_id];
             is_true =
                 bdry.orientation == BoundaryOrientation::Vertical && bdry.side2.contains(&self.id);
         });
@@ -184,7 +195,7 @@ impl Area {
     pub fn is_below(&self, bdry_id: &BoundaryId) -> bool {
         let mut is_true = true;
         BDRY_MAP.with_borrow(|bdry_map| {
-            let bdry = &bdry_map[bdry_id];
+            let bdry = &bdry_map[*bdry_id];
             is_true =
                 bdry.orientation == BoundaryOrientation::Vertical && bdry.side2.contains(&self.id);
             bdry.orientation == BoundaryOrientation::Horizontal && bdry.side2.contains(&self.id)
@@ -195,7 +206,7 @@ impl Area {
     pub fn is_above(&self, bdry_id: &BoundaryId) -> bool {
         let mut is_true = true;
         BDRY_MAP.with_borrow(|bdry_map| {
-            let bdry = &bdry_map[bdry_id];
+            let bdry = &bdry_map[*bdry_id];
             is_true =
                 bdry.orientation == BoundaryOrientation::Horizontal && bdry.side1.contains(&self.id)
         });
@@ -204,7 +215,7 @@ impl Area {
 
     pub fn further_down_bdry_tree(
         &self,
-        bdry_map: &HashMap<BoundaryId, Boundary>,
+        bdry_map: &Registry<BoundaryId, Boundary>,
     ) -> Vec<BoundaryId> {
         let mut out = vec![];
         for (id, bdry) in bdry_map.iter() {
@@ -238,7 +249,7 @@ impl Area {
         let AreaId(n) = self.id;
         text.set_text(format!("{:?}", n), rl);
         text.set_font_size(40.0, rl);
-        self.ui.push(text);
+        //text.set_on_mouse_enter(Box::new(|| text.set_font_size(20.0, rl)));
         self.anchor = RenderAnchor::Center;
     }
 }
@@ -271,19 +282,62 @@ impl MouseEventHandler for Area {
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+        UI_MAP.with_borrow_mut(|ui_map| {
+            if self.contains_point(mouse_pos) {
+                if !self.hovered {
+                    // onMouseEnter if it exists
+                }
+                self.hovered = true;
+                for id in &self.ui {
+                    let ui = &mut ui_map[*id];
+                    ui.receive_mouse_pos(mouse_pos - self.screen_pos);
+                }
+            } else {
+                if self.hovered {
+                    // onMouseExit if it exists
+                }
+                self.hovered = false;
+                for id in &self.ui {
+                    let ui = &mut ui_map[*id];
+                    // If the mouse isn't in the active area, treat it as being outside the entire
+                    // window
+                    ui.receive_mouse_pos(Vector2::<f64>::new(-100.0, -100.0));
+                }
+            }
+        });
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+        if self.contains_point(mouse_pos) {
+            UI_MAP.with_borrow_mut(|ui_map| {
+                for id in &self.ui {
+                    let ui = &mut ui_map[*id];
+                    ui.receive_mouse_down(mouse_pos - self.screen_pos);
+                }
+            });
+        }
     }
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
+        if self.contains_point(mouse_pos) {
+            UI_MAP.with_borrow_mut(|ui_map| {
+                for id in &mut self.ui {
+                    let ui = &mut ui_map[*id];
+                    ui.receive_mouse_up(mouse_pos - self.screen_pos);
+                }
+            });
+        }
     }
 
     fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {
-        todo!()
+        if self.contains_point(mouse_pos) {
+            UI_MAP.with_borrow_mut(|ui_map| {
+                for id in &self.ui {
+                    let ui = &mut ui_map[*id];
+                    ui.receive_mouse_up(mouse_pos - self.screen_pos);
+                }
+            });
+        }
     }
 }
 

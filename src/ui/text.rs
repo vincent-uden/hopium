@@ -1,6 +1,5 @@
 use nalgebra::Vector2;
 use raylib::{
-    color::Color,
     drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode},
     text::RaylibFont,
     RaylibHandle,
@@ -8,10 +7,10 @@ use raylib::{
 
 use crate::{
     rendering::renderer::{to_nalgebra, to_raylib},
-    style,
+    STYLE,
 };
 
-use super::Ui;
+use super::{Drawable, MouseEventHandler};
 
 #[derive(Debug)]
 pub enum TextAlignment {
@@ -20,13 +19,15 @@ pub enum TextAlignment {
     RIGHT,
 }
 
-#[derive(Debug)]
 pub struct Text {
     pos: Vector2<f64>,
     size: Vector2<f64>,
     pub align: TextAlignment,
     text: String,
     font_size: f32,
+    on_mouse_enter: Option<Box<dyn FnMut()>>,
+    on_mouse_exit: Option<Box<dyn FnMut()>>,
+    hovered: bool,
 }
 
 // TODO: Move off the default font
@@ -38,6 +39,9 @@ impl Text {
             align: TextAlignment::LEFT,
             text: "".to_string(),
             font_size: 20.0,
+            on_mouse_enter: None,
+            on_mouse_exit: None,
+            hovered: false,
         }
     }
 
@@ -60,7 +64,7 @@ impl Text {
     }
 }
 
-impl Ui for Text {
+impl Drawable for Text {
     fn move_relative(&mut self, distance: Vector2<f64>) {
         self.pos += distance;
     }
@@ -81,7 +85,7 @@ impl Ui for Text {
                 draw_pos.x -= self.size.x;
             }
         }
-        let s = style.read().unwrap();
+        let s = STYLE.read().unwrap();
         rl.draw_text_ex(
             rl.get_font_default(),
             &self.text,
@@ -94,5 +98,53 @@ impl Ui for Text {
 
     fn get_size(&self) -> Vector2<f64> {
         self.size
+    }
+}
+
+impl MouseEventHandler for Text {
+    fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool {
+        todo!()
+    }
+
+    fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
+        if self.contains_point(mouse_pos) {
+            if !self.hovered {
+                if let Some(f) = self.get_on_mouse_enter() {
+                    f();
+                }
+            }
+            self.hovered = true;
+        } else {
+            if self.hovered {
+                if let Some(f) = self.get_on_mouse_exit() {
+                    f();
+                }
+            }
+            self.hovered = false;
+        }
+    }
+
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
+        todo!()
+    }
+
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
+        todo!()
+    }
+
+    fn get_on_mouse_enter(&mut self) -> Option<&mut Box<dyn FnMut()>> {
+        self.on_mouse_enter.as_mut()
+    }
+
+    fn set_on_mouse_enter(&mut self, f: Box<dyn FnMut()>) {
+        self.on_mouse_enter = Some(f);
+    }
+
+    fn get_on_mouse_exit(&mut self) -> Option<&mut Box<dyn FnMut()>> {
+        self.on_mouse_exit.as_mut()
+    }
+
+    fn set_on_mouse_exit(&mut self, f: Box<dyn FnMut()>) {
+        self.on_mouse_exit = Some(f);
     }
 }
