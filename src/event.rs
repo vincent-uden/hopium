@@ -29,7 +29,16 @@ pub enum Event {
     DumpLayout,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+fn should_serialize_as_layout(event: &Event) -> bool {
+    match event {
+        Event::SplitPaneHorizontally { .. }
+        | Event::SplitPaneVertically { .. }
+        | Event::CollapseBoundary { .. } => true,
+        _ => false,
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EventQueue {
     queue: VecDeque<Event>,
     history: Vec<Event>,
@@ -70,5 +79,11 @@ impl EventQueue {
 
     pub fn is_empty(&self) -> bool {
         self.queue.is_empty()
+    }
+
+    pub fn layout_copy(&self) -> Self {
+        let mut out = self.clone();
+        out.history.retain(should_serialize_as_layout);
+        out
     }
 }

@@ -1,3 +1,5 @@
+use std::{fs, ops::Deref};
+
 use raylib::{RaylibHandle, RaylibThread};
 
 use crate::{
@@ -79,6 +81,13 @@ impl<'a> App<'a> {
         // These need to be cleared manually before renderer.rl is dropped, otherwise we segfault
         AREA_MAP.with_borrow_mut(|area_map| area_map.clear());
         BDRY_MAP.with_borrow_mut(|bdry_map| bdry_map.clear());
+
+        let eq = EVENT_QUEUE.lock().unwrap();
+        fs::write(
+            "layout.json",
+            serde_json::to_string(&eq.layout_copy()).unwrap(),
+        )
+        .unwrap();
     }
 
     pub fn process_event(&mut self, event: Event) {

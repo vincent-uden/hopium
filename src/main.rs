@@ -1,4 +1,7 @@
-use std::sync::{Mutex, RwLock};
+use std::{
+    fs,
+    sync::{Mutex, RwLock},
+};
 
 use app::{App, State};
 use event::EventQueue;
@@ -68,5 +71,15 @@ fn main() {
         .build();
 
     let mut app = App::new(1600, 900, &mut rl, &thread);
+    match fs::read_to_string("layout.json") {
+        Ok(contents) => {
+            let mut eq: EventQueue = serde_json::from_str(&contents).unwrap();
+            eq.reset_history_index();
+            while let Some(e) = eq.get_next_history_event() {
+                app.process_event(e);
+            }
+        }
+        Err(_) => {}
+    }
     app.run();
 }

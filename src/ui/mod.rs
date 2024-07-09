@@ -5,6 +5,7 @@ use raylib::{
     drawing::{RaylibDrawHandle, RaylibTextureMode},
     RaylibThread,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::registry::{RegId, Registry};
 
@@ -12,7 +13,7 @@ pub mod rect;
 pub mod style;
 pub mod text;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Serialize, Deserialize)]
 pub struct UiId(pub i64);
 
 impl RegId for UiId {

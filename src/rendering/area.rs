@@ -8,7 +8,7 @@ use raylib::{
     texture::{RaylibTexture2D, RenderTexture2D},
     RaylibHandle, RaylibThread,
 };
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
 use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, UiId, UI_MAP};
 use crate::{registry::RegId, STYLES};
@@ -38,7 +38,7 @@ pub enum AreaType {
     SketchViewer,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Deserialize, Serialize)]
 pub struct AreaId(pub i64);
 
 impl RegId for AreaId {
@@ -58,15 +58,22 @@ impl Default for AreaId {
     }
 }
 
+#[derive(Serialize)]
 pub struct Area {
     pub id: AreaId,
     pub area_type: AreaType,
+    #[serde(skip_serializing)]
     pub screen_rect: Rectangle,
+    #[serde(skip_serializing)]
     pub screen_pos: Vector2<f64>,
+    #[serde(skip_serializing)]
     pub active: bool,
+    #[serde(skip_serializing)]
     pub anchor: RenderAnchor,
+    #[serde(skip_serializing)]
     pub texture: RenderTexture2D,
     pub ui: Vec<UiId>,
+    #[serde(skip_serializing)]
     hovered: bool,
 }
 
@@ -296,9 +303,6 @@ impl MouseEventHandler for Area {
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
         UI_MAP.with_borrow_mut(|ui_map| {
             if self.contains_point(mouse_pos) {
-                if !self.hovered {
-                    // onMouseEnter if it exists
-                }
                 self.hovered = true;
                 for id in &self.ui {
                     let ui = &mut ui_map[*id];
@@ -306,9 +310,6 @@ impl MouseEventHandler for Area {
                     ui.receive_mouse_pos(self.to_local_space(mouse_pos));
                 }
             } else {
-                if self.hovered {
-                    // onMouseExit if it exists
-                }
                 self.hovered = false;
                 for id in &self.ui {
                     let ui = &mut ui_map[*id];
