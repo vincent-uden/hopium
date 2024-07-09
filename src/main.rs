@@ -13,6 +13,8 @@ use ui::style::{Style, StyleId};
 
 mod app;
 #[allow(dead_code, unused_variables)]
+mod cad;
+#[allow(dead_code, unused_variables)]
 mod event;
 #[allow(dead_code, unused_variables)]
 mod modes;
