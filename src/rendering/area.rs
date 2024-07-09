@@ -10,9 +10,12 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::registry::Registry;
 use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, UiId, UI_MAP};
-use crate::{registry::RegId, STYLE};
+use crate::{registry::RegId, STYLES};
+use crate::{
+    registry::Registry,
+    ui::style::{StyleId, StyleType},
+};
 
 use super::{
     boundary::{Boundary, BoundaryId, BoundaryOrientation},
@@ -114,7 +117,7 @@ impl Area {
         );
         {
             let mut td = d.begin_texture_mode(t, &mut self.texture);
-            let s = STYLE.read().unwrap();
+            let s = &STYLES.read().unwrap()[StyleId(StyleType::Area)];
             td.clear_background(s.bg_color);
             UI_MAP.with_borrow_mut(|ui_map| {
                 for id in &self.ui {
@@ -250,6 +253,17 @@ impl Area {
         });
         self.anchor = RenderAnchor::Center;
     }
+
+    fn to_local_space(&self, mouse_pos: Vector2<f64>) -> Vector2<f64> {
+        let offset = Vector2::<f64>::new(
+            ((self.texture.width() as f32 - self.screen_rect.width) / 2.0
+                - self.screen_pos.x as f32) as f64,
+            ((self.texture.height() as f32 - self.screen_rect.height) / 2.0
+                - self.screen_pos.y as f32) as f64,
+        );
+
+        mouse_pos + offset
+    }
 }
 
 impl fmt::Debug for Area {
@@ -288,7 +302,8 @@ impl MouseEventHandler for Area {
                 self.hovered = true;
                 for id in &self.ui {
                     let ui = &mut ui_map[*id];
-                    ui.receive_mouse_pos(mouse_pos - self.screen_pos);
+                    let local = self.to_local_space(mouse_pos);
+                    ui.receive_mouse_pos(self.to_local_space(mouse_pos));
                 }
             } else {
                 if self.hovered {

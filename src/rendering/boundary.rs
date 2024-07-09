@@ -5,7 +5,11 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{registry::RegId, STYLE};
+use crate::{
+    registry::RegId,
+    ui::style::{StyleId, StyleType},
+    STYLES,
+};
 
 use super::{
     area::AreaId,
@@ -74,12 +78,12 @@ impl Boundary {
                     end_pos.y += self.extent();
                 }
             }
-            let s = STYLE.read().unwrap();
+            let s = &STYLES.read().unwrap()[StyleId(StyleType::Boundary)];
             d.draw_line_ex(
                 to_raylib(start_pos),
                 to_raylib(end_pos),
                 self.thickness as f32,
-                s.border_color,
+                s.color,
             );
         });
     }

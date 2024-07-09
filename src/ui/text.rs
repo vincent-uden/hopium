@@ -7,10 +7,13 @@ use raylib::{
 
 use crate::{
     rendering::renderer::{to_nalgebra, to_raylib},
-    STYLE,
+    STYLES,
 };
 
-use super::{Drawable, MouseEventHandler, UiId};
+use super::{
+    style::{StyleId, StyleType},
+    Drawable, MouseEventHandler, UiId,
+};
 
 #[derive(Debug)]
 pub enum TextAlignment {
@@ -87,14 +90,18 @@ impl Drawable for Text {
                 draw_pos.x -= self.size.x;
             }
         }
-        let s = STYLE.read().unwrap();
+        let s = &STYLES.read().unwrap()[StyleId(StyleType::AreaText)];
         rl.draw_text_ex(
             rl.get_font_default(),
             &self.text,
             to_raylib(draw_pos),
             self.font_size,
             1.0,
-            s.border_color,
+            if self.hovered {
+                s.hovered_color
+            } else {
+                s.color
+            },
         )
     }
 
@@ -105,6 +112,12 @@ impl Drawable for Text {
 
 impl MouseEventHandler for Text {
     fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool {
+        let offset = match self.align {
+            TextAlignment::Left => Vector2::<f64>::new(0.0, 0.0),
+            TextAlignment::Center => Vector2::<f64>::new(self.size.x / 2.0, 0.0),
+            TextAlignment::Right => Vector2::<f64>::new(self.size.x, 0.0),
+        };
+        let mouse_pos = mouse_pos + offset;
         mouse_pos.x > self.pos.x
             && mouse_pos.x < self.pos.x + self.size.x
             && mouse_pos.y > self.pos.y

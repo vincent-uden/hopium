@@ -28,6 +28,10 @@ impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Registry<K, V> {
         out
     }
 
+    pub fn insert_with_key(&mut self, k: K, v: V) {
+        self.map.insert(k, v);
+    }
+
     #[inline(always)]
     pub fn clear(&mut self) {
         self.map.clear();
