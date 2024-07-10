@@ -1,4 +1,4 @@
-use std::{cell::RefCell, hash::Hash};
+use std::hash::Hash;
 
 use nalgebra::Vector2;
 use raylib::{
@@ -7,7 +7,7 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::registry::{RegId, Registry};
+use crate::registry::RegId;
 
 pub mod dropdown;
 pub mod rect;

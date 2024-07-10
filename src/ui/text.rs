@@ -123,11 +123,7 @@ impl MouseEventHandler for Text {
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
-        if self.contains_point(mouse_pos) {
-            self.hovered = true;
-        } else {
-            self.hovered = false;
-        }
+        self.hovered = self.contains_point(mouse_pos);
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {

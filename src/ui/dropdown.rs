@@ -5,10 +5,10 @@ use raylib::{
     RaylibHandle, RaylibThread,
 };
 
+use crate::rendering::renderer::to_nalgebra;
 use crate::ui::Drawable;
-use crate::{registry::Registry, rendering::renderer::to_nalgebra};
 
-use super::{rect::Rect, text::Text, MouseEventHandler, Ui, UiId};
+use super::{rect::Rect, text::Text, MouseEventHandler};
 
 pub struct DropDown {
     pos: Vector2<f64>,
@@ -122,11 +122,7 @@ impl MouseEventHandler for DropDown {
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
-        if self.contains_point(mouse_pos) {
-            self.hovered = true;
-        } else {
-            self.hovered = false;
-        }
+        self.hovered = self.contains_point(mouse_pos);
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {

@@ -1,4 +1,4 @@
-use std::{fs, ops::Deref};
+use std::fs;
 
 use raylib::{RaylibHandle, RaylibThread};
 

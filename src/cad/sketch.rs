@@ -76,46 +76,46 @@ pub struct BiConstraint {
 impl BiConstraint {
     pub fn possible(e1: &FundamentalEntity, e2: &FundamentalEntity, c: &ConstraintType) -> bool {
         match (e1, e2) {
-            (FundamentalEntity::Point { .. }, FundamentalEntity::Point { .. }) => match c {
+            (FundamentalEntity::Point { .. }, FundamentalEntity::Point { .. }) => matches!(
+                c,
                 ConstraintType::Coincident
-                | ConstraintType::Distance { .. }
-                | ConstraintType::Vertical
-                | ConstraintType::Horizontal => true,
-                _ => false,
-            },
-            (FundamentalEntity::Point { .. }, FundamentalEntity::Line { .. }) => match c {
-                ConstraintType::Coincident | ConstraintType::Distance { .. } => true,
-                _ => false,
-            },
-            (FundamentalEntity::Point { .. }, FundamentalEntity::Circle { .. }) => match c {
+                    | ConstraintType::Distance { .. }
+                    | ConstraintType::Vertical
+                    | ConstraintType::Horizontal
+            ),
+            (FundamentalEntity::Point { .. }, FundamentalEntity::Line { .. }) => matches!(
+                c,
+                ConstraintType::Coincident | ConstraintType::Distance { .. }
+            ),
+            (FundamentalEntity::Point { .. }, FundamentalEntity::Circle { .. }) => matches!(
+                c,
                 ConstraintType::Coincident
-                | ConstraintType::Distance { .. }
-                | ConstraintType::Vertical
-                | ConstraintType::Horizontal => true,
-                _ => false,
-            },
-            (FundamentalEntity::Line { .. }, FundamentalEntity::Line { .. }) => match c {
+                    | ConstraintType::Distance { .. }
+                    | ConstraintType::Vertical
+                    | ConstraintType::Horizontal
+            ),
+            (FundamentalEntity::Line { .. }, FundamentalEntity::Line { .. }) => matches!(
+                c,
                 ConstraintType::Parallel
-                | ConstraintType::Perpendicular
-                | ConstraintType::Colinear
-                | ConstraintType::Distance { .. }
-                | ConstraintType::Angle { .. } => true,
-                _ => false,
-            },
-            (FundamentalEntity::Circle { .. }, FundamentalEntity::Line { .. }) => match c {
+                    | ConstraintType::Perpendicular
+                    | ConstraintType::Colinear
+                    | ConstraintType::Distance { .. }
+                    | ConstraintType::Angle { .. }
+            ),
+            (FundamentalEntity::Circle { .. }, FundamentalEntity::Line { .. }) => matches!(
+                c,
                 ConstraintType::Coincident
-                | ConstraintType::Tangent
-                | ConstraintType::Distance { .. } => true,
-                _ => false,
-            },
-            (FundamentalEntity::Circle { .. }, FundamentalEntity::Circle { .. }) => match c {
+                    | ConstraintType::Tangent
+                    | ConstraintType::Distance { .. }
+            ),
+            (FundamentalEntity::Circle { .. }, FundamentalEntity::Circle { .. }) => matches!(
+                c,
                 ConstraintType::Coincident
-                | ConstraintType::Distance { .. }
-                | ConstraintType::Tangent
-                | ConstraintType::Vertical
-                | ConstraintType::Horizontal => true,
-                _ => false,
-            },
+                    | ConstraintType::Distance { .. }
+                    | ConstraintType::Tangent
+                    | ConstraintType::Vertical
+                    | ConstraintType::Horizontal
+            ),
             (_, _) => BiConstraint::possible(e2, e1, c),
         }
     }

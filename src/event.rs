@@ -21,12 +21,12 @@ pub enum Event {
 }
 
 fn should_serialize_as_layout(event: &Event) -> bool {
-    match event {
+    matches!(
+        event,
         Event::SplitPaneHorizontally { .. }
-        | Event::SplitPaneVertically { .. }
-        | Event::CollapseBoundary { .. } => true,
-        _ => false,
-    }
+            | Event::SplitPaneVertically { .. }
+            | Event::CollapseBoundary { .. }
+    )
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

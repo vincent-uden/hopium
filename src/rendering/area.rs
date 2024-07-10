@@ -10,7 +10,7 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui, UiId};
+use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui};
 use crate::{registry::RegId, STYLES};
 use crate::{
     registry::Registry,
@@ -128,18 +128,12 @@ impl Area {
             let s = &STYLES.read().unwrap()[StyleId(StyleType::Area)];
             td.clear_background(s.bg_color);
             for ui in &mut self.ui {
-                match self.area_type {
-                    AreaType::Viewport3d => {
-                        ui.move_relative(-offset);
-                    }
-                    _ => {}
+                if let AreaType::Viewport3d = self.area_type {
+                    ui.move_relative(-offset);
                 }
                 ui.draw(&mut td, t);
-                match self.area_type {
-                    AreaType::Viewport3d => {
-                        ui.move_relative(offset);
-                    }
-                    _ => {}
+                if let AreaType::Viewport3d = self.area_type {
+                    ui.move_relative(offset);
                 }
             }
         }

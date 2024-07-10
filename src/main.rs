@@ -73,17 +73,14 @@ fn main() {
         .build();
 
     let mut app = App::new(1600, 900, &mut rl, &thread);
-    match fs::read_to_string("layout.json") {
-        Ok(contents) => {
-            let mut eq: EventQueue = serde_json::from_str(&contents).unwrap();
-            eq.reset_history_index();
-            let mut event_queue = EVENT_QUEUE.lock().unwrap();
-            while let Some(e) = eq.get_next_history_event() {
-                app.process_event(e);
-            }
-            *event_queue = eq.clone();
+    if let Ok(contents) = fs::read_to_string("layout.json") {
+        let mut eq: EventQueue = serde_json::from_str(&contents).unwrap();
+        eq.reset_history_index();
+        let mut event_queue = EVENT_QUEUE.lock().unwrap();
+        while let Some(e) = eq.get_next_history_event() {
+            app.process_event(e);
         }
-        Err(_) => {}
+        *event_queue = eq.clone();
     }
     app.run();
 }
