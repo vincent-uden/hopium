@@ -64,6 +64,22 @@ fn main() {
                 ..Default::default()
             },
         );
+        styles.insert_with_key(
+            StyleId(ui::style::StyleType::DropDown),
+            Style {
+                color: Color::new(200, 200, 200, 255),
+                bg_color: Color::new(31, 31, 31, 255),
+                ..Default::default()
+            },
+        );
+        styles.insert_with_key(
+            StyleId(ui::style::StyleType::DropDownHovered),
+            Style {
+                color: Color::new(200, 200, 200, 255),
+                bg_color: Color::new(71, 71, 71, 255),
+                ..Default::default()
+            },
+        );
     }
     let (mut rl, thread) = raylib::init()
         .size(1600, 900)

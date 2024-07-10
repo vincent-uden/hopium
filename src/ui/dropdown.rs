@@ -1,5 +1,6 @@
 use nalgebra::Vector2;
 use raylib::{
+    color::Color,
     drawing::{RaylibDrawHandle, RaylibTextureMode},
     text::RaylibFont,
     RaylibHandle, RaylibThread,
@@ -8,7 +9,12 @@ use raylib::{
 use crate::rendering::renderer::to_nalgebra;
 use crate::ui::Drawable;
 
-use super::{rect::Rect, text::Text, MouseEventHandler};
+use super::{
+    rect::Rect,
+    style::{StyleId, StyleType},
+    text::Text,
+    MouseEventHandler,
+};
 
 pub struct DropDown {
     pos: Vector2<f64>,
@@ -22,6 +28,7 @@ pub struct DropDown {
     ui_options: Vec<Text>,
     ui_bgs: Vec<Rect>,
     ui_label: Text,
+    ui_label_bg: Rect,
 }
 
 impl DropDown {
@@ -38,6 +45,7 @@ impl DropDown {
             ui_options: Vec::new(),
             ui_bgs: Vec::new(),
             ui_label: Text::new(),
+            ui_label_bg: Rect::new(),
         }
     }
 
@@ -61,6 +69,10 @@ impl DropDown {
             biggest_size.x + self.padding * 2.0,
             (biggest_size.y + self.padding * 2.0) * self.options.len() as f64,
         );
+        self.btn_size.x = biggest_size.x;
+        self.ui_label_bg.size = self.btn_size + Vector2::new(self.padding, self.padding) * 2.0;
+        self.ui_label_bg.style = StyleId(StyleType::DropDown);
+        self.ui_label_bg.hovered_style = StyleId(StyleType::DropDownHovered);
 
         self.ui_options.clear();
         self.ui_bgs.clear();
@@ -72,12 +84,25 @@ impl DropDown {
                 self.padding,
                 (self.padding * 2.0 + biggest_size.y) * (i + 1) as f64 + self.padding,
             ));
+            text.style = StyleId(StyleType::DropDown);
+            text.hovered_style = StyleId(StyleType::DropDownHovered);
             self.ui_options.push(text);
+            let mut bg = Rect::new();
+            bg.set_pos(Vector2::new(
+                0.0,
+                (self.padding * 2.0 + biggest_size.y) * (i + 1) as f64,
+            ));
+            bg.size = self.btn_size + Vector2::new(self.padding, self.padding) * 2.0;
+            bg.style = StyleId(StyleType::DropDown);
+            bg.hovered_style = StyleId(StyleType::DropDownHovered);
+            self.ui_bgs.push(bg);
         }
 
         let mut label = Text::new();
         label.set_text(self.label.clone(), rl);
         label.set_pos(Vector2::new(self.padding, self.padding));
+        label.style = StyleId(StyleType::DropDown);
+        label.hovered_style = StyleId(StyleType::DropDownHovered);
         self.ui_label = label;
     }
 }
@@ -97,18 +122,22 @@ impl Drawable for DropDown {
 
     fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &RaylibThread) {
         if self.hovered {
+            for ui in &self.ui_bgs {
+                ui.draw(rl, t);
+            }
             for ui in &self.ui_options {
                 ui.draw(rl, t);
             }
         }
+        self.ui_label_bg.draw(rl, t);
         self.ui_label.draw(rl, t);
     }
 
     fn get_size(&self) -> Vector2<f64> {
         if self.hovered {
-            Vector2::new(0.0, self.btn_size.y) + self.list_size
+            Vector2::new(0.0, self.ui_label_bg.get_size().y) + self.list_size
         } else {
-            self.btn_size
+            self.ui_label_bg.get_size()
         }
     }
 }
@@ -123,6 +152,10 @@ impl MouseEventHandler for DropDown {
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
         self.hovered = self.contains_point(mouse_pos);
+        for ui in &mut self.ui_bgs {
+            ui.receive_mouse_pos(mouse_pos);
+        }
+        self.ui_label_bg.receive_mouse_pos(mouse_pos);
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {

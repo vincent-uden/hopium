@@ -31,6 +31,8 @@ pub struct Text {
     on_mouse_enter: Option<Box<dyn FnMut(UiId)>>,
     on_mouse_exit: Option<Box<dyn FnMut(UiId)>>,
     hovered: bool,
+    pub style: StyleId,
+    pub hovered_style: StyleId,
 }
 
 // TODO: Move off the default font
@@ -45,6 +47,8 @@ impl Text {
             on_mouse_enter: None,
             on_mouse_exit: None,
             hovered: false,
+            style: StyleId(StyleType::Default),
+            hovered_style: StyleId(StyleType::Default),
         }
     }
 
@@ -88,18 +92,18 @@ impl Drawable for Text {
                 draw_pos.x -= self.size.x;
             }
         }
-        let s = &STYLES.read().unwrap()[StyleId(StyleType::AreaText)];
+        let s = &STYLES.read().unwrap()[if self.hovered {
+            self.hovered_style
+        } else {
+            self.style
+        }];
         rl.draw_text_ex(
             rl.get_font_default(),
             &self.text,
             to_raylib(draw_pos),
             self.font_size,
             1.0,
-            if self.hovered {
-                s.hovered_color
-            } else {
-                s.color
-            },
+            s.color,
         )
     }
 

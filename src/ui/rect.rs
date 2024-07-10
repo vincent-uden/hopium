@@ -1,28 +1,30 @@
 use nalgebra::Vector2;
-use raylib::{
-    color::Color,
-    drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode},
+use raylib::drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode};
+
+use crate::{rendering::renderer::to_raylib, STYLES};
+
+use super::{
+    style::{StyleId, StyleType},
+    Drawable, MouseEventHandler,
 };
-
-use crate::rendering::renderer::to_raylib;
-
-use super::Drawable;
 
 #[derive(Debug)]
 pub struct Rect {
     pos: Vector2<f64>,
-    size: Vector2<f64>,
-    pub color: Color,
-    pub hover_color: Color,
+    pub size: Vector2<f64>,
+    pub style: StyleId,
+    pub hovered_style: StyleId,
+    hovered: bool,
 }
 
 impl Rect {
-    pub fn new(color: Color) -> Self {
+    pub fn new() -> Self {
         Self {
             pos: Vector2::<f64>::new(0.0, 0.0),
             size: Vector2::<f64>::new(0.0, 0.0),
-            color,
-            hover_color: color,
+            style: StyleId(StyleType::Default),
+            hovered_style: StyleId(StyleType::Default),
+            hovered: false,
         }
     }
 }
@@ -38,10 +40,36 @@ impl Drawable for Rect {
     }
 
     fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &raylib::RaylibThread) {
-        rl.draw_rectangle_v(to_raylib(self.pos), to_raylib(self.size), self.color);
+        let s = &STYLES.read().unwrap()[if self.hovered {
+            self.hovered_style
+        } else {
+            self.style
+        }];
+        rl.draw_rectangle_v(to_raylib(self.pos), to_raylib(self.size), s.bg_color);
     }
 
     fn get_size(&self) -> Vector2<f64> {
         self.size
+    }
+}
+
+impl MouseEventHandler for Rect {
+    fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool {
+        mouse_pos.x > self.pos.x
+            && mouse_pos.x < self.pos.x + self.get_size().x
+            && mouse_pos.y > self.pos.y
+            && mouse_pos.y < self.pos.y + self.get_size().y
+    }
+
+    fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
+        self.hovered = self.contains_point(mouse_pos);
+    }
+
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
+        todo!()
+    }
+
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
+        todo!()
     }
 }
