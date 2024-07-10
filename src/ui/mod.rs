@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::registry::{RegId, Registry};
 
+pub mod dropdown;
 pub mod rect;
 pub mod style;
 pub mod text;
@@ -27,6 +28,7 @@ impl RegId for UiId {
     }
 }
 
+// TODO: DELETE UI_MAP
 thread_local!(pub static UI_MAP: RefCell<Registry<UiId, Box<dyn Ui>>> = RefCell::new(Registry::new()));
 
 pub trait Drawable {

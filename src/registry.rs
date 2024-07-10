@@ -61,6 +61,12 @@ impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Registry<K, V> {
     pub fn remove(&mut self, k: &K) -> Option<V> {
         self.map.remove(k)
     }
+
+    pub fn remove_many(&mut self, ks: &[K]) {
+        for k in ks {
+            self.remove(k);
+        }
+    }
 }
 
 impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Index<K> for Registry<K, V> {

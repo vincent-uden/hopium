@@ -257,6 +257,15 @@ impl Area {
             text.set_text(format!("{:?}", n), rl);
             text.set_font_size(40.0, rl);
             self.ui.push(ui_map.insert(text));
+
+            let mut picker = Box::new(ui::dropdown::DropDown::new(ui_map.next_id()));
+            picker.set_contents(
+                String::from("Area Type"),
+                vec![String::from("Empty"), String::from("Constraints")],
+                rl,
+                ui_map,
+            );
+            self.ui.push(ui_map.insert(picker));
         });
         self.anchor = RenderAnchor::Center;
     }

@@ -125,20 +125,9 @@ impl MouseEventHandler for Text {
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
-        let id = self.id.clone();
         if self.contains_point(mouse_pos) {
-            if !self.hovered {
-                if let Some(f) = self.get_on_mouse_enter() {
-                    f(id);
-                }
-            }
             self.hovered = true;
         } else {
-            if self.hovered {
-                if let Some(f) = self.get_on_mouse_exit() {
-                    f(id);
-                }
-            }
             self.hovered = false;
         }
     }
