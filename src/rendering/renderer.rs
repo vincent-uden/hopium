@@ -152,6 +152,7 @@ impl Renderer {
                         to_split.screen_rect.width /= 2.0;
                     }
                 }
+                to_split.build(rl);
 
                 let mut bdry = Boundary::new(self.next_bdry_id, orientation);
                 bdry.side1.push(to_split.id);
@@ -163,7 +164,18 @@ impl Renderer {
                             if existing_bdry.orientation == bdry.orientation {
                                 existing_bdry.side1.retain(|id| *id != to_split.id);
                             }
-                            existing_bdry.side1.push(new_area.id);
+                            if !existing_bdry.side1.contains(&new_area.id) {
+                                existing_bdry.side1.push(new_area.id);
+                            }
+                        }
+                    }
+                    for id in to_split.further_up_bdry_tree(bdry_map) {
+                        if let Some(existing_bdry) = bdry_map.get_mut(&id) {
+                            if existing_bdry.orientation != bdry.orientation {
+                                if !existing_bdry.side2.contains(&new_area.id) {
+                                    existing_bdry.side2.push(new_area.id);
+                                }
+                            }
                         }
                     }
                     bdry_map.insert(bdry);
@@ -173,15 +185,17 @@ impl Renderer {
         });
     }
 
-    pub fn collapse_boundary(&mut self, mouse_pos: Vector2<f64>) {
+    pub fn collapse_boundary(&mut self, mouse_pos: Vector2<f64>, rl: &mut RaylibHandle) {
         if let Some(hovered) = self.find_boundary(mouse_pos, self.mouse_bdry_tol) {
             BDRY_MAP.with_borrow_mut(|bdry_map| {
-                let mut bdry = bdry_map.remove(&hovered).unwrap();
-                if bdry.side2.len() != 1 {
-                    panic!("Cannot delete boundary with more than one child area");
+                if bdry_map[hovered].can_collapse() {
+                    let mut bdry = bdry_map.remove(&hovered).unwrap();
+                    if bdry.side2.len() != 1 {
+                        panic!("Cannot delete boundary with more than one child area");
+                    }
+                    bdry.collapse(bdry_map, rl);
+                    AREA_MAP.with_borrow_mut(|area_map| area_map.remove(&bdry.side2[0]));
                 }
-                bdry.collapse();
-                AREA_MAP.with_borrow_mut(|area_map| area_map.remove(&bdry.side2[0]));
             });
         }
     }
@@ -245,6 +259,18 @@ impl MouseEventHandler for Renderer {
         AREA_MAP.with_borrow_mut(|area_map| {
             for area in area_map.values_mut() {
                 area.receive_mouse_pos(mouse_pos);
+            }
+        });
+
+        let maybe_hovered = self.find_boundary(mouse_pos, self.mouse_bdry_tol);
+        BDRY_MAP.with_borrow_mut(|bdry_map| {
+            for (id, bdry) in bdry_map.iter_mut() {
+                bdry.hovered = false;
+                if let Some(hovered) = maybe_hovered {
+                    if hovered == *id {
+                        bdry.hovered = true;
+                    }
+                }
             }
         });
     }

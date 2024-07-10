@@ -1,6 +1,6 @@
 use core::fmt;
 use core::hash::Hash;
-use std::collections::hash_map::{Iter, Values, ValuesMut};
+use std::collections::hash_map::{Iter, IterMut, Values, ValuesMut};
 use std::collections::HashMap;
 use std::ops::{Index, IndexMut};
 
@@ -50,6 +50,11 @@ impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Registry<K, V> {
     #[inline(always)]
     pub fn iter(&self) -> Iter<'_, K, V> {
         self.map.iter()
+    }
+
+    #[inline(always)]
+    pub fn iter_mut(&mut self) -> IterMut<'_, K, V> {
+        self.map.iter_mut()
     }
 
     #[inline(always)]

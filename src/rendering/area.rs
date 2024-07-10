@@ -98,24 +98,28 @@ impl Area {
             ui: vec![],
             hovered: false,
         };
-        match area_type {
+        out.build(rl);
+        out
+    }
+
+    pub fn build(&mut self, rl: &mut RaylibHandle) {
+        match self.area_type {
             AreaType::Viewport3d => {
-                out.build_viewport_3d();
+                self.build_viewport_3d();
             }
             AreaType::ToolSelection => {
-                out.build_tool_selection();
+                self.build_tool_selection();
             }
             AreaType::ContraintSelection => {
-                out.build_constraint_selection();
+                self.build_constraint_selection();
             }
             AreaType::SketchViewer => {
-                out.build_sketch_viewer();
+                self.build_sketch_viewer();
             }
             AreaType::Empty => {
-                out.build_empty(rl);
+                self.build_empty(rl);
             }
         }
-        out
     }
 
     pub fn draw(&mut self, d: &mut RaylibDrawHandle, t: &RaylibThread) {
@@ -223,6 +227,18 @@ impl Area {
         }
         out
     }
+    pub fn further_up_bdry_tree(
+        &self,
+        bdry_map: &Registry<BoundaryId, Boundary>,
+    ) -> Vec<BoundaryId> {
+        let mut out = vec![];
+        for (id, bdry) in bdry_map.iter() {
+            if bdry.side2.contains(&self.id) {
+                out.push(*id);
+            }
+        }
+        out
+    }
 
     fn build_viewport_3d(&mut self) {
         todo!()
@@ -238,10 +254,11 @@ impl Area {
     }
 
     fn build_empty(&mut self, rl: &mut RaylibHandle) {
+        self.ui.clear();
         let mut text = Box::new(ui::text::Text::new());
         text.set_pos(Vector2::<f64>::new(
-            self.texture.width() as f64 / 2.0,
-            self.texture.height() as f64 / 2.0,
+            self.screen_rect.width as f64 / 2.0,
+            self.screen_rect.height as f64 / 2.0,
         ));
         text.align = TextAlignment::Center;
         let AreaId(n) = self.id;

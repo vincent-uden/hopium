@@ -1,19 +1,19 @@
 use nalgebra::Vector2;
 use raylib::{
     drawing::{RaylibDraw, RaylibDrawHandle},
-    RaylibThread,
+    RaylibHandle, RaylibThread,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    registry::RegId,
+    registry::{RegId, Registry},
     ui::style::{StyleId, StyleType},
     STYLES,
 };
 
 use super::{
     area::AreaId,
-    renderer::{to_raylib, AREA_MAP, BDRY_MAP},
+    renderer::{to_raylib, AREA_MAP},
 };
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -48,6 +48,8 @@ pub struct Boundary {
     pub orientation: BoundaryOrientation,
     pub active: bool,
     pub thickness: i32,
+    pub hovered_thickness: i32,
+    pub hovered: bool,
     // Left / Up
     pub side1: Vec<AreaId>,
     // Down / Right
@@ -61,8 +63,10 @@ impl Boundary {
             orientation,
             active: false,
             thickness: 3,
+            hovered_thickness: 6,
             side1: vec![],
             side2: vec![],
+            hovered: false,
         }
     }
 
@@ -82,7 +86,11 @@ impl Boundary {
             d.draw_line_ex(
                 to_raylib(start_pos),
                 to_raylib(end_pos),
-                self.thickness as f32,
+                if self.hovered {
+                    self.hovered_thickness as f32
+                } else {
+                    self.thickness as f32
+                },
                 s.color,
             );
         });
@@ -125,12 +133,12 @@ impl Boundary {
         AREA_MAP.with_borrow(|area_map| {
             let area = &area_map[self.side2[0]];
             match self.orientation {
-                BoundaryOrientation::Horizontal => {
+                BoundaryOrientation::Vertical => {
                     if p.y > area.screen_pos.y && p.y < area.screen_pos.y + self.extent() {
                         return (area.screen_pos.x - p.x).abs();
                     }
                 }
-                BoundaryOrientation::Vertical => {
+                BoundaryOrientation::Horizontal => {
                     if p.x > area.screen_pos.x && p.x < area.screen_pos.x + self.extent() {
                         return (area.screen_pos.y - p.y).abs();
                     }
@@ -144,7 +152,11 @@ impl Boundary {
         self.side1.len() == 1 && self.side2.len() == 1
     }
 
-    pub fn collapse(&mut self) {
+    pub fn collapse(
+        &mut self,
+        bdry_map: &mut Registry<BoundaryId, Boundary>,
+        rl: &mut RaylibHandle,
+    ) {
         // When collapsing, the area on side2 is always deleted
         // There might be another boundary to the right/down of side2, it must be
         // connected with area in side1
@@ -161,15 +173,20 @@ impl Boundary {
                             remaining_area.screen_rect.width += deleted_dims.width;
                         }
                     }
+                    remaining_area.build(rl);
                 }
                 let to_delete = &area_map[self.side2[0]];
-                BDRY_MAP.with_borrow_mut(|bdry_map| {
-                    if let Some(bdry_id) = to_delete.further_down_bdry_tree(bdry_map).first() {
-                        let bdry = &mut bdry_map[*bdry_id];
+                if let Some(bdry_id) = to_delete.further_down_bdry_tree(bdry_map).first() {
+                    let bdry = &mut bdry_map[*bdry_id];
+                    if !bdry.side1.contains(&self.side1[0]) {
                         bdry.side1.push(self.side1[0]);
                     }
-                })
-            });
+                }
+                for bdry in bdry_map.values_mut() {
+                    bdry.side1.retain(|x| *x != to_delete.id);
+                    bdry.side2.retain(|x| *x != to_delete.id);
+                }
+            })
         }
     }
 

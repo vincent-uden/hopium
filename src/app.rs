@@ -105,7 +105,9 @@ impl<'a> App<'a> {
                 self.rl,
                 self.t,
             ),
-            Event::CollapseBoundary { mouse_pos } => self.renderer.collapse_boundary(mouse_pos),
+            Event::CollapseBoundary { mouse_pos } => {
+                self.renderer.collapse_boundary(mouse_pos, self.rl)
+            }
             _ => {}
         }
     }
