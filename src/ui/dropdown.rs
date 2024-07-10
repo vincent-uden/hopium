@@ -8,7 +8,7 @@ use raylib::{
 use crate::ui::Drawable;
 use crate::{registry::Registry, rendering::renderer::to_nalgebra};
 
-use super::{text::Text, MouseEventHandler, Ui, UiId, UI_MAP};
+use super::{rect::Rect, text::Text, MouseEventHandler, Ui, UiId};
 
 pub struct DropDown {
     pos: Vector2<f64>,
@@ -19,15 +19,13 @@ pub struct DropDown {
     hovered: bool,
     font_size: f32,
     padding: f64,
-    open: bool,
-    ui_options: Vec<UiId>,
-    ui_bgs: Vec<UiId>,
-    ui_label: UiId,
-    id: UiId,
+    ui_options: Vec<Text>,
+    ui_bgs: Vec<Rect>,
+    ui_label: Text,
 }
 
 impl DropDown {
-    pub fn new(id: UiId) -> Self {
+    pub fn new() -> Self {
         Self {
             pos: Vector2::zeros(),
             btn_size: Vector2::zeros(),
@@ -35,23 +33,15 @@ impl DropDown {
             label: String::new(),
             options: Vec::new(),
             hovered: false,
-            open: false,
             font_size: 20.0,
             padding: 4.0,
             ui_options: Vec::new(),
             ui_bgs: Vec::new(),
-            ui_label: UiId(-1),
-            id,
+            ui_label: Text::new(),
         }
     }
 
-    pub fn set_contents(
-        &mut self,
-        label: String,
-        options: Vec<String>,
-        rl: &mut RaylibHandle,
-        ui_map: &mut Registry<UiId, Box<dyn Ui>>,
-    ) {
+    pub fn set_contents(&mut self, label: String, options: Vec<String>, rl: &mut RaylibHandle) {
         self.label = label;
         self.options = options;
         self.btn_size = to_nalgebra(rl.get_font_default().measure_text(
@@ -72,35 +62,32 @@ impl DropDown {
             (biggest_size.y + self.padding * 2.0) * self.options.len() as f64,
         );
 
-        ui_map.remove_many(&self.ui_options);
-        ui_map.remove_many(&self.ui_bgs);
+        self.ui_options.clear();
+        self.ui_bgs.clear();
 
         for (i, opt) in self.options.iter().enumerate() {
-            let mut text = Box::new(Text::new(ui_map.next_id()));
+            let mut text = Text::new();
             text.set_text(opt.clone(), rl);
             text.set_pos(Vector2::new(
                 self.padding,
                 (self.padding * 2.0 + biggest_size.y) * (i + 1) as f64 + self.padding,
             ));
-            ui_map.insert(text);
+            self.ui_options.push(text);
         }
 
-        let mut label = Box::new(Text::new(ui_map.next_id()));
+        let mut label = Text::new();
         label.set_text(self.label.clone(), rl);
         label.set_pos(Vector2::new(self.padding, self.padding));
-        self.ui_label = ui_map.insert(label);
+        self.ui_label = label;
     }
 }
 
 impl Drawable for DropDown {
     fn move_relative(&mut self, distance: Vector2<f64>) {
         self.pos += distance;
-        UI_MAP.with_borrow_mut(|ui_map| {
-            for id in &self.ui_options {
-                let ui = &mut ui_map[*id];
-                ui.move_relative(distance);
-            }
-        });
+        for ui in &mut self.ui_options {
+            ui.move_relative(distance);
+        }
     }
 
     fn set_pos(&mut self, pos: Vector2<f64>) {
@@ -109,23 +96,19 @@ impl Drawable for DropDown {
     }
 
     fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &RaylibThread) {
-        if self.open {
-            UI_MAP.with_borrow(|ui_map| {
-                for id in &self.ui_options {
-                    let ui = &ui_map[*id];
-                    ui.draw(rl, t);
-                }
-                ui_map[self.ui_label].draw(rl, t);
-            });
-        } else {
+        if self.hovered {
+            for ui in &self.ui_options {
+                ui.draw(rl, t);
+            }
         }
+        self.ui_label.draw(rl, t);
     }
 
     fn get_size(&self) -> Vector2<f64> {
-        if self.open {
-            self.btn_size
+        if self.hovered {
+            Vector2::new(0.0, self.btn_size.y) + self.list_size
         } else {
-            self.list_size
+            self.btn_size
         }
     }
 }

@@ -31,12 +31,11 @@ pub struct Text {
     on_mouse_enter: Option<Box<dyn FnMut(UiId)>>,
     on_mouse_exit: Option<Box<dyn FnMut(UiId)>>,
     hovered: bool,
-    id: UiId,
 }
 
 // TODO: Move off the default font
 impl Text {
-    pub fn new(id: UiId) -> Self {
+    pub fn new() -> Self {
         Self {
             pos: Vector2::<f64>::new(0.0, 0.0),
             size: Vector2::<f64>::new(0.0, 0.0),
@@ -46,7 +45,6 @@ impl Text {
             on_mouse_enter: None,
             on_mouse_exit: None,
             hovered: false,
-            id,
         }
     }
 

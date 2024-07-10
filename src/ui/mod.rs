@@ -28,9 +28,6 @@ impl RegId for UiId {
     }
 }
 
-// TODO: DELETE UI_MAP
-thread_local!(pub static UI_MAP: RefCell<Registry<UiId, Box<dyn Ui>>> = RefCell::new(Registry::new()));
-
 pub trait Drawable {
     fn move_relative(&mut self, distance: Vector2<f64>);
     fn set_pos(&mut self, distance: Vector2<f64>);

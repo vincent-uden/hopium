@@ -8,9 +8,9 @@ use raylib::{
     texture::{RaylibTexture2D, RenderTexture2D},
     RaylibHandle, RaylibThread,
 };
-use serde::{ser::SerializeStruct, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
-use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, UiId, UI_MAP};
+use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui, UiId};
 use crate::{registry::RegId, STYLES};
 use crate::{
     registry::Registry,
@@ -72,7 +72,8 @@ pub struct Area {
     pub anchor: RenderAnchor,
     #[serde(skip_serializing)]
     pub texture: RenderTexture2D,
-    pub ui: Vec<UiId>,
+    #[serde(skip_serializing)]
+    pub ui: Vec<Box<dyn Ui>>,
     #[serde(skip_serializing)]
     hovered: bool,
 }
@@ -126,24 +127,21 @@ impl Area {
             let mut td = d.begin_texture_mode(t, &mut self.texture);
             let s = &STYLES.read().unwrap()[StyleId(StyleType::Area)];
             td.clear_background(s.bg_color);
-            UI_MAP.with_borrow_mut(|ui_map| {
-                for id in &self.ui {
-                    let ui = &mut ui_map[*id];
-                    match self.area_type {
-                        AreaType::Empty | AreaType::Viewport3d => {
-                            ui.move_relative(-offset);
-                        }
-                        _ => {}
+            for ui in &mut self.ui {
+                match self.area_type {
+                    AreaType::Viewport3d => {
+                        ui.move_relative(-offset);
                     }
-                    ui.draw(&mut td, t);
-                    match self.area_type {
-                        AreaType::Empty | AreaType::Viewport3d => {
-                            ui.move_relative(offset);
-                        }
-                        _ => {}
-                    }
+                    _ => {}
                 }
-            });
+                ui.draw(&mut td, t);
+                match self.area_type {
+                    AreaType::Viewport3d => {
+                        ui.move_relative(offset);
+                    }
+                    _ => {}
+                }
+            }
         }
         let mut draw_rect = self.screen_rect;
         draw_rect.y = -draw_rect.height;
@@ -151,11 +149,11 @@ impl Area {
         match self.anchor {
             RenderAnchor::Left => {}
             RenderAnchor::Center => {
-                //draw_rect.x = (self.texture.width() as f32 - self.screen_rect.width) / 2.0;
-                //draw_rect.y = (self.texture.height() as f32 - self.screen_rect.height) / 2.0;
+                draw_rect.x = (self.texture.width() as f32 - self.screen_rect.width) / 2.0;
+                draw_rect.y = (self.texture.height() as f32 - self.screen_rect.height) / 2.0;
             }
             RenderAnchor::Right => {
-                //draw_rect.x = self.texture.width() as f32 - self.screen_rect.width;
+                draw_rect.x = self.texture.width() as f32 - self.screen_rect.width;
             }
         }
         draw_rect.x = draw_rect.x.round();
@@ -246,39 +244,44 @@ impl Area {
     }
 
     fn build_empty(&mut self, rl: &mut RaylibHandle) {
-        UI_MAP.with_borrow_mut(|ui_map| {
-            let mut text = Box::new(ui::text::Text::new(ui_map.next_id()));
-            text.set_pos(Vector2::<f64>::new(
-                self.texture.width() as f64 / 2.0,
-                self.texture.height() as f64 / 2.0,
-            ));
-            text.align = TextAlignment::Center;
-            let AreaId(n) = self.id;
-            text.set_text(format!("{:?}", n), rl);
-            text.set_font_size(40.0, rl);
-            self.ui.push(ui_map.insert(text));
+        let mut text = Box::new(ui::text::Text::new());
+        text.set_pos(Vector2::<f64>::new(
+            self.texture.width() as f64 / 2.0,
+            self.texture.height() as f64 / 2.0,
+        ));
+        text.align = TextAlignment::Center;
+        let AreaId(n) = self.id;
+        text.set_text(format!("{:?}", n), rl);
+        text.set_font_size(40.0, rl);
+        self.ui.push(text);
 
-            let mut picker = Box::new(ui::dropdown::DropDown::new(ui_map.next_id()));
-            picker.set_contents(
-                String::from("Area Type"),
-                vec![String::from("Empty"), String::from("Constraints")],
-                rl,
-                ui_map,
-            );
-            self.ui.push(ui_map.insert(picker));
-        });
-        self.anchor = RenderAnchor::Center;
+        let mut picker = Box::new(ui::dropdown::DropDown::new());
+        picker.set_contents(
+            String::from("Area Type"),
+            vec![String::from("Empty"), String::from("Constraints")],
+            rl,
+        );
+        self.ui.push(picker);
+        self.anchor = RenderAnchor::Left;
     }
 
     fn to_local_space(&self, mouse_pos: Vector2<f64>) -> Vector2<f64> {
-        let offset = Vector2::<f64>::new(
-            ((self.texture.width() as f32 - self.screen_rect.width) / 2.0
-                - self.screen_pos.x as f32) as f64,
-            ((self.texture.height() as f32 - self.screen_rect.height) / 2.0
-                - self.screen_pos.y as f32) as f64,
-        );
+        let anchor_offset = match self.anchor {
+            RenderAnchor::Left => -self.screen_pos,
+            RenderAnchor::Center => Vector2::<f64>::new(
+                ((self.texture.width() as f32 - self.screen_rect.width) / 2.0
+                    - self.screen_pos.x as f32) as f64,
+                ((self.texture.height() as f32 - self.screen_rect.height) / 2.0
+                    - self.screen_pos.y as f32) as f64,
+            ),
+            RenderAnchor::Right => Vector2::new(
+                ((self.texture.width() as f32 - self.screen_rect.width) / 2.0
+                    - self.screen_pos.x as f32) as f64,
+                -self.screen_pos.y,
+            ),
+        };
 
-        mouse_pos + offset
+        mouse_pos + anchor_offset
     }
 }
 
@@ -310,56 +313,43 @@ impl MouseEventHandler for Area {
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
-        UI_MAP.with_borrow_mut(|ui_map| {
-            if self.contains_point(mouse_pos) {
-                self.hovered = true;
-                for id in &self.ui {
-                    let ui = &mut ui_map[*id];
-                    let local = self.to_local_space(mouse_pos);
-                    ui.receive_mouse_pos(self.to_local_space(mouse_pos));
-                }
-            } else {
-                self.hovered = false;
-                for id in &self.ui {
-                    let ui = &mut ui_map[*id];
-                    // If the mouse isn't in the active area, treat it as being outside the entire
-                    // window
-                    ui.receive_mouse_pos(Vector2::<f64>::new(-100.0, -100.0));
-                }
+        if self.contains_point(mouse_pos) {
+            self.hovered = true;
+            let local = self.to_local_space(mouse_pos);
+            for ui in &mut self.ui {
+                ui.receive_mouse_pos(local);
             }
-        });
+        } else {
+            self.hovered = false;
+            for ui in &mut self.ui {
+                // If the mouse isn't in the active area, treat it as being outside the entire
+                // window
+                ui.receive_mouse_pos(Vector2::<f64>::new(-100.0, -100.0));
+            }
+        }
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
         if self.contains_point(mouse_pos) {
-            UI_MAP.with_borrow_mut(|ui_map| {
-                for id in &self.ui {
-                    let ui = &mut ui_map[*id];
-                    ui.receive_mouse_down(mouse_pos - self.screen_pos);
-                }
-            });
+            for ui in &mut self.ui {
+                ui.receive_mouse_down(mouse_pos - self.screen_pos);
+            }
         }
     }
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
         if self.contains_point(mouse_pos) {
-            UI_MAP.with_borrow_mut(|ui_map| {
-                for id in &mut self.ui {
-                    let ui = &mut ui_map[*id];
-                    ui.receive_mouse_up(mouse_pos - self.screen_pos);
-                }
-            });
+            for ui in &mut self.ui {
+                ui.receive_mouse_up(mouse_pos - self.screen_pos);
+            }
         }
     }
 
     fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {
         if self.contains_point(mouse_pos) {
-            UI_MAP.with_borrow_mut(|ui_map| {
-                for id in &self.ui {
-                    let ui = &mut ui_map[*id];
-                    ui.receive_mouse_up(mouse_pos - self.screen_pos);
-                }
-            });
+            for ui in &mut self.ui {
+                ui.receive_mouse_up(mouse_pos - self.screen_pos);
+            }
         }
     }
 }

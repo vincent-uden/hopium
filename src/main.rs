@@ -77,9 +77,11 @@ fn main() {
         Ok(contents) => {
             let mut eq: EventQueue = serde_json::from_str(&contents).unwrap();
             eq.reset_history_index();
+            let mut event_queue = EVENT_QUEUE.lock().unwrap();
             while let Some(e) = eq.get_next_history_event() {
                 app.process_event(e);
             }
+            *event_queue = eq.clone();
         }
         Err(_) => {}
     }

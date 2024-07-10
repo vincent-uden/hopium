@@ -9,7 +9,6 @@ use crate::{
         boundary::BoundaryOrientation,
         renderer::{Renderer, AREA_MAP, BDRY_MAP},
     },
-    ui::UI_MAP,
     APP_STATE, EVENT_QUEUE, MODE_STACK,
 };
 
@@ -107,24 +106,6 @@ impl<'a> App<'a> {
                 self.t,
             ),
             Event::CollapseBoundary { mouse_pos } => self.renderer.collapse_boundary(mouse_pos),
-            Event::UiEntered { id } => {
-                UI_MAP.with_borrow_mut(|ui_map| {
-                    let ui = &mut ui_map[id];
-                    match ui.get_on_mouse_enter() {
-                        Some(f) => f(id),
-                        None => {}
-                    }
-                });
-            }
-            Event::UiExited { id } => {
-                UI_MAP.with_borrow_mut(|ui_map| {
-                    let ui = &mut ui_map[id];
-                    match ui.get_on_mouse_exit() {
-                        Some(f) => f(id),
-                        None => {}
-                    }
-                });
-            }
             _ => {}
         }
     }

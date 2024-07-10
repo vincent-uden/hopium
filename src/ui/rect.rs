@@ -9,7 +9,7 @@ use crate::rendering::renderer::to_raylib;
 use super::Drawable;
 
 #[derive(Debug)]
-struct Rect {
+pub struct Rect {
     pos: Vector2<f64>,
     size: Vector2<f64>,
     pub color: Color,
