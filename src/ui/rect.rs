@@ -65,11 +65,7 @@ impl MouseEventHandler for Rect {
         self.hovered = self.contains_point(mouse_pos);
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
-    }
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {}
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
-    }
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {}
 }

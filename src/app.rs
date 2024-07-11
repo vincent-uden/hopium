@@ -108,6 +108,18 @@ impl<'a> App<'a> {
             Event::CollapseBoundary { mouse_pos } => {
                 self.renderer.collapse_boundary(mouse_pos, self.rl)
             }
+            Event::BoundaryMoved {
+                start_pos: _,
+                end_pos,
+                bdry_id,
+            } => {
+                self.renderer.move_boundary(end_pos, bdry_id);
+                AREA_MAP.with_borrow_mut(|area_map| {
+                    for area in area_map.values_mut() {
+                        area.build(self.rl);
+                    }
+                });
+            }
             _ => {}
         }
     }

@@ -22,7 +22,7 @@ pub enum BoundaryOrientation {
     Vertical,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Deserialize, Serialize)]
 pub struct BoundaryId(pub i64);
 
 impl RegId for BoundaryId {
@@ -200,8 +200,8 @@ impl Boundary {
     }
 
     pub fn move_boundary(&mut self, pos: Vector2<f64>) {
+        // TODO: Ensure minimum extents
         AREA_MAP.with_borrow_mut(|area_map| {
-            // TODO: Ensure minimum extents
             let bdry_pos = area_map[self.side2[0]].screen_pos;
             let diff = pos - bdry_pos;
             match self.orientation {
@@ -213,6 +213,7 @@ impl Boundary {
                     for area_id in &self.side2 {
                         let area = &mut area_map[*area_id];
                         area.screen_rect.height -= diff.y as f32;
+                        area.screen_pos.y += diff.y;
                     }
                 }
                 BoundaryOrientation::Vertical => {
@@ -223,6 +224,7 @@ impl Boundary {
                     for area_id in &self.side2 {
                         let area = &mut area_map[*area_id];
                         area.screen_rect.width -= diff.x as f32;
+                        area.screen_pos.x += diff.x;
                     }
                 }
             }

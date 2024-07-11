@@ -3,21 +3,36 @@ use std::collections::VecDeque;
 use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
-use crate::ui::UiId;
+use crate::{rendering::boundary::BoundaryId, ui::UiId};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub enum Event {
     PopMode,
     StartRotate,
     StopRotate,
-    SplitPaneHorizontally { mouse_pos: Vector2<f64> },
-    SplitPaneVertically { mouse_pos: Vector2<f64> },
-    CollapseBoundary { mouse_pos: Vector2<f64> },
+    SplitPaneHorizontally {
+        mouse_pos: Vector2<f64>,
+    },
+    SplitPaneVertically {
+        mouse_pos: Vector2<f64>,
+    },
+    CollapseBoundary {
+        mouse_pos: Vector2<f64>,
+    },
+    BoundaryMoved {
+        start_pos: Vector2<f64>,
+        end_pos: Vector2<f64>,
+        bdry_id: BoundaryId,
+    },
     DumpShapes,
     ExitProgram,
     DumpLayout,
-    UiEntered { id: UiId },
-    UiExited { id: UiId },
+    UiEntered {
+        id: UiId,
+    },
+    UiExited {
+        id: UiId,
+    },
 }
 
 fn should_serialize_as_layout(event: &Event) -> bool {
@@ -26,6 +41,7 @@ fn should_serialize_as_layout(event: &Event) -> bool {
         Event::SplitPaneHorizontally { .. }
             | Event::SplitPaneVertically { .. }
             | Event::CollapseBoundary { .. }
+            | Event::BoundaryMoved { .. }
     )
 }
 

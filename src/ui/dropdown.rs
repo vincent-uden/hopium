@@ -158,11 +158,7 @@ impl MouseEventHandler for DropDown {
         self.ui_label_bg.receive_mouse_pos(mouse_pos);
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
-    }
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {}
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
-        todo!()
-    }
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {}
 }

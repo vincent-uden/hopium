@@ -1,14 +1,16 @@
 use std::cell::RefCell;
 
 use nalgebra::Vector2;
+use raylib::ffi::MouseButton;
 use raylib::{
     color::Color, drawing::RaylibDraw, ffi::KeyboardKey, math::Rectangle, RaylibHandle,
     RaylibThread,
 };
 
+use crate::event::Event;
 use crate::ui::MouseEventHandler;
-use crate::APP_STATE;
 use crate::{registry::Registry, ui::UiId};
+use crate::{APP_STATE, EVENT_QUEUE};
 
 use super::{
     area::{Area, AreaId, AreaType},
@@ -36,6 +38,7 @@ pub struct Renderer {
     mouse_bdry_tol: f64,
     mouse_pos: Vector2<f64>,
     grabbed: Option<BoundaryId>,
+    grabbed_at: Vector2<f64>,
     next_area_id: AreaId,
     next_bdry_id: BoundaryId,
 }
@@ -65,6 +68,7 @@ impl Renderer {
             mouse_bdry_tol: 5.0,
             mouse_pos: Vector2::default(),
             grabbed: None,
+            grabbed_at: Vector2::default(),
             next_area_id: AreaId(1),
             next_bdry_id: BoundaryId(0),
         }
@@ -97,6 +101,13 @@ impl Renderer {
 
         let mouse_pos = to_nalgebra(rl.get_mouse_position());
         self.receive_mouse_pos(mouse_pos);
+        if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
+            self.receive_mouse_down(mouse_pos);
+        }
+        if rl.is_mouse_button_released(MouseButton::MOUSE_BUTTON_LEFT) {
+            self.receive_mouse_up(mouse_pos);
+        }
+        self.receive_mouse_wheel(mouse_pos, rl.get_mouse_wheel_move().into());
     }
 
     pub fn split_area(
@@ -200,6 +211,10 @@ impl Renderer {
         }
     }
 
+    pub fn move_boundary(&mut self, end_pos: Vector2<f64>, bdry_id: BoundaryId) {
+        BDRY_MAP.with_borrow_mut(|bdry_map| bdry_map[bdry_id].move_boundary(end_pos));
+    }
+
     fn find_boundary(&self, mouse_pos: Vector2<f64>, radius: f64) -> Option<BoundaryId> {
         let mut out = None;
         let mut closest_dist = f64::INFINITY;
@@ -272,6 +287,10 @@ impl MouseEventHandler for Renderer {
                     }
                 }
             }
+
+            if let Some(bdry_id) = self.grabbed {
+                bdry_map[bdry_id].move_boundary(mouse_pos);
+            }
         });
     }
 
@@ -281,6 +300,7 @@ impl MouseEventHandler for Renderer {
             None => match self.find_boundary(mouse_pos, self.mouse_bdry_tol) {
                 Some(hovered) => {
                     self.grabbed = Some(hovered);
+                    self.grabbed_at = mouse_pos;
                 }
                 None => {
                     AREA_MAP.with_borrow_mut(|area_map| {
@@ -295,7 +315,15 @@ impl MouseEventHandler for Renderer {
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
         match self.grabbed {
-            Some(_) => self.grabbed = None,
+            Some(id) => {
+                let mut eq = EVENT_QUEUE.lock().unwrap();
+                eq.post_event(Event::BoundaryMoved {
+                    start_pos: self.grabbed_at,
+                    end_pos: mouse_pos,
+                    bdry_id: id,
+                });
+                self.grabbed = None;
+            }
             None => {
                 AREA_MAP.with_borrow_mut(|area_map| {
                     for area in area_map.values_mut() {
