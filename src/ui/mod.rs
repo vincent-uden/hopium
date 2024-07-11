@@ -11,6 +11,7 @@ use crate::registry::RegId;
 
 pub mod dropdown;
 pub mod rect;
+pub mod sketchviewer;
 pub mod style;
 pub mod text;
 
@@ -30,7 +31,7 @@ impl RegId for UiId {
 
 pub trait Drawable {
     fn move_relative(&mut self, distance: Vector2<f64>);
-    fn set_pos(&mut self, distance: Vector2<f64>);
+    fn set_pos(&mut self, pos: Vector2<f64>);
     fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &RaylibThread);
     fn get_size(&self) -> Vector2<f64>;
 }

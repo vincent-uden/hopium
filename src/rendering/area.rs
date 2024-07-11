@@ -10,7 +10,10 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui};
+use crate::{
+    event::Event,
+    ui::{self, sketchviewer, text::TextAlignment, Drawable, MouseEventHandler, Ui},
+};
 use crate::{registry::RegId, STYLES};
 use crate::{
     registry::Registry,
@@ -114,7 +117,7 @@ impl Area {
                 self.build_constraint_selection();
             }
             AreaType::SketchViewer => {
-                self.build_sketch_viewer();
+                self.build_sketch_viewer(rl);
             }
             AreaType::Empty => {
                 self.build_empty(rl);
@@ -227,6 +230,7 @@ impl Area {
         }
         out
     }
+
     pub fn further_up_bdry_tree(
         &self,
         bdry_map: &Registry<BoundaryId, Boundary>,
@@ -240,6 +244,26 @@ impl Area {
         out
     }
 
+    fn build_area_type_picker(&mut self, rl: &mut RaylibHandle) {
+        let mut picker = Box::new(ui::dropdown::DropDown::new());
+        picker.set_contents(
+            String::from("Area Type"),
+            vec![String::from("Empty"), String::from("Sketch Viewer")],
+            rl,
+        );
+        picker.option_events = vec![
+            Event::ChangeAreaType {
+                id: self.id,
+                area_type: AreaType::Empty,
+            },
+            Event::ChangeAreaType {
+                id: self.id,
+                area_type: AreaType::SketchViewer,
+            },
+        ];
+        self.ui.push(picker);
+    }
+
     fn build_viewport_3d(&mut self) {
         todo!()
     }
@@ -249,8 +273,11 @@ impl Area {
     fn build_constraint_selection(&mut self) {
         todo!()
     }
-    fn build_sketch_viewer(&mut self) {
-        todo!()
+    fn build_sketch_viewer(&mut self, rl: &mut RaylibHandle) {
+        self.ui.clear();
+        let sketch_viewer = Box::new(ui::sketchviewer::SketchViewer::new());
+        self.ui.push(sketch_viewer);
+        self.build_area_type_picker(rl);
     }
 
     fn build_empty(&mut self, rl: &mut RaylibHandle) {
@@ -266,13 +293,7 @@ impl Area {
         text.set_font_size(40.0, rl);
         self.ui.push(text);
 
-        let mut picker = Box::new(ui::dropdown::DropDown::new());
-        picker.set_contents(
-            String::from("Area Type"),
-            vec![String::from("Empty"), String::from("Constraints")],
-            rl,
-        );
-        self.ui.push(picker);
+        self.build_area_type_picker(rl);
         self.anchor = RenderAnchor::Left;
     }
 

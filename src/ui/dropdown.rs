@@ -1,13 +1,12 @@
 use nalgebra::Vector2;
 use raylib::{
-    color::Color,
     drawing::{RaylibDrawHandle, RaylibTextureMode},
     text::RaylibFont,
     RaylibHandle, RaylibThread,
 };
 
-use crate::rendering::renderer::to_nalgebra;
-use crate::ui::Drawable;
+use crate::{event::Event, rendering::renderer::to_nalgebra};
+use crate::{ui::Drawable, EVENT_QUEUE};
 
 use super::{
     rect::Rect,
@@ -22,6 +21,7 @@ pub struct DropDown {
     list_size: Vector2<f64>,
     label: String,
     options: Vec<String>,
+    pub option_events: Vec<Event>,
     hovered: bool,
     font_size: f32,
     padding: f64,
@@ -39,6 +39,7 @@ impl DropDown {
             list_size: Vector2::zeros(),
             label: String::new(),
             options: Vec::new(),
+            option_events: Vec::new(),
             hovered: false,
             font_size: 20.0,
             padding: 4.0,
@@ -158,7 +159,15 @@ impl MouseEventHandler for DropDown {
         self.ui_label_bg.receive_mouse_pos(mouse_pos);
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {}
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
+        for (i, bg) in self.ui_bgs.iter().enumerate() {
+            if bg.contains_point(mouse_pos) {
+                let mut eq = EVENT_QUEUE.lock().unwrap();
+                eq.post_event(self.option_events[i]);
+                break;
+            }
+        }
+    }
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {}
 }

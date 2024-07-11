@@ -3,6 +3,7 @@ use std::fs;
 use raylib::{RaylibHandle, RaylibThread};
 
 use crate::{
+    cad::sketch::Sketch,
     event::Event,
     modes::global::GlobalMode,
     rendering::{
@@ -120,6 +121,13 @@ impl<'a> App<'a> {
                     }
                 });
             }
+            Event::ChangeAreaType { id, area_type } => {
+                AREA_MAP.with_borrow_mut(|area_map| {
+                    let area = &mut area_map[id];
+                    area.area_type = area_type;
+                    area.build(self.rl);
+                });
+            }
             _ => {}
         }
     }
@@ -128,10 +136,14 @@ impl<'a> App<'a> {
 #[derive(Debug)]
 pub struct State {
     pub running: bool,
+    pub sketch: Sketch,
 }
 
 impl State {
     pub fn new() -> Self {
-        Self { running: true }
+        Self {
+            running: true,
+            sketch: Sketch::new(),
+        }
     }
 }

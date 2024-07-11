@@ -4,6 +4,7 @@ use std::collections::hash_map::{Iter, IterMut, Values, ValuesMut};
 use std::collections::HashMap;
 use std::ops::{Index, IndexMut};
 
+#[derive(Debug)]
 pub struct Registry<K: RegId + Eq + Hash + Copy + fmt::Debug, V> {
     map: HashMap<K, V>,
     next_id: K,

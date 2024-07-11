@@ -3,7 +3,13 @@ use std::collections::VecDeque;
 use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
-use crate::{rendering::boundary::BoundaryId, ui::UiId};
+use crate::{
+    rendering::{
+        area::{AreaId, AreaType},
+        boundary::BoundaryId,
+    },
+    ui::UiId,
+};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub enum Event {
@@ -33,6 +39,10 @@ pub enum Event {
     UiExited {
         id: UiId,
     },
+    ChangeAreaType {
+        id: AreaId,
+        area_type: AreaType,
+    },
 }
 
 fn should_serialize_as_layout(event: &Event) -> bool {
@@ -42,6 +52,7 @@ fn should_serialize_as_layout(event: &Event) -> bool {
             | Event::SplitPaneVertically { .. }
             | Event::CollapseBoundary { .. }
             | Event::BoundaryMoved { .. }
+            | Event::ChangeAreaType { .. }
     )
 }
 

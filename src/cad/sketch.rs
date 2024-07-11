@@ -2,6 +2,7 @@ use crate::registry::Registry;
 
 use super::entity::{BiConstraint, EntityId, FundamentalEntity};
 
+#[derive(Debug)]
 pub struct Sketch {
     pub fundamental_entities: Registry<EntityId, FundamentalEntity>,
     pub bi_constraints: Vec<BiConstraint>,
@@ -13,7 +14,7 @@ impl Sketch {
         Self {
             fundamental_entities: Registry::new(),
             bi_constraints: Vec::new(),
-            step_size: 1e-4,
+            step_size: 1e-2,
         }
     }
 
@@ -96,5 +97,60 @@ mod tests {
             "The final error should be smaller than the intial error"
         );
         assert!(final_error < 1e-2, "final_error {}", final_error);
+    }
+
+    #[test]
+    fn pythagorean_triplet() {
+        let mut sketch = Sketch::new();
+        let e1 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Point(Point {
+                pos: Vector2::new(0.0, 0.0),
+            }));
+        let e2 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Point(Point {
+                pos: Vector2::new(1.0, 0.1),
+            }));
+        let e3 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Point(Point {
+                pos: Vector2::new(0.1, 1.0),
+            }));
+
+        sketch.bi_constraints.push(BiConstraint {
+            e1,
+            e2,
+            c: ConstraintType::Horizontal,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1,
+            e2: e3,
+            c: ConstraintType::Vertical,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1,
+            e2,
+            c: ConstraintType::Distance { x: 3.0 },
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1,
+            e2: e3,
+            c: ConstraintType::Distance { x: 4.0 },
+        });
+
+        for _ in 0..20000 {
+            sketch.sgd_step();
+        }
+
+        if let FundamentalEntity::Point(top_corner) = &sketch.fundamental_entities[e3] {
+            if let FundamentalEntity::Point(right_corner) = &sketch.fundamental_entities[e2] {
+                let diff = (top_corner.pos - right_corner.pos).norm();
+                assert!((diff - 5.0) < 1e-6);
+                return;
+            }
+        }
+
+        assert!(false);
     }
 }
