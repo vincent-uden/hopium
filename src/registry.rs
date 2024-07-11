@@ -63,6 +63,11 @@ impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Registry<K, V> {
     }
 
     #[inline(always)]
+    pub fn get_many_mut<const N: usize>(&mut self, ks: [&K; N]) -> Option<[&mut V; N]> {
+        self.map.get_many_mut(ks)
+    }
+
+    #[inline(always)]
     pub fn remove(&mut self, k: &K) -> Option<V> {
         self.map.remove(k)
     }

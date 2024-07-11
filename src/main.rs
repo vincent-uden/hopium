@@ -1,3 +1,5 @@
+#![feature(map_many_mut)]
+
 use std::{
     fs,
     sync::{Mutex, RwLock},
