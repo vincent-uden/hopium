@@ -1,9 +1,13 @@
 use std::fs;
 
+use nalgebra::Vector2;
 use raylib::{RaylibHandle, RaylibThread};
 
 use crate::{
-    cad::sketch::Sketch,
+    cad::{
+        entity::{Circle, FundamentalEntity, Line, Point},
+        sketch::Sketch,
+    },
     event::Event,
     modes::global::GlobalMode,
     rendering::{
@@ -70,6 +74,37 @@ impl<'a> App<'a> {
         {
             let mut ms = MODE_STACK.lock().unwrap();
             ms.push(global_mode);
+        }
+
+        {
+            let mut state = APP_STATE.lock().unwrap();
+            state
+                .sketch
+                .fundamental_entities
+                .insert(FundamentalEntity::Point(Point {
+                    pos: Vector2::new(0.0, 0.0),
+                }));
+            state
+                .sketch
+                .fundamental_entities
+                .insert(FundamentalEntity::Circle(Circle {
+                    pos: Vector2::new(0.0, 0.0),
+                    radius: 1.0,
+                }));
+            state
+                .sketch
+                .fundamental_entities
+                .insert(FundamentalEntity::Line(Line {
+                    offset: Vector2::new(0.0, 0.0),
+                    direction: Vector2::new(1.0, 1.0),
+                }));
+            state
+                .sketch
+                .fundamental_entities
+                .insert(FundamentalEntity::Line(Line {
+                    offset: Vector2::new(0.707, 0.707),
+                    direction: Vector2::new(1.0, -1.0),
+                }));
         }
 
         let mut running = true;
