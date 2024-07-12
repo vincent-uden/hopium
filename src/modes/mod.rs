@@ -4,12 +4,14 @@ use raylib::{
     ffi::{KeyboardKey, MouseButton},
     RaylibHandle,
 };
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
 use crate::event::Event;
 
 pub mod global;
 pub mod sketch;
 
+#[derive(Debug, Clone, Copy)]
 pub struct KeyPress {
     pub key: KeyboardKey,
     pub shift: bool,
@@ -18,7 +20,21 @@ pub struct KeyPress {
     pub r_alt: bool,
 }
 
+#[derive(Deserialize, Serialize)]
+#[serde(remote = "MouseButton")]
+enum MouseButtonDef {
+    MOUSE_BUTTON_LEFT = 0,
+    MOUSE_BUTTON_RIGHT = 1,
+    MOUSE_BUTTON_MIDDLE = 2,
+    MOUSE_BUTTON_SIDE = 3,
+    MOUSE_BUTTON_EXTRA = 4,
+    MOUSE_BUTTON_FORWARD = 5,
+    MOUSE_BUTTON_BACK = 6,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct MousePress {
+    #[serde(with = "MouseButtonDef")]
     pub button: MouseButton,
     pub shift: bool,
     pub ctrl: bool,

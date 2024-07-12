@@ -4,6 +4,7 @@ use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    modes::MousePress,
     rendering::{
         area::{AreaId, AreaType},
         boundary::BoundaryId,
@@ -46,6 +47,7 @@ pub enum Event {
     SketchClick {
         pos: Vector2<f64>,
         sketch_space_select_radius: f64,
+        press: MousePress,
     },
 }
 

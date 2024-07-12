@@ -2,7 +2,7 @@ use nalgebra::Vector2;
 
 use crate::{event::Event, ui::sketchviewer::SketchViewer, APP_STATE};
 
-use super::{Mode, ModeId};
+use super::{Mode, ModeId, MousePress};
 
 #[derive(Debug)]
 pub struct SketchMode {}
@@ -12,7 +12,7 @@ impl SketchMode {
         Self {}
     }
 
-    fn sketch_click(&self, click_pos: Vector2<f64>, select_radius: f64) {
+    fn sketch_click(&self, click_pos: Vector2<f64>, select_radius: f64, press: MousePress) {
         let mut state = APP_STATE.lock().unwrap();
         let mut closest = None;
         let mut closest_id = None;
@@ -30,12 +30,11 @@ impl SketchMode {
             }
         }
 
+        if !press.shift {
+            state.selected.clear();
+        }
         if let Some(id) = closest_id {
-            // Duplication for now, will be needed later when parsing Shift
-            state.selected.clear();
             state.selected.push(id);
-        } else {
-            state.selected.clear();
         }
     }
 }
@@ -50,8 +49,9 @@ impl Mode for SketchMode {
             Event::SketchClick {
                 pos,
                 sketch_space_select_radius,
+                press,
             } => {
-                self.sketch_click(pos, sketch_space_select_radius);
+                self.sketch_click(pos, sketch_space_select_radius, press);
                 true
             }
             _ => false,

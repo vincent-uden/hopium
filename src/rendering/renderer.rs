@@ -1,7 +1,8 @@
 use std::cell::RefCell;
 
 use nalgebra::Vector2;
-use raylib::ffi::MouseButton;
+use raylib::ffi::{MouseButton, TextureFilter};
+use raylib::texture::RaylibTexture2D;
 use raylib::{
     color::Color, drawing::RaylibDraw, ffi::KeyboardKey, math::Rectangle, RaylibHandle,
     RaylibThread,
@@ -46,6 +47,10 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(screen_w: i32, screen_h: i32, rl: &mut RaylibHandle, t: &RaylibThread) -> Self {
+        let mut texture = rl
+            .load_render_texture(t, screen_w as u32, screen_h as u32)
+            .unwrap();
+        texture.set_texture_filter(t, TextureFilter::TEXTURE_FILTER_TRILINEAR);
         AREA_MAP.with_borrow_mut(|areas| {
             areas.insert(Area::new(
                 AreaType::Empty,
@@ -57,8 +62,7 @@ impl Renderer {
                     height: screen_h as f32,
                 },
                 Vector2::default(),
-                rl.load_render_texture(t, screen_w as u32, screen_h as u32)
-                    .unwrap(),
+                texture,
                 rl,
             ));
         });
@@ -173,13 +177,16 @@ impl Renderer {
                         to_split.screen_pos.y + to_split.screen_rect.height as f64 / 2.0,
                     ),
                 };
+                let texture = rl
+                    .load_render_texture(t, self.screen_w as u32, self.screen_h as u32)
+                    .unwrap();
+                texture.set_texture_filter(t, TextureFilter::TEXTURE_FILTER_TRILINEAR);
                 let new_area = Area::new(
                     AreaType::Empty,
                     next_area_id,
                     new_rect,
                     new_pos,
-                    rl.load_render_texture(t, self.screen_w as u32, self.screen_h as u32)
-                        .unwrap(),
+                    texture,
                     rl,
                 );
                 match orientation {
