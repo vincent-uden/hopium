@@ -5,11 +5,11 @@ use raylib::{RaylibHandle, RaylibThread};
 
 use crate::{
     cad::{
-        entity::{Circle, FundamentalEntity, Line, Point},
+        entity::{Circle, EntityId, FundamentalEntity, Line, Point},
         sketch::Sketch,
     },
     event::Event,
-    modes::global::GlobalMode,
+    modes::{global::GlobalMode, sketch::SketchMode},
     rendering::{
         boundary::BoundaryOrientation,
         renderer::{Renderer, AREA_MAP, BDRY_MAP},
@@ -71,9 +71,11 @@ impl<'a> App<'a> {
 
     pub fn run(&mut self) {
         let global_mode = Box::new(GlobalMode::new());
+        let sketch_mode = Box::new(SketchMode::new());
         {
             let mut ms = MODE_STACK.lock().unwrap();
             ms.push(global_mode);
+            ms.push(sketch_mode);
         }
 
         {
@@ -172,6 +174,7 @@ impl<'a> App<'a> {
 pub struct State {
     pub running: bool,
     pub sketch: Sketch,
+    pub selected: Vec<EntityId>,
 }
 
 impl State {
@@ -179,6 +182,7 @@ impl State {
         Self {
             running: true,
             sketch: Sketch::new(),
+            selected: Vec::new(),
         }
     }
 }

@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     event::Event,
+    modes::MousePress,
     ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui},
 };
 use crate::{registry::RegId, STYLES};
@@ -361,18 +362,18 @@ impl MouseEventHandler for Area {
         }
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         if self.contains_point(mouse_pos) {
             for ui in &mut self.ui {
-                ui.receive_mouse_down(mouse_pos - self.screen_pos);
+                ui.receive_mouse_down(mouse_pos - self.screen_pos, press);
             }
         }
     }
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         if self.contains_point(mouse_pos) {
             for ui in &mut self.ui {
-                ui.receive_mouse_up(mouse_pos - self.screen_pos);
+                ui.receive_mouse_up(mouse_pos - self.screen_pos, press);
             }
         }
     }
@@ -380,7 +381,7 @@ impl MouseEventHandler for Area {
     fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {
         if self.contains_point(mouse_pos) {
             for ui in &mut self.ui {
-                ui.receive_mouse_up(mouse_pos - self.screen_pos);
+                ui.receive_mouse_wheel(mouse_pos - self.screen_pos, movement);
             }
         }
     }

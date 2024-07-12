@@ -44,16 +44,4 @@ impl Mode for GlobalMode {
         }
         consumed
     }
-
-    fn key_release(&mut self, key: &super::KeyPress) -> bool {
-        false
-    }
-
-    fn mouse_press(&mut self, key: &super::MousePress) -> bool {
-        false
-    }
-
-    fn mouse_release(&mut self, key: &super::MousePress) -> bool {
-        false
-    }
 }

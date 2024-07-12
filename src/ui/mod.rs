@@ -7,7 +7,7 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::registry::RegId;
+use crate::{modes::MousePress, registry::RegId};
 
 pub mod dropdown;
 pub mod rect;
@@ -41,9 +41,9 @@ pub trait MouseEventHandler {
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>);
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>);
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress);
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>);
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress);
 
     fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {}
 

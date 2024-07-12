@@ -130,9 +130,9 @@ impl MouseEventHandler for Text {
         self.hovered = self.contains_point(mouse_pos);
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {}
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {}
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {}
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {}
 
     fn get_on_mouse_enter(&mut self) -> Option<&mut Box<(dyn FnMut(UiId) + 'static)>> {
         self.on_mouse_enter.as_mut()

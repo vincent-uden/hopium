@@ -8,9 +8,10 @@ use raylib::{
 };
 
 use crate::event::Event;
+use crate::modes::MousePress;
 use crate::ui::MouseEventHandler;
 use crate::{registry::Registry, ui::UiId};
-use crate::{APP_STATE, EVENT_QUEUE};
+use crate::{APP_STATE, EVENT_QUEUE, MODE_STACK};
 
 use super::{
     area::{Area, AreaId, AreaType},
@@ -103,11 +104,35 @@ impl Renderer {
 
         let mouse_pos = to_nalgebra(rl.get_mouse_position());
         self.receive_mouse_pos(mouse_pos);
-        if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
-            self.receive_mouse_down(mouse_pos);
-        }
-        if rl.is_mouse_button_released(MouseButton::MOUSE_BUTTON_LEFT) {
-            self.receive_mouse_up(mouse_pos);
+
+        let ms = MODE_STACK.lock().unwrap();
+        let shift = rl.is_key_down(KeyboardKey::KEY_LEFT_SHIFT)
+            || rl.is_key_down(KeyboardKey::KEY_RIGHT_SHIFT);
+        let ctrl = rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL)
+            || rl.is_key_down(KeyboardKey::KEY_RIGHT_CONTROL);
+        let l_alt = rl.is_key_down(KeyboardKey::KEY_LEFT_ALT);
+        let r_alt = rl.is_key_down(KeyboardKey::KEY_RIGHT_ALT);
+        for button in &ms.all_mouse_buttons {
+            if rl.is_mouse_button_pressed(*button) {
+                let press = MousePress {
+                    button: *button,
+                    shift,
+                    ctrl,
+                    l_alt,
+                    r_alt,
+                };
+                self.receive_mouse_down(mouse_pos, &press);
+            }
+            if rl.is_mouse_button_released(*button) {
+                let press = MousePress {
+                    button: *button,
+                    shift,
+                    ctrl,
+                    l_alt,
+                    r_alt,
+                };
+                self.receive_mouse_up(mouse_pos, &press);
+            }
         }
         self.receive_mouse_wheel(mouse_pos, rl.get_mouse_wheel_move().into());
     }
@@ -296,7 +321,7 @@ impl MouseEventHandler for Renderer {
         });
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         match self.grabbed {
             Some(_) => {}
             None => match self.find_boundary(mouse_pos, self.mouse_bdry_tol) {
@@ -307,7 +332,7 @@ impl MouseEventHandler for Renderer {
                 None => {
                     AREA_MAP.with_borrow_mut(|area_map| {
                         for area in area_map.values_mut() {
-                            area.receive_mouse_down(mouse_pos);
+                            area.receive_mouse_down(mouse_pos, press);
                         }
                     });
                 }
@@ -315,7 +340,7 @@ impl MouseEventHandler for Renderer {
         }
     }
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         match self.grabbed {
             Some(id) => {
                 let mut eq = EVENT_QUEUE.lock().unwrap();
@@ -329,7 +354,7 @@ impl MouseEventHandler for Renderer {
             None => {
                 AREA_MAP.with_borrow_mut(|area_map| {
                     for area in area_map.values_mut() {
-                        area.receive_mouse_up(mouse_pos);
+                        area.receive_mouse_up(mouse_pos, press);
                     }
                 });
             }

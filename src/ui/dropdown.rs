@@ -5,7 +5,7 @@ use raylib::{
     RaylibHandle, RaylibThread,
 };
 
-use crate::{event::Event, rendering::renderer::to_nalgebra};
+use crate::{event::Event, modes::MousePress, rendering::renderer::to_nalgebra};
 use crate::{ui::Drawable, EVENT_QUEUE};
 
 use super::{
@@ -159,7 +159,7 @@ impl MouseEventHandler for DropDown {
         self.ui_label_bg.receive_mouse_pos(mouse_pos);
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         for (i, bg) in self.ui_bgs.iter().enumerate() {
             if bg.contains_point(mouse_pos) {
                 let mut eq = EVENT_QUEUE.lock().unwrap();
@@ -169,5 +169,5 @@ impl MouseEventHandler for DropDown {
         }
     }
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {}
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {}
 }

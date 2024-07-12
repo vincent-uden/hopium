@@ -5,9 +5,11 @@ use raylib::{color::Color, drawing::RaylibDraw};
 
 use raylib::math::Vector2 as V2;
 
-use crate::cad::entity::{EntityId, FundamentalEntity};
+use crate::cad::entity::FundamentalEntity;
+use crate::event::Event;
+use crate::modes::MousePress;
 use crate::rendering::renderer::to_raylib;
-use crate::APP_STATE;
+use crate::{APP_STATE, EVENT_QUEUE};
 
 use super::MouseEventHandler;
 use super::{text::Text, Drawable};
@@ -38,7 +40,6 @@ pub struct SketchViewer {
     select_radius: f64,
     texture_size: Vector2<f64>,
     style: SketchViewerStyle,
-    selected: Vec<EntityId>,
 }
 
 impl SketchViewer {
@@ -53,7 +54,6 @@ impl SketchViewer {
             select_radius: 10.0,
             texture_size: Vector2::new(1600.0, 900.0),
             style: SketchViewerStyle::default(),
-            selected: Vec::new(),
         }
     }
 
@@ -71,11 +71,15 @@ impl SketchViewer {
         x * self.scale * self.zoom
     }
 
+    fn sketch_to_screen_scale(&self, x: f64) -> f64 {
+        self.scale * self.zoom
+    }
+
     fn to_sketch_scale(&self, x: f64) -> f64 {
         x / (self.scale * self.zoom)
     }
 
-    fn can_ovveride_selection(
+    pub fn can_ovveride_selection(
         e: &FundamentalEntity,
         selection: &Option<FundamentalEntity>,
     ) -> bool {
@@ -95,7 +99,7 @@ impl SketchViewer {
         }
     }
 
-    fn should_ovveride_selection(
+    pub fn should_ovveride_selection(
         e: &FundamentalEntity,
         selection: &Option<FundamentalEntity>,
     ) -> bool {
@@ -139,7 +143,7 @@ impl Drawable for SketchViewer {
 
         let state = APP_STATE.lock().unwrap();
         for (id, e) in state.sketch.fundamental_entities.iter() {
-            let color = if self.selected.contains(id) {
+            let color = if state.selected.contains(id) {
                 self.style.selected_entity_color
             } else {
                 self.style.entity_color
@@ -187,34 +191,20 @@ impl MouseEventHandler for SketchViewer {
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {}
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
-        let state = APP_STATE.lock().unwrap();
-        let mut closest = None;
-        let mut closest_id = None;
-        let mut closest_dist = f64::INFINITY;
-        for (id, e) in state.sketch.fundamental_entities.iter() {
-            let dist =
-                self.to_screen_scale(e.distance_to_position(&self.to_sketch_space(mouse_pos)));
-            if dist <= self.select_radius
-                && ((dist < closest_dist && Self::can_ovveride_selection(e, &closest))
-                    || Self::should_ovveride_selection(e, &closest))
-            {
-                closest = Some(*e);
-                closest_id = Some(*id);
-                closest_dist = dist;
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
+        let mut eq = EVENT_QUEUE.lock().unwrap();
+        match press.button {
+            raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT => {
+                eq.post_event(Event::SketchClick {
+                    pos: self.to_sketch_space(mouse_pos),
+                    sketch_space_select_radius: self.to_sketch_scale(self.select_radius),
+                });
             }
-        }
-
-        if let Some(id) = closest_id {
-            // Duplication for now, will be needed later when parsing Shift
-            self.selected.clear();
-            self.selected.push(id);
-        } else {
-            self.selected.clear();
+            _ => {}
         }
     }
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {}
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {}
 }
 
 impl Debug for SketchViewer {

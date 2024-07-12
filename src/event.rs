@@ -43,6 +43,10 @@ pub enum Event {
         id: AreaId,
         area_type: AreaType,
     },
+    SketchClick {
+        pos: Vector2<f64>,
+        sketch_space_select_radius: f64,
+    },
 }
 
 fn should_serialize_as_layout(event: &Event) -> bool {

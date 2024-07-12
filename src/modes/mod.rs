@@ -8,42 +8,56 @@ use raylib::{
 use crate::event::Event;
 
 pub mod global;
+pub mod sketch;
 
 pub struct KeyPress {
-    key: KeyboardKey,
-    shift: bool,
-    ctrl: bool,
-    l_alt: bool,
-    r_alt: bool,
+    pub key: KeyboardKey,
+    pub shift: bool,
+    pub ctrl: bool,
+    pub l_alt: bool,
+    pub r_alt: bool,
 }
 
 pub struct MousePress {
-    button: MouseButton,
-    shift: bool,
-    ctrl: bool,
-    l_alt: bool,
-    r_alt: bool,
+    pub button: MouseButton,
+    pub shift: bool,
+    pub ctrl: bool,
+    pub l_alt: bool,
+    pub r_alt: bool,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ModeId {
     Global,
+    Sketch,
 }
 
 pub trait Mode {
     fn id(&self) -> ModeId;
     /// Due to ownership rules, a mode may not directly modify the mode stack.
     fn process_event(&self, event: Event) -> bool;
-    fn key_press(&mut self, key: &KeyPress, rl: &mut RaylibHandle) -> bool;
-    fn key_release(&mut self, key: &KeyPress) -> bool;
-    fn mouse_press(&mut self, key: &MousePress) -> bool;
-    fn mouse_release(&mut self, key: &MousePress) -> bool;
+
+    fn key_press(&mut self, key: &KeyPress, rl: &mut RaylibHandle) -> bool {
+        false
+    }
+
+    fn key_release(&mut self, key: &KeyPress) -> bool {
+        false
+    }
+
+    fn mouse_press(&mut self, key: &MousePress) -> bool {
+        false
+    }
+
+    fn mouse_release(&mut self, key: &MousePress) -> bool {
+        false
+    }
 }
 
 pub struct ModeStack {
     modes: Vec<Box<dyn Mode + Send + Sync>>,
-    all_keys: Vec<KeyboardKey>,
-    all_mouse_buttons: Vec<MouseButton>,
+    pub all_keys: Vec<KeyboardKey>,
+    pub all_mouse_buttons: Vec<MouseButton>,
 }
 
 impl ModeStack {
@@ -178,7 +192,7 @@ impl ModeStack {
     pub fn process_event(&mut self, event: Event) -> bool {
         let mut consumed = false;
         for mode in self.modes.iter().rev() {
-            consumed = consumed && mode.process_event(event);
+            consumed = consumed || mode.process_event(event);
         }
         if !consumed {
             consumed = true;
