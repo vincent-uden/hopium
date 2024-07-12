@@ -151,6 +151,6 @@ mod tests {
             }
         }
 
-        assert!(false);
+        unreachable!()
     }
 }

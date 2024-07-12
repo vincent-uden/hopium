@@ -23,25 +23,39 @@ impl Default for EntityId {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub enum FundamentalEntity {
     Point(Point),
     Line(Line),
     Circle(Circle),
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+impl FundamentalEntity {
+    pub fn distance_to_position(&self, target: &Vector2<f64>) -> f64 {
+        match self {
+            FundamentalEntity::Point(p) => (p.pos - target).norm(),
+            FundamentalEntity::Line(l) => {
+                let ortho_a = target - project(target, &l.direction);
+                let ortho_r = l.offset - project(&l.offset, &l.direction);
+                (ortho_r - ortho_a).norm()
+            }
+            FundamentalEntity::Circle(c) => ((target - c.pos).norm() - c.radius).abs(),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub struct Point {
     pub pos: Vector2<f64>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub struct Line {
     pub offset: Vector2<f64>,
     pub direction: Vector2<f64>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub struct Circle {
     pub pos: Vector2<f64>,
     pub radius: f64,
@@ -160,8 +174,8 @@ impl BiConstraint {
         let ortho_a = p.pos - project(&p.pos, &l.direction);
         let ortho_r = l.offset - project(&l.offset, &l.direction);
         match c {
-            ConstraintType::Coincident => (ortho_r + ortho_a).norm_squared(),
-            ConstraintType::Distance { x } => ((ortho_r + ortho_a).norm() - x).powi(2),
+            ConstraintType::Coincident => (ortho_r - ortho_a).norm_squared(),
+            ConstraintType::Distance { x } => ((ortho_r - ortho_a).norm() - x).powi(2),
             _ => 0.0,
         }
     }
@@ -238,8 +252,7 @@ impl BiConstraint {
         step_size: f64,
     ) {
         let h = 1e-6;
-        let x_errors = vec![
-            Self::error(
+        let x_errors = [Self::error(
                 &FundamentalEntity::Point(Point {
                     pos: p1.pos + Vector2::new(-h / 2.0, 0.0),
                 }),
@@ -252,10 +265,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
-        let y_errors = vec![
-            Self::error(
+            )];
+        let y_errors = [Self::error(
                 &FundamentalEntity::Point(Point {
                     pos: p1.pos + Vector2::new(0.0, -h / 2.0),
                 }),
@@ -268,8 +279,7 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
+            )];
 
         let x_derivative = (x_errors[1] - x_errors[0]) / h;
         let y_derivative = (y_errors[1] - y_errors[0]) / h;
@@ -279,8 +289,7 @@ impl BiConstraint {
 
     fn apply_grad_error_l(l: &mut Line, e: &FundamentalEntity, c: ConstraintType, step_size: f64) {
         let h = 1e-6;
-        let o_x_errors = vec![
-            Self::error(
+        let o_x_errors = [Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset + Vector2::new(-h / 2.0, 0.0),
                     direction: l.direction,
@@ -295,10 +304,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
-        let o_y_errors = vec![
-            Self::error(
+            )];
+        let o_y_errors = [Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset + Vector2::new(0.0, -h / 2.0),
                     direction: l.direction,
@@ -313,10 +320,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
-        let d_x_errors = vec![
-            Self::error(
+            )];
+        let d_x_errors = [Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset,
                     direction: l.direction + Vector2::new(-h / 2.0, 0.0),
@@ -331,10 +336,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
-        let d_y_errors = vec![
-            Self::error(
+            )];
+        let d_y_errors = [Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset,
                     direction: l.direction + Vector2::new(0.0, -h / 2.0),
@@ -349,8 +352,7 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
+            )];
 
         let o_x_derivative = (o_x_errors[1] - o_x_errors[0]) / h;
         let o_y_derivative = (o_y_errors[1] - o_y_errors[0]) / h;
@@ -369,8 +371,7 @@ impl BiConstraint {
         step_size: f64,
     ) {
         let h = 1e-6;
-        let x_errors = vec![
-            Self::error(
+        let x_errors = [Self::error(
                 &FundamentalEntity::Circle(Circle {
                     pos: c1.pos + Vector2::new(-h / 2.0, 0.0),
                     radius: c1.radius,
@@ -385,10 +386,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
-        let y_errors = vec![
-            Self::error(
+            )];
+        let y_errors = [Self::error(
                 &FundamentalEntity::Circle(Circle {
                     pos: c1.pos + Vector2::new(0.0, -h / 2.0),
                     radius: c1.radius,
@@ -403,10 +402,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
-        let r_errors = vec![
-            Self::error(
+            )];
+        let r_errors = [Self::error(
                 &FundamentalEntity::Circle(Circle {
                     pos: c1.pos,
                     radius: c1.radius - h / 2.0,
@@ -421,8 +418,7 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            ),
-        ];
+            )];
 
         let x_derivative = (x_errors[1] - x_errors[0]) / h;
         let y_derivative = (y_errors[1] - y_errors[0]) / h;

@@ -5,7 +5,7 @@ use raylib::{color::Color, drawing::RaylibDraw};
 
 use raylib::math::Vector2 as V2;
 
-use crate::cad::entity::FundamentalEntity;
+use crate::cad::entity::{EntityId, FundamentalEntity};
 use crate::rendering::renderer::to_raylib;
 use crate::APP_STATE;
 
@@ -35,8 +35,10 @@ pub struct SketchViewer {
     last_mouse_pos: Vector2<f64>,
     scale: f64,
     zoom: f64,
+    select_radius: f64,
     texture_size: Vector2<f64>,
     style: SketchViewerStyle,
+    selected: Vec<EntityId>,
 }
 
 impl SketchViewer {
@@ -48,17 +50,64 @@ impl SketchViewer {
             last_mouse_pos: Vector2::zeros(),
             scale: 200.0,
             zoom: 1.0,
+            select_radius: 10.0,
             texture_size: Vector2::new(1600.0, 900.0),
             style: SketchViewerStyle::default(),
+            selected: Vec::new(),
         }
     }
 
+    #[inline(always)]
     fn to_screen_space(&self, x: Vector2<f64>) -> V2 {
         to_raylib((x * self.scale * self.zoom) + self.pan_offset)
     }
 
+    #[inline(always)]
     fn to_sketch_space(&self, x: Vector2<f64>) -> Vector2<f64> {
         (x - self.pan_offset) / (self.scale * self.zoom)
+    }
+
+    fn to_screen_scale(&self, x: f64) -> f64 {
+        x * self.scale * self.zoom
+    }
+
+    fn to_sketch_scale(&self, x: f64) -> f64 {
+        x / (self.scale * self.zoom)
+    }
+
+    fn can_ovveride_selection(
+        e: &FundamentalEntity,
+        selection: &Option<FundamentalEntity>,
+    ) -> bool {
+        if let Some(selected) = selection {
+            matches!(
+                (e, selected),
+                (FundamentalEntity::Point(_), FundamentalEntity::Point(_))
+                    | (FundamentalEntity::Point(_), FundamentalEntity::Line(_))
+                    | (FundamentalEntity::Point(_), FundamentalEntity::Circle(_))
+                    | (FundamentalEntity::Line(_), FundamentalEntity::Line(_))
+                    | (FundamentalEntity::Line(_), FundamentalEntity::Circle(_))
+                    | (FundamentalEntity::Circle(_), FundamentalEntity::Line(_))
+                    | (FundamentalEntity::Circle(_), FundamentalEntity::Circle(_))
+            )
+        } else {
+            true
+        }
+    }
+
+    fn should_ovveride_selection(
+        e: &FundamentalEntity,
+        selection: &Option<FundamentalEntity>,
+    ) -> bool {
+        if let Some(selected) = selection {
+            matches!(
+                (e, selected),
+                (FundamentalEntity::Point(_), FundamentalEntity::Line(_))
+                    | (FundamentalEntity::Point(_), FundamentalEntity::Circle(_))
+            )
+        } else {
+            true
+        }
     }
 }
 
@@ -89,10 +138,15 @@ impl Drawable for SketchViewer {
         );
 
         let state = APP_STATE.lock().unwrap();
-        for e in state.sketch.fundamental_entities.values() {
+        for (id, e) in state.sketch.fundamental_entities.iter() {
+            let color = if self.selected.contains(id) {
+                self.style.selected_entity_color
+            } else {
+                self.style.entity_color
+            };
             match e {
                 FundamentalEntity::Point(p) => {
-                    rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, self.style.entity_color);
+                    rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, color);
                 }
                 FundamentalEntity::Line(l) => {
                     let start = self.to_sketch_space(Vector2::zeros());
@@ -103,7 +157,7 @@ impl Drawable for SketchViewer {
                     rl.draw_line_v(
                         self.to_screen_space(l.offset + l.direction * ts.min()),
                         self.to_screen_space(l.offset + l.direction * ts_end.max()),
-                        self.style.entity_color,
+                        color,
                     );
                 }
                 FundamentalEntity::Circle(c) => {
@@ -112,7 +166,7 @@ impl Drawable for SketchViewer {
                         pos.x as i32,
                         pos.y as i32,
                         (c.radius * self.zoom * self.scale) as f32,
-                        self.style.entity_color,
+                        color,
                     );
                 }
             }
@@ -133,7 +187,32 @@ impl MouseEventHandler for SketchViewer {
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {}
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {}
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>) {
+        let state = APP_STATE.lock().unwrap();
+        let mut closest = None;
+        let mut closest_id = None;
+        let mut closest_dist = f64::INFINITY;
+        for (id, e) in state.sketch.fundamental_entities.iter() {
+            let dist =
+                self.to_screen_scale(e.distance_to_position(&self.to_sketch_space(mouse_pos)));
+            if dist <= self.select_radius
+                && ((dist < closest_dist && Self::can_ovveride_selection(e, &closest))
+                    || Self::should_ovveride_selection(e, &closest))
+            {
+                closest = Some(*e);
+                closest_id = Some(*id);
+                closest_dist = dist;
+            }
+        }
+
+        if let Some(id) = closest_id {
+            // Duplication for now, will be needed later when parsing Shift
+            self.selected.clear();
+            self.selected.push(id);
+        } else {
+            self.selected.clear();
+        }
+    }
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>) {}
 }

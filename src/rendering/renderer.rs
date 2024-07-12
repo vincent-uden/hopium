@@ -94,9 +94,11 @@ impl Renderer {
     }
 
     pub fn update(&mut self, rl: &mut RaylibHandle) {
-        let mut state = APP_STATE.lock().unwrap();
-        if rl.is_key_pressed(KeyboardKey::KEY_Q) {
-            state.running = false;
+        {
+            let mut state = APP_STATE.lock().unwrap();
+            if rl.is_key_pressed(KeyboardKey::KEY_Q) {
+                state.running = false;
+            }
         }
 
         let mouse_pos = to_nalgebra(rl.get_mouse_position());
@@ -182,10 +184,10 @@ impl Renderer {
                     }
                     for id in to_split.further_up_bdry_tree(bdry_map) {
                         if let Some(existing_bdry) = bdry_map.get_mut(&id) {
-                            if existing_bdry.orientation != bdry.orientation {
-                                if !existing_bdry.side2.contains(&new_area.id) {
-                                    existing_bdry.side2.push(new_area.id);
-                                }
+                            if existing_bdry.orientation != bdry.orientation
+                                && !existing_bdry.side2.contains(&new_area.id)
+                            {
+                                existing_bdry.side2.push(new_area.id);
                             }
                         }
                     }

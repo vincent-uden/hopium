@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     event::Event,
-    ui::{self, sketchviewer, text::TextAlignment, Drawable, MouseEventHandler, Ui},
+    ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui},
 };
 use crate::{registry::RegId, STYLES};
 use crate::{
