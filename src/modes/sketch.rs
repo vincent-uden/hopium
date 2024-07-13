@@ -1,7 +1,10 @@
 use nalgebra::Vector2;
 use raylib::{ffi::KeyboardKey, RaylibHandle};
 
-use crate::{cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE};
+use crate::{
+    cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE,
+    EVENT_QUEUE, MODE_STACK,
+};
 
 use super::{KeyPress, Mode, ModeId, MousePress};
 
@@ -80,10 +83,14 @@ impl Mode for SketchMode {
 
     fn key_press(&mut self, key: &KeyPress, rl: &mut RaylibHandle) -> bool {
         let mut state = APP_STATE.lock().unwrap();
+        let mut eq = EVENT_QUEUE.lock().unwrap();
         let mut out = true;
         match key.key {
             KeyboardKey::KEY_ENTER => {
                 state.solving = true;
+            }
+            KeyboardKey::KEY_P => {
+                eq.post_event(Event::PushMode(ModeId::Point));
             }
             _ => {
                 out = false;

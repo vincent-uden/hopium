@@ -1,14 +1,23 @@
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
 
+use circle::CircleMode;
+use global::GlobalMode;
+use line::LineMode;
+use point::PointMode;
 use raylib::{
     ffi::{KeyboardKey, MouseButton},
     RaylibHandle,
 };
 use serde::{ser::SerializeStruct, Deserialize, Serialize};
+use sketch::SketchMode;
+use strum_macros::EnumString;
 
 use crate::event::Event;
 
+pub mod circle;
 pub mod global;
+pub mod line;
+pub mod point;
 pub mod sketch;
 
 #[derive(Debug, Clone, Copy)]
@@ -42,10 +51,13 @@ pub struct MousePress {
     pub r_alt: bool,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, EnumString, Serialize, Deserialize, Clone, Copy, Hash)]
 pub enum ModeId {
     Global,
     Sketch,
+    Point,
+    Line,
+    Circle,
 }
 
 pub trait Mode {
@@ -71,7 +83,8 @@ pub trait Mode {
 }
 
 pub struct ModeStack {
-    modes: Vec<Box<dyn Mode + Send + Sync>>,
+    modes: Vec<ModeId>,
+    pub all_modes: HashMap<ModeId, Box<dyn Mode + Send + Sync>>,
     pub all_keys: Vec<KeyboardKey>,
     pub all_mouse_buttons: Vec<MouseButton>,
 }
@@ -201,13 +214,15 @@ impl ModeStack {
                 MouseButton::MOUSE_BUTTON_FORWARD,
                 MouseButton::MOUSE_BUTTON_BACK,
             ],
+            all_modes: HashMap::new(),
         }
     }
 
     /// Due to ownership rules, a mode may not directly modify the mode stack.
     pub fn process_event(&mut self, event: Event) -> bool {
         let mut consumed = false;
-        for mode in self.modes.iter().rev() {
+        for id in self.modes.iter().rev() {
+            let mode = &self.all_modes[id];
             consumed = consumed || mode.process_event(event);
         }
         if !consumed {
@@ -216,6 +231,7 @@ impl ModeStack {
                 Event::PopMode => {
                     self.modes.pop();
                 }
+                Event::PushMode(mode_id) => {}
                 _ => {
                     consumed = false;
                 }
@@ -230,7 +246,6 @@ impl ModeStack {
                 .modes
                 .pop()
                 .expect("Since the mode is active, self.modes CANT be empty")
-                .id()
                 != *mode_id
             {}
         }
@@ -253,7 +268,8 @@ impl ModeStack {
                     l_alt,
                     r_alt,
                 };
-                for mode in self.modes.iter_mut().rev() {
+                for id in self.modes.iter_mut().rev() {
+                    let mode = self.all_modes.get_mut(&id).unwrap();
                     if mode.key_press(&press, rl) {
                         break;
                     }
@@ -267,7 +283,8 @@ impl ModeStack {
                     l_alt,
                     r_alt,
                 };
-                for mode in self.modes.iter_mut().rev() {
+                for id in self.modes.iter_mut().rev() {
+                    let mode = self.all_modes.get_mut(&id).unwrap();
                     if mode.key_release(&press) {
                         break;
                     }
@@ -284,7 +301,8 @@ impl ModeStack {
                     l_alt,
                     r_alt,
                 };
-                for mode in self.modes.iter_mut().rev() {
+                for id in self.modes.iter_mut().rev() {
+                    let mode = self.all_modes.get_mut(&id).unwrap();
                     if mode.mouse_press(&press) {
                         break;
                     }
@@ -298,7 +316,8 @@ impl ModeStack {
                     l_alt,
                     r_alt,
                 };
-                for mode in self.modes.iter_mut().rev() {
+                for id in self.modes.iter_mut().rev() {
+                    let mode = self.all_modes.get_mut(&id).unwrap();
                     if mode.mouse_release(&press) {
                         break;
                     }
@@ -307,7 +326,7 @@ impl ModeStack {
         }
     }
 
-    pub fn push(&mut self, mode: Box<dyn Mode + Send + Sync>) {
+    pub fn push(&mut self, mode: ModeId) {
         self.modes.push(mode);
     }
 
@@ -320,8 +339,8 @@ impl ModeStack {
     }
 
     pub fn is_active(&self, mode_id: &ModeId) -> bool {
-        for mode in &self.modes {
-            if mode.id() == *mode_id {
+        for id in &self.modes {
+            if id == mode_id {
                 return true;
             }
         }
@@ -330,9 +349,13 @@ impl ModeStack {
 
     pub fn is_innermost_mode(&self, mode_id: &ModeId) -> bool {
         match self.modes.last() {
-            Some(mode) => mode.id() == *mode_id,
+            Some(id) => id == mode_id,
             None => false,
         }
+    }
+
+    pub fn innermost_mode(&self) -> ModeId {
+        *self.modes.last().unwrap()
     }
 }
 

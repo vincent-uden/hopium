@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     cad::entity::ConstraintType,
-    modes::MousePress,
+    modes::{ModeId, MousePress},
     rendering::{
         area::{AreaId, AreaType},
         boundary::BoundaryId,
@@ -16,6 +16,7 @@ use crate::{
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub enum Event {
     PopMode,
+    PushMode(ModeId),
     StartRotate,
     StopRotate,
     SplitPaneHorizontally {

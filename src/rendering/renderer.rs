@@ -96,6 +96,14 @@ impl Renderer {
         });
 
         d.draw_fps(self.screen_w - 100, 900);
+        let ms = MODE_STACK.lock().unwrap();
+        d.draw_text(
+            &format!("{:?}", &ms.innermost_mode()),
+            10,
+            900,
+            20,
+            Color::WHITE,
+        );
     }
 
     pub fn update(&mut self, rl: &mut RaylibHandle) {

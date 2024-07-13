@@ -10,7 +10,10 @@ use crate::{
         sketch::Sketch,
     },
     event::Event,
-    modes::{global::GlobalMode, sketch::SketchMode},
+    modes::{
+        circle::CircleMode, global::GlobalMode, line::LineMode, point::PointMode,
+        sketch::SketchMode, ModeId,
+    },
     rendering::{
         boundary::BoundaryOrientation,
         renderer::{Renderer, AREA_MAP, BDRY_MAP},
@@ -78,10 +81,17 @@ impl<'a> App<'a> {
     pub fn run(&mut self) {
         let global_mode = Box::new(GlobalMode::new());
         let sketch_mode = Box::new(SketchMode::new());
+        let point_mode = Box::new(PointMode::new());
+        let line_mode = Box::new(LineMode::new());
+        let circle_mode = Box::new(CircleMode::new());
         {
             let mut ms = MODE_STACK.lock().unwrap();
-            ms.push(global_mode);
-            ms.push(sketch_mode);
+            ms.all_modes.insert(ModeId::Global, global_mode);
+            ms.all_modes.insert(ModeId::Sketch, sketch_mode);
+            ms.all_modes.insert(ModeId::Point, point_mode);
+            ms.all_modes.insert(ModeId::Line, line_mode);
+            ms.all_modes.insert(ModeId::Circle, circle_mode);
+            ms.push(ModeId::Global);
         }
 
         {
