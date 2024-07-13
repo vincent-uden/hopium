@@ -4,6 +4,7 @@ use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    cad::entity::ConstraintType,
     modes::MousePress,
     rendering::{
         area::{AreaId, AreaType},
@@ -48,6 +49,9 @@ pub enum Event {
         pos: Vector2<f64>,
         sketch_space_select_radius: f64,
         press: MousePress,
+    },
+    Constrain {
+        constraint_type: ConstraintType,
     },
 }
 

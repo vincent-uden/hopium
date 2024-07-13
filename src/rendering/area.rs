@@ -116,7 +116,7 @@ impl Area {
                 self.build_tool_selection();
             }
             AreaType::ContraintSelection => {
-                self.build_constraint_selection();
+                self.build_constraint_selection(rl);
             }
             AreaType::SketchViewer => {
                 self.build_sketch_viewer(rl);
@@ -250,13 +250,21 @@ impl Area {
         let mut picker = Box::new(ui::dropdown::DropDown::new());
         picker.set_contents(
             String::from("Area Type"),
-            vec![String::from("Empty"), String::from("Sketch Viewer")],
+            vec![
+                String::from("Empty"),
+                String::from("Constraint Selection"),
+                String::from("Sketch Viewer"),
+            ],
             rl,
         );
         picker.option_events = vec![
             Event::ChangeAreaType {
                 id: self.id,
                 area_type: AreaType::Empty,
+            },
+            Event::ChangeAreaType {
+                id: self.id,
+                area_type: AreaType::ContraintSelection,
             },
             Event::ChangeAreaType {
                 id: self.id,
@@ -272,8 +280,12 @@ impl Area {
     fn build_tool_selection(&mut self) {
         todo!()
     }
-    fn build_constraint_selection(&mut self) {
-        todo!()
+    fn build_constraint_selection(&mut self, rl: &mut RaylibHandle) {
+        self.ui.clear();
+        let mut constraint_selector = Box::new(ui::constraint_selector::ConstraintSelector::new());
+        constraint_selector.set_pos(Vector2::new(40.0, 40.0));
+        self.ui.push(constraint_selector);
+        self.build_area_type_picker(rl);
     }
     fn build_sketch_viewer(&mut self, rl: &mut RaylibHandle) {
         self.ui.clear();
@@ -300,10 +312,6 @@ impl Area {
         icon.set_pos(Vector2::new(200.0, 10.0));
         icon.size = Vector2::new(40.0, 40.0);
         self.ui.push(icon);
-
-        let mut constraint_selector = Box::new(ui::constraint_selector::ConstraintSelector::new());
-        constraint_selector.set_pos(Vector2::new(200.0, 100.0));
-        self.ui.push(constraint_selector);
 
         self.build_area_type_picker(rl);
         self.anchor = RenderAnchor::Left;

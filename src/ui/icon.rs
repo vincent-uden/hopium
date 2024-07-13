@@ -9,7 +9,6 @@ use super::{
     Drawable, MouseEventHandler,
 };
 
-#[derive(Debug)]
 pub struct Icon {
     pos: Vector2<f64>,
     pub size: Vector2<f64>,
@@ -19,6 +18,7 @@ pub struct Icon {
     hovered: bool,
     bg: Rect,
     image_id: ImageId,
+    pub on_click: Option<Box<dyn Fn()>>,
 }
 
 impl Icon {
@@ -32,6 +32,7 @@ impl Icon {
             hovered: false,
             bg: Rect::new(),
             image_id: ImageId::IconCoincident,
+            on_click: None,
         }
     }
 
@@ -94,7 +95,13 @@ impl MouseEventHandler for Icon {
         self.hovered = self.contains_point(mouse_pos);
     }
 
-    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {}
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {
+        if self.contains_point(mouse_pos) {
+            if let Some(on_click) = &self.on_click {
+                on_click();
+            }
+        }
+    }
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {}
 }

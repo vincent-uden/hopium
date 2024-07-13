@@ -5,8 +5,9 @@ use crate::{
         entity::{BiConstraint, ConstraintType},
         sketch::Sketch,
     },
+    event::Event,
     images::ImageId,
-    APP_STATE, IMAGES,
+    APP_STATE, EVENT_QUEUE, IMAGES,
 };
 
 use super::{
@@ -55,6 +56,11 @@ impl ConstraintSelector {
             icon.set_image(*icon_id);
             icon.size = Vector2::new(40.0, 40.0);
             icon.set_pos(Vector2::new(i as f64 * icon.get_size().x, 0.0));
+            let c = constraint_types[i].clone();
+            icon.on_click = Some(Box::new(move || {
+                let mut eq = EVENT_QUEUE.lock().unwrap();
+                eq.post_event(Event::Constrain { constraint_type: c });
+            }));
             icons.push(icon);
         }
         Self {
@@ -110,10 +116,8 @@ impl MouseEventHandler for ConstraintSelector {
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
         self.hovered = self.contains_point(mouse_pos);
-        if self.hovered {
-            for icon in &mut self.icons {
-                icon.receive_mouse_pos(mouse_pos);
-            }
+        for icon in &mut self.icons {
+            icon.receive_mouse_pos(mouse_pos);
         }
         for (icon, constraint_type) in self.icons.iter_mut().zip(&self.constraint_types) {
             let state = APP_STATE.lock().unwrap();
@@ -129,10 +133,12 @@ impl MouseEventHandler for ConstraintSelector {
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {
-        todo!()
+        for icon in &mut self.icons {
+            if icon.contains_point(mouse_pos) {
+                icon.receive_mouse_down(mouse_pos, press);
+            }
+        }
     }
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {
-        todo!()
-    }
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {}
 }

@@ -11,12 +11,14 @@ use app::{App, State};
 use event::EventQueue;
 use images::{populate_images, ImageId};
 use lazy_static::lazy_static;
+use log::LevelFilter;
 use modes::ModeStack;
 use raylib::{
     color::Color,
     texture::{Image, Texture2D},
 };
 use registry::Registry;
+use simplelog::{ColorChoice, CombinedLogger, Config, TermLogger, TerminalMode};
 use ui::style::{populate_styles, Style, StyleId};
 
 mod app;
@@ -52,6 +54,13 @@ thread_local! {
 }
 
 fn main() {
+    CombinedLogger::init(vec![TermLogger::new(
+        LevelFilter::Debug,
+        Config::default(),
+        TerminalMode::Mixed,
+        ColorChoice::Auto,
+    )])
+    .unwrap();
     let (mut rl, thread) = raylib::init()
         .size(1600, 900)
         .undecorated()

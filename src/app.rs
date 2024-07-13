@@ -1,5 +1,6 @@
 use std::fs;
 
+use log::debug;
 use nalgebra::Vector2;
 use raylib::{RaylibHandle, RaylibThread};
 
@@ -58,6 +59,7 @@ impl<'a> App<'a> {
                 let mut ms = MODE_STACK.lock().unwrap();
                 match maybe_event {
                     Some(event) => {
+                        debug!("Processing event {:?}", event);
                         ms.process_event(event);
                         self.process_event(event);
                     }
@@ -66,6 +68,10 @@ impl<'a> App<'a> {
                     }
                 }
             }
+        }
+        let mut state = APP_STATE.lock().unwrap();
+        if state.solving {
+            state.sketch.sgd_step();
         }
     }
 
@@ -176,6 +182,7 @@ pub struct State {
     pub running: bool,
     pub sketch: Sketch,
     pub selected: Vec<EntityId>,
+    pub solving: bool,
 }
 
 impl State {
@@ -184,6 +191,7 @@ impl State {
             running: true,
             sketch: Sketch::new(),
             selected: Vec::new(),
+            solving: false,
         }
     }
 }

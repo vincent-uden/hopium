@@ -86,6 +86,10 @@ pub struct BiConstraint {
 }
 
 impl BiConstraint {
+    pub fn new(e1: EntityId, e2: EntityId, c: ConstraintType) -> Self {
+        Self { e1, e2, c }
+    }
+
     pub fn possible(e1: &FundamentalEntity, e2: &FundamentalEntity, c: &ConstraintType) -> bool {
         match (e1, e2) {
             (FundamentalEntity::Point { .. }, FundamentalEntity::Point { .. }) => matches!(
@@ -194,7 +198,7 @@ impl BiConstraint {
         match c {
             ConstraintType::Parallel => (l1.direction.angle(&l2.direction)).powi(2),
             ConstraintType::Perpendicular => {
-                (l1.direction.angle(&l2.direction) - std::f64::consts::PI).powi(2)
+                (l1.direction.angle(&l2.direction) - std::f64::consts::PI / 2.0).powi(2)
             }
             ConstraintType::Colinear => {
                 let ortho_1 = l1.offset - project(&l1.offset, &l1.direction);

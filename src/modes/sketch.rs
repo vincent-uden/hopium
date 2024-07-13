@@ -1,8 +1,9 @@
 use nalgebra::Vector2;
+use raylib::{ffi::KeyboardKey, RaylibHandle};
 
-use crate::{event::Event, ui::sketchviewer::SketchViewer, APP_STATE};
+use crate::{cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE};
 
-use super::{Mode, ModeId, MousePress};
+use super::{KeyPress, Mode, ModeId, MousePress};
 
 #[derive(Debug)]
 pub struct SketchMode {}
@@ -37,6 +38,21 @@ impl SketchMode {
             state.selected.push(id);
         }
     }
+
+    fn constrain(&self, constraint_type: crate::cad::entity::ConstraintType) {
+        let mut state = APP_STATE.lock().unwrap();
+        if state.selected.len() == 2 {
+            let id1 = state.selected[0];
+            let id2 = state.selected[1];
+            let e1 = &state.sketch.fundamental_entities[id1];
+            let e2 = &state.sketch.fundamental_entities[id2];
+            if BiConstraint::possible(e1, e2, &constraint_type) {
+                let bi_constraint = BiConstraint::new(id1, id2, constraint_type);
+                state.sketch.bi_constraints.push(bi_constraint);
+                state.selected.clear();
+            }
+        }
+    }
 }
 
 impl Mode for SketchMode {
@@ -54,7 +70,39 @@ impl Mode for SketchMode {
                 self.sketch_click(pos, sketch_space_select_radius, press);
                 true
             }
+            Event::Constrain { constraint_type } => {
+                self.constrain(constraint_type);
+                true
+            }
             _ => false,
         }
+    }
+
+    fn key_press(&mut self, key: &KeyPress, rl: &mut RaylibHandle) -> bool {
+        let mut state = APP_STATE.lock().unwrap();
+        let mut out = true;
+        match key.key {
+            KeyboardKey::KEY_ENTER => {
+                state.solving = true;
+            }
+            _ => {
+                out = false;
+            }
+        }
+        out
+    }
+
+    fn key_release(&mut self, key: &KeyPress) -> bool {
+        let mut state = APP_STATE.lock().unwrap();
+        let mut out = true;
+        match key.key {
+            KeyboardKey::KEY_ENTER => {
+                state.solving = false;
+            }
+            _ => {
+                out = false;
+            }
+        }
+        out
     }
 }

@@ -14,7 +14,7 @@ impl Sketch {
         Self {
             fundamental_entities: Registry::new(),
             bi_constraints: Vec::new(),
-            step_size: 1e-2,
+            step_size: 1e-1,
         }
     }
 
