@@ -67,15 +67,15 @@ pub fn project(a: &Vector2<f64>, b: &Vector2<f64>) -> Vector2<f64> {
 
 #[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub enum ConstraintType {
+    Angle { x: f64 },
     Coincident,
-    Horizontal,
-    Vertical,
-    Tangent,
-    Parallel,
-    Perpendicular,
     Colinear,            // Should be paired with a parallel constraint for line-line
     Distance { x: f64 }, // Should be paired with a parallel constraint for line-line
-    Angle { x: f64 },
+    Horizontal,
+    Parallel,
+    Perpendicular,
+    Tangent,
+    Vertical,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -252,7 +252,8 @@ impl BiConstraint {
         step_size: f64,
     ) {
         let h = 1e-6;
-        let x_errors = [Self::error(
+        let x_errors = [
+            Self::error(
                 &FundamentalEntity::Point(Point {
                     pos: p1.pos + Vector2::new(-h / 2.0, 0.0),
                 }),
@@ -265,8 +266,10 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
-        let y_errors = [Self::error(
+            ),
+        ];
+        let y_errors = [
+            Self::error(
                 &FundamentalEntity::Point(Point {
                     pos: p1.pos + Vector2::new(0.0, -h / 2.0),
                 }),
@@ -279,7 +282,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
+            ),
+        ];
 
         let x_derivative = (x_errors[1] - x_errors[0]) / h;
         let y_derivative = (y_errors[1] - y_errors[0]) / h;
@@ -289,7 +293,8 @@ impl BiConstraint {
 
     fn apply_grad_error_l(l: &mut Line, e: &FundamentalEntity, c: ConstraintType, step_size: f64) {
         let h = 1e-6;
-        let o_x_errors = [Self::error(
+        let o_x_errors = [
+            Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset + Vector2::new(-h / 2.0, 0.0),
                     direction: l.direction,
@@ -304,8 +309,10 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
-        let o_y_errors = [Self::error(
+            ),
+        ];
+        let o_y_errors = [
+            Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset + Vector2::new(0.0, -h / 2.0),
                     direction: l.direction,
@@ -320,8 +327,10 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
-        let d_x_errors = [Self::error(
+            ),
+        ];
+        let d_x_errors = [
+            Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset,
                     direction: l.direction + Vector2::new(-h / 2.0, 0.0),
@@ -336,8 +345,10 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
-        let d_y_errors = [Self::error(
+            ),
+        ];
+        let d_y_errors = [
+            Self::error(
                 &FundamentalEntity::Line(Line {
                     offset: l.offset,
                     direction: l.direction + Vector2::new(0.0, -h / 2.0),
@@ -352,7 +363,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
+            ),
+        ];
 
         let o_x_derivative = (o_x_errors[1] - o_x_errors[0]) / h;
         let o_y_derivative = (o_y_errors[1] - o_y_errors[0]) / h;
@@ -371,7 +383,8 @@ impl BiConstraint {
         step_size: f64,
     ) {
         let h = 1e-6;
-        let x_errors = [Self::error(
+        let x_errors = [
+            Self::error(
                 &FundamentalEntity::Circle(Circle {
                     pos: c1.pos + Vector2::new(-h / 2.0, 0.0),
                     radius: c1.radius,
@@ -386,8 +399,10 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
-        let y_errors = [Self::error(
+            ),
+        ];
+        let y_errors = [
+            Self::error(
                 &FundamentalEntity::Circle(Circle {
                     pos: c1.pos + Vector2::new(0.0, -h / 2.0),
                     radius: c1.radius,
@@ -402,8 +417,10 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
-        let r_errors = [Self::error(
+            ),
+        ];
+        let r_errors = [
+            Self::error(
                 &FundamentalEntity::Circle(Circle {
                     pos: c1.pos,
                     radius: c1.radius - h / 2.0,
@@ -418,7 +435,8 @@ impl BiConstraint {
                 }),
                 e,
                 &c,
-            )];
+            ),
+        ];
 
         let x_derivative = (x_errors[1] - x_errors[0]) / h;
         let y_derivative = (y_errors[1] - y_errors[0]) / h;

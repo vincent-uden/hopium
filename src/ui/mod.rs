@@ -9,7 +9,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{modes::MousePress, registry::RegId};
 
+pub mod constraint_selector;
 pub mod dropdown;
+pub mod icon;
 pub mod rect;
 pub mod sketchviewer;
 pub mod style;

@@ -1,23 +1,31 @@
 #![feature(map_many_mut)]
 
 use std::{
+    cell::RefCell,
+    collections::HashMap,
     fs,
     sync::{Mutex, RwLock},
 };
 
 use app::{App, State};
 use event::EventQueue;
+use images::{populate_images, ImageId};
 use lazy_static::lazy_static;
 use modes::ModeStack;
-use raylib::color::Color;
+use raylib::{
+    color::Color,
+    texture::{Image, Texture2D},
+};
 use registry::Registry;
-use ui::style::{Style, StyleId};
+use ui::style::{populate_styles, Style, StyleId};
 
 mod app;
 #[allow(dead_code, unused_variables)]
 mod cad;
 #[allow(dead_code, unused_variables)]
 mod event;
+#[allow(dead_code, unused_variables)]
+mod images;
 #[allow(dead_code, unused_variables)]
 mod modes;
 #[allow(dead_code, unused_variables)]
@@ -39,56 +47,20 @@ lazy_static! {
 lazy_static! {
     static ref STYLES: RwLock<Registry<StyleId, Style>> = RwLock::new(Registry::new());
 }
+thread_local! {
+    pub static IMAGES: RefCell<HashMap<ImageId, Texture2D>> = RefCell::new(HashMap::new());
+}
 
 fn main() {
-    {
-        let mut styles = STYLES.write().unwrap();
-        styles.insert_with_key(StyleId(ui::style::StyleType::Default), Style::default());
-        styles.insert_with_key(
-            StyleId(ui::style::StyleType::Area),
-            Style {
-                bg_color: Color::new(51, 51, 51, 255),
-                ..Default::default()
-            },
-        );
-        styles.insert_with_key(
-            StyleId(ui::style::StyleType::AreaText),
-            Style {
-                color: Color::new(15, 15, 15, 255),
-                hovered_color: Color::new(185, 15, 15, 255),
-                ..Default::default()
-            },
-        );
-        styles.insert_with_key(
-            StyleId(ui::style::StyleType::Boundary),
-            Style {
-                bg_color: Color::new(15, 15, 15, 255),
-                ..Default::default()
-            },
-        );
-        styles.insert_with_key(
-            StyleId(ui::style::StyleType::DropDown),
-            Style {
-                color: Color::new(200, 200, 200, 255),
-                bg_color: Color::new(31, 31, 31, 255),
-                ..Default::default()
-            },
-        );
-        styles.insert_with_key(
-            StyleId(ui::style::StyleType::DropDownHovered),
-            Style {
-                color: Color::new(200, 200, 200, 255),
-                bg_color: Color::new(71, 71, 71, 255),
-                ..Default::default()
-            },
-        );
-    }
     let (mut rl, thread) = raylib::init()
         .size(1600, 900)
         .undecorated()
         .msaa_4x()
         .vsync()
         .build();
+
+    populate_styles();
+    populate_images(&mut rl, &thread);
 
     let mut app = App::new(1600, 900, &mut rl, &thread);
     if let Ok(contents) = fs::read_to_string("layout.json") {

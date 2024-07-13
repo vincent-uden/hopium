@@ -14,7 +14,7 @@ use crate::{
         boundary::BoundaryOrientation,
         renderer::{Renderer, AREA_MAP, BDRY_MAP},
     },
-    APP_STATE, EVENT_QUEUE, MODE_STACK,
+    APP_STATE, EVENT_QUEUE, IMAGES, MODE_STACK,
 };
 
 #[derive(Debug)]
@@ -119,6 +119,7 @@ impl<'a> App<'a> {
         // These need to be cleared manually before renderer.rl is dropped, otherwise we segfault
         AREA_MAP.with_borrow_mut(|area_map| area_map.clear());
         BDRY_MAP.with_borrow_mut(|bdry_map| bdry_map.clear());
+        IMAGES.with_borrow_mut(|images| images.clear());
 
         let eq = EVENT_QUEUE.lock().unwrap();
         fs::write(

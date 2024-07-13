@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     event::Event,
+    images::ImageId,
     modes::MousePress,
     ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui},
 };
@@ -293,6 +294,16 @@ impl Area {
         text.set_text(format!("{:?}", n), rl);
         text.set_font_size(40.0, rl);
         self.ui.push(text);
+
+        let mut icon = Box::new(ui::icon::Icon::new());
+        icon.set_image(ImageId::IconCoincident);
+        icon.set_pos(Vector2::new(200.0, 10.0));
+        icon.size = Vector2::new(40.0, 40.0);
+        self.ui.push(icon);
+
+        let mut constraint_selector = Box::new(ui::constraint_selector::ConstraintSelector::new());
+        constraint_selector.set_pos(Vector2::new(200.0, 100.0));
+        self.ui.push(constraint_selector);
 
         self.build_area_type_picker(rl);
         self.anchor = RenderAnchor::Left;
