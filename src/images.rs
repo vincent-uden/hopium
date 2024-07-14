@@ -1,13 +1,12 @@
 use colored::Colorize;
 use raylib::{
-    texture::{Image, RaylibTexture2D},
     RaylibHandle, RaylibThread,
 };
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use crate::{registry::RegId, IMAGES};
+use crate::IMAGES;
 
 #[derive(
     Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Serialize, Deserialize, EnumIter,
@@ -73,7 +72,7 @@ pub fn populate_images(rl: &mut RaylibHandle, t: &RaylibThread) {
                 format!("Missing image {:?}", k).to_uppercase().red().bold()
             )
         }
-        if missing.len() > 0 {
+        if !missing.is_empty() {
             let msg = "Missing images".to_uppercase().red().bold();
             panic!("{}", msg);
         }

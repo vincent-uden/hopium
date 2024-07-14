@@ -87,7 +87,7 @@ pub fn populate_styles() {
         );
 
         let missing = StyleType::iter()
-            .filter(|k| !styles.get_mut(&StyleId(*k)).is_some())
+            .filter(|k| styles.get_mut(&StyleId(*k)).is_none())
             .collect::<Vec<_>>();
         for k in &missing {
             println!(
@@ -95,7 +95,7 @@ pub fn populate_styles() {
                 format!("Missing style {:?}", k).to_uppercase().red().bold()
             )
         }
-        if missing.len() > 0 {
+        if !missing.is_empty() {
             let msg = "Missing styles".to_uppercase().red().bold();
             panic!("{}", msg);
         }

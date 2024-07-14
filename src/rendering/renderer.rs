@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use nalgebra::Vector2;
-use raylib::ffi::{MouseButton, TextureFilter};
+use raylib::ffi::TextureFilter;
 use raylib::texture::RaylibTexture2D;
 use raylib::{
     color::Color, drawing::RaylibDraw, ffi::KeyboardKey, math::Rectangle, RaylibHandle,
@@ -47,7 +47,7 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(screen_w: i32, screen_h: i32, rl: &mut RaylibHandle, t: &RaylibThread) -> Self {
-        let mut texture = rl
+        let texture = rl
             .load_render_texture(t, screen_w as u32, screen_h as u32)
             .unwrap();
         texture.set_texture_filter(t, TextureFilter::TEXTURE_FILTER_TRILINEAR);

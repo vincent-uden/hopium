@@ -193,15 +193,12 @@ impl MouseEventHandler for SketchViewer {
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         let mut eq = EVENT_QUEUE.lock().unwrap();
-        match press.button {
-            raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT => {
-                eq.post_event(Event::SketchClick {
-                    pos: self.to_sketch_space(mouse_pos),
-                    sketch_space_select_radius: self.to_sketch_scale(self.select_radius),
-                    press: *press,
-                });
-            }
-            _ => {}
+        if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT {
+            eq.post_event(Event::SketchClick {
+                pos: self.to_sketch_space(mouse_pos),
+                sketch_space_select_radius: self.to_sketch_scale(self.select_radius),
+                press: *press,
+            });
         }
     }
 

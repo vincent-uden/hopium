@@ -1,13 +1,10 @@
 use nalgebra::Vector2;
 
 use crate::{
-    cad::{
-        entity::{BiConstraint, ConstraintType},
-        sketch::Sketch,
-    },
+    cad::entity::{BiConstraint, ConstraintType},
     event::Event,
     images::ImageId,
-    APP_STATE, EVENT_QUEUE, IMAGES,
+    APP_STATE, EVENT_QUEUE,
 };
 
 use super::{
@@ -29,8 +26,7 @@ pub struct ConstraintSelector {
 impl ConstraintSelector {
     pub fn new() -> Self {
         let mut icons = vec![];
-        let icon_ids = vec![
-            ImageId::IconAngle,
+        let icon_ids = [ImageId::IconAngle,
             ImageId::IconCoincident,
             ImageId::IconColinear,
             ImageId::IconDistance,
@@ -38,8 +34,7 @@ impl ConstraintSelector {
             ImageId::IconParallel,
             ImageId::IconPerpendicular,
             ImageId::IconTangent,
-            ImageId::IconVertical,
-        ];
+            ImageId::IconVertical];
         let constraint_types = vec![
             ConstraintType::Angle { x: 0.0 },
             ConstraintType::Coincident,
@@ -56,7 +51,7 @@ impl ConstraintSelector {
             icon.set_image(*icon_id);
             icon.size = Vector2::new(40.0, 40.0);
             icon.set_pos(Vector2::new(i as f64 * icon.get_size().x, 0.0));
-            let c = constraint_types[i].clone();
+            let c = constraint_types[i];
             icon.on_click = Some(Box::new(move || {
                 let mut eq = EVENT_QUEUE.lock().unwrap();
                 eq.post_event(Event::Constrain { constraint_type: c });

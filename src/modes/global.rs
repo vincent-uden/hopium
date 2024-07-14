@@ -37,7 +37,7 @@ impl Mode for GlobalMode {
                 mouse_pos: Vector2::<f64>::new(rl.get_mouse_x() as f64, rl.get_mouse_y() as f64),
             }),
             KeyboardKey::KEY_Q => eq.post_event(Event::ExitProgram),
-            KeyboardKey::KEY_S => eq.post_event(Event::DumpLayout),
+            KeyboardKey::KEY_S => eq.post_event(Event::PushMode(ModeId::Sketch)),
             _ => {
                 consumed = false;
             }

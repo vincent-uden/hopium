@@ -199,7 +199,7 @@ impl State {
     pub fn new() -> Self {
         Self {
             running: true,
-            sketch: Sketch::new(),
+            sketch: Sketch::new("Untitled".to_string()),
             selected: Vec::new(),
             solving: false,
         }

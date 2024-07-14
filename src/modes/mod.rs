@@ -1,15 +1,10 @@
 use std::{collections::HashMap, fmt::Debug};
 
-use circle::CircleMode;
-use global::GlobalMode;
-use line::LineMode;
-use point::PointMode;
 use raylib::{
     ffi::{KeyboardKey, MouseButton},
     RaylibHandle,
 };
-use serde::{ser::SerializeStruct, Deserialize, Serialize};
-use sketch::SketchMode;
+use serde::{Deserialize, Serialize};
 use strum_macros::EnumString;
 
 use crate::event::Event;
@@ -29,6 +24,7 @@ pub struct KeyPress {
     pub r_alt: bool,
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Deserialize, Serialize)]
 #[serde(remote = "MouseButton")]
 enum MouseButtonDef {
@@ -231,7 +227,9 @@ impl ModeStack {
                 Event::PopMode => {
                     self.modes.pop();
                 }
-                Event::PushMode(mode_id) => {}
+                Event::PushMode(mode_id) => {
+                    self.modes.push(mode_id);
+                }
                 _ => {
                     consumed = false;
                 }
@@ -269,7 +267,7 @@ impl ModeStack {
                     r_alt,
                 };
                 for id in self.modes.iter_mut().rev() {
-                    let mode = self.all_modes.get_mut(&id).unwrap();
+                    let mode = self.all_modes.get_mut(id).unwrap();
                     if mode.key_press(&press, rl) {
                         break;
                     }
@@ -284,7 +282,7 @@ impl ModeStack {
                     r_alt,
                 };
                 for id in self.modes.iter_mut().rev() {
-                    let mode = self.all_modes.get_mut(&id).unwrap();
+                    let mode = self.all_modes.get_mut(id).unwrap();
                     if mode.key_release(&press) {
                         break;
                     }
@@ -302,7 +300,7 @@ impl ModeStack {
                     r_alt,
                 };
                 for id in self.modes.iter_mut().rev() {
-                    let mode = self.all_modes.get_mut(&id).unwrap();
+                    let mode = self.all_modes.get_mut(id).unwrap();
                     if mode.mouse_press(&press) {
                         break;
                     }
@@ -317,7 +315,7 @@ impl ModeStack {
                     r_alt,
                 };
                 for id in self.modes.iter_mut().rev() {
-                    let mode = self.all_modes.get_mut(&id).unwrap();
+                    let mode = self.all_modes.get_mut(id).unwrap();
                     if mode.mouse_release(&press) {
                         break;
                     }

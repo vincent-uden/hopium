@@ -13,10 +13,7 @@ use images::{populate_images, ImageId};
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use modes::ModeStack;
-use raylib::{
-    color::Color,
-    texture::{Image, Texture2D},
-};
+use raylib::texture::Texture2D;
 use registry::Registry;
 use simplelog::{ColorChoice, CombinedLogger, Config, TermLogger, TerminalMode};
 use ui::style::{populate_styles, Style, StyleId};

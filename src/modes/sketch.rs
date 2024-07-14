@@ -3,7 +3,7 @@ use raylib::{ffi::KeyboardKey, RaylibHandle};
 
 use crate::{
     cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE,
-    EVENT_QUEUE, MODE_STACK,
+    EVENT_QUEUE,
 };
 
 use super::{KeyPress, Mode, ModeId, MousePress};

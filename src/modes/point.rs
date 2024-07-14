@@ -18,14 +18,11 @@ impl PointMode {
 
     fn sketch_click(&self, click_pos: Vector2<f64>, press: MousePress) {
         let mut state = APP_STATE.lock().unwrap();
-        match press.button {
-            raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT => {
-                state
-                    .sketch
-                    .fundamental_entities
-                    .insert(FundamentalEntity::Point(Point { pos: click_pos }));
-            }
-            _ => {}
+        if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT {
+            state
+                .sketch
+                .fundamental_entities
+                .insert(FundamentalEntity::Point(Point { pos: click_pos }));
         }
     }
 }

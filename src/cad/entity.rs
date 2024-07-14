@@ -219,7 +219,8 @@ impl BiConstraint {
         let ortho_a = ci.pos - project(&ci.pos, &l.direction);
         let ortho_r = l.offset - project(&l.offset, &l.direction);
         match c {
-            ConstraintType::Coincident => ((ortho_r + ortho_a).norm() - ci.radius).powi(2),
+            // Doesnt seem to be working
+            ConstraintType::Tangent => ((ortho_r + ortho_a).norm() - ci.radius).powi(2),
             ConstraintType::Distance { x } => ((ortho_r + ortho_a).norm() - x).powi(2),
             _ => 0.0,
         }
