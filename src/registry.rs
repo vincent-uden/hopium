@@ -80,6 +80,10 @@ impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Registry<K, V> {
             self.remove(k);
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
 }
 
 impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Index<K> for Registry<K, V> {

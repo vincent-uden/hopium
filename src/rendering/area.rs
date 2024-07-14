@@ -335,6 +335,15 @@ impl Area {
 
         mouse_pos + anchor_offset
     }
+
+    pub fn update(&mut self, rl: &mut RaylibHandle) {
+        match self.area_type {
+            AreaType::SketchViewer => {
+                self.ui[0].update(rl);
+            }
+            _ => {}
+        }
+    }
 }
 
 impl fmt::Debug for Area {

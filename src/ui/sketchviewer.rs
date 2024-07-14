@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 
+use log::info;
 use nalgebra::Vector2;
+use raylib::RaylibHandle;
 use raylib::{color::Color, drawing::RaylibDraw};
 
 use raylib::math::Vector2 as V2;
@@ -11,6 +13,7 @@ use crate::modes::MousePress;
 use crate::rendering::renderer::to_raylib;
 use crate::{APP_STATE, EVENT_QUEUE};
 
+use super::style::{StyleId, StyleType};
 use super::MouseEventHandler;
 use super::{text::Text, Drawable};
 
@@ -44,8 +47,11 @@ pub struct SketchViewer {
 
 impl SketchViewer {
     pub fn new() -> Self {
+        let mut ui_error = Text::new();
+        ui_error.set_pos(Vector2::new(10.0, 100.0));
+
         Self {
-            ui_error: Text::new(),
+            ui_error,
             pan_offset: Vector2::new(800.0, 450.0),
             pos: Vector2::zeros(),
             last_mouse_pos: Vector2::zeros(),
@@ -112,6 +118,12 @@ impl SketchViewer {
         } else {
             true
         }
+    }
+
+    pub fn update_error(&mut self, rl: &mut RaylibHandle) {
+        let state = APP_STATE.lock().unwrap();
+        self.ui_error
+            .set_text(format!("Error: {:?}", state.sketch.error()), rl);
     }
 }
 
@@ -182,6 +194,10 @@ impl Drawable for SketchViewer {
     fn get_size(&self) -> nalgebra::Vector2<f64> {
         Vector2::new(0.0, 0.0)
     }
+
+    fn update(&mut self, rl: &mut RaylibHandle) {
+        self.update_error(rl);
+    }
 }
 
 impl MouseEventHandler for SketchViewer {
@@ -189,7 +205,10 @@ impl MouseEventHandler for SketchViewer {
         true
     }
 
-    fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {}
+    fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
+        self.ui_error.receive_mouse_pos(mouse_pos);
+        let state = APP_STATE.lock().unwrap();
+    }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         let mut eq = EVENT_QUEUE.lock().unwrap();

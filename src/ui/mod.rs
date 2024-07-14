@@ -3,7 +3,7 @@ use std::hash::Hash;
 use nalgebra::Vector2;
 use raylib::{
     drawing::{RaylibDrawHandle, RaylibTextureMode},
-    RaylibThread,
+    RaylibHandle, RaylibThread,
 };
 use serde::{Deserialize, Serialize};
 
@@ -36,6 +36,7 @@ pub trait Drawable {
     fn set_pos(&mut self, pos: Vector2<f64>);
     fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &RaylibThread);
     fn get_size(&self) -> Vector2<f64>;
+    fn update(&mut self, rl: &mut RaylibHandle) {}
 }
 
 pub trait MouseEventHandler {

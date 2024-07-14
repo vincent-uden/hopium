@@ -38,6 +38,7 @@ impl Mode for GlobalMode {
             }),
             KeyboardKey::KEY_Q => eq.post_event(Event::ExitProgram),
             KeyboardKey::KEY_S => eq.post_event(Event::PushMode(ModeId::Sketch)),
+            KeyboardKey::KEY_W => eq.post_event(Event::DumpShapes),
             _ => {
                 consumed = false;
             }

@@ -1,3 +1,4 @@
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 use crate::registry::Registry;
@@ -35,9 +36,17 @@ impl Sketch {
     }
 
     pub fn sgd_step(&mut self) {
+        let mut rng = rand::thread_rng();
+        let prop = 1.0 / self.fundamental_entities.len() as f64;
         for BiConstraint { e1, e2, c } in &self.bi_constraints {
             let [fe1, fe2] = self.fundamental_entities.get_many_mut([e1, e2]).unwrap();
-            BiConstraint::apply_grad_error(fe1, fe2, c, self.step_size);
+            if rng.gen_bool(prop) {
+                if rng.gen_bool(0.5) {
+                    BiConstraint::apply_grad_error(fe1, fe2, c, self.step_size);
+                } else {
+                    BiConstraint::apply_grad_error(fe2, fe1, c, self.step_size);
+                }
+            }
         }
     }
 }
@@ -164,11 +173,13 @@ mod tests {
             if let FundamentalEntity::Point(right_corner) = &sketch.fundamental_entities[e2] {
                 let diff = (top_corner.pos - right_corner.pos).norm();
                 assert!((diff - 5.0) < 1e-6);
-                return;
             }
         }
 
-        unreachable!()
+        assert!(
+            sketch.error() < 1e-6,
+            "The error should be smaller than 1e-6"
+        );
     }
 
     #[test]

@@ -147,6 +147,12 @@ impl Renderer {
             }
         }
         self.receive_mouse_wheel(mouse_pos, rl.get_mouse_wheel_move().into());
+
+        AREA_MAP.with_borrow_mut(|area_map| {
+            for area in area_map.values_mut() {
+                area.update(rl);
+            }
+        });
     }
 
     pub fn split_area(

@@ -94,37 +94,6 @@ impl<'a> App<'a> {
             ms.push(ModeId::Global);
         }
 
-        {
-            let mut state = APP_STATE.lock().unwrap();
-            state
-                .sketch
-                .fundamental_entities
-                .insert(FundamentalEntity::Point(Point {
-                    pos: Vector2::new(0.0, 0.0),
-                }));
-            state
-                .sketch
-                .fundamental_entities
-                .insert(FundamentalEntity::Circle(Circle {
-                    pos: Vector2::new(0.0, 0.0),
-                    radius: 1.0,
-                }));
-            state
-                .sketch
-                .fundamental_entities
-                .insert(FundamentalEntity::Line(Line {
-                    offset: Vector2::new(0.0, 0.0),
-                    direction: Vector2::new(1.0, 1.0),
-                }));
-            state
-                .sketch
-                .fundamental_entities
-                .insert(FundamentalEntity::Line(Line {
-                    offset: Vector2::new(0.707, 0.707),
-                    direction: Vector2::new(1.0, -1.0),
-                }));
-        }
-
         let mut running = true;
         while running {
             self.update();
@@ -149,6 +118,10 @@ impl<'a> App<'a> {
         match event {
             Event::DumpLayout => {
                 self.renderer.dump_layout();
+            }
+            Event::DumpShapes => {
+                let state = APP_STATE.lock().unwrap();
+                println!("{:#?}", state.sketch);
             }
             Event::SplitPaneHorizontally { mouse_pos } => {
                 self.renderer

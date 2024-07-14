@@ -4,10 +4,12 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     fs,
+    path::PathBuf,
     sync::{Mutex, RwLock},
 };
 
 use app::{App, State};
+use clap::Parser;
 use event::EventQueue;
 use images::{populate_images, ImageId};
 use lazy_static::lazy_static;
@@ -50,7 +52,15 @@ thread_local! {
     pub static IMAGES: RefCell<HashMap<ImageId, Texture2D>> = RefCell::new(HashMap::new());
 }
 
+#[derive(Parser)]
+pub struct Args {
+    #[arg(short, long)]
+    pub file: Option<PathBuf>,
+}
+
 fn main() {
+    let args = Args::parse();
+
     CombinedLogger::init(vec![TermLogger::new(
         LevelFilter::Debug,
         Config::default(),
@@ -77,6 +87,12 @@ fn main() {
             app.process_event(e);
         }
         *event_queue = eq.clone();
+    }
+    {
+        let mut state = APP_STATE.lock().unwrap();
+        if let Some(file) = args.file {
+            state.sketch = serde_json::from_str(&fs::read_to_string(file).unwrap()).unwrap();
+        }
     }
     app.run();
 }
