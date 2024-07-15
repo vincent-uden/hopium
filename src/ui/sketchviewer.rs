@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
-use log::info;
 use nalgebra::Vector2;
+use raylib::ffi::MouseButton;
 use raylib::RaylibHandle;
 use raylib::{color::Color, drawing::RaylibDraw};
 
@@ -13,7 +13,6 @@ use crate::modes::MousePress;
 use crate::rendering::renderer::to_raylib;
 use crate::{APP_STATE, EVENT_QUEUE};
 
-use super::style::{StyleId, StyleType};
 use super::MouseEventHandler;
 use super::{text::Text, Drawable};
 
@@ -43,6 +42,7 @@ pub struct SketchViewer {
     select_radius: f64,
     texture_size: Vector2<f64>,
     style: SketchViewerStyle,
+    panning: bool,
 }
 
 impl SketchViewer {
@@ -60,6 +60,7 @@ impl SketchViewer {
             select_radius: 10.0,
             texture_size: Vector2::new(1600.0, 900.0),
             style: SketchViewerStyle::default(),
+            panning: false,
         }
     }
 
@@ -206,22 +207,52 @@ impl MouseEventHandler for SketchViewer {
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
+        if self.panning {
+            self.pan_offset += mouse_pos - self.last_mouse_pos;
+        }
         self.ui_error.receive_mouse_pos(mouse_pos);
-        let state = APP_STATE.lock().unwrap();
+        self.last_mouse_pos = mouse_pos;
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
         let mut eq = EVENT_QUEUE.lock().unwrap();
-        if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT {
-            eq.post_event(Event::SketchClick {
-                pos: self.to_sketch_space(mouse_pos),
-                sketch_space_select_radius: self.to_sketch_scale(self.select_radius),
-                press: *press,
-            });
+        match press.button {
+            MouseButton::MOUSE_BUTTON_LEFT => {
+                eq.post_event(Event::SketchClick {
+                    pos: self.to_sketch_space(mouse_pos),
+                    sketch_space_select_radius: self.to_sketch_scale(self.select_radius),
+                    press: *press,
+                });
+            }
+            MouseButton::MOUSE_BUTTON_MIDDLE => {
+                self.panning = true;
+            }
+            _ => {}
         }
     }
 
-    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {}
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
+        match press.button {
+            MouseButton::MOUSE_BUTTON_MIDDLE => {
+                self.panning = false;
+            }
+            _ => {}
+        }
+    }
+
+    fn process_event(&mut self, event: Event, mouse_pos: Vector2<f64>) {
+        if self.contains_point(mouse_pos) {
+            match event {
+                Event::IncreaseZoom => {
+                    self.zoom *= 1.25;
+                }
+                Event::DecreaseZoom => {
+                    self.zoom /= 1.25;
+                }
+                _ => {}
+            }
+        }
+    }
 }
 
 impl Debug for SketchViewer {

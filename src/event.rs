@@ -54,6 +54,8 @@ pub enum Event {
     Constrain {
         constraint_type: ConstraintType,
     },
+    IncreaseZoom,
+    DecreaseZoom,
 }
 
 fn should_serialize_as_layout(event: &Event) -> bool {

@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fmt::Debug};
 
+use log::debug;
 use raylib::{
     ffi::{KeyboardKey, MouseButton},
     RaylibHandle,
@@ -268,6 +269,7 @@ impl ModeStack {
                 };
                 for id in self.modes.iter_mut().rev() {
                     let mode = self.all_modes.get_mut(id).unwrap();
+                    debug!("Pressing {:?}", press);
                     if mode.key_press(&press, rl) {
                         break;
                     }

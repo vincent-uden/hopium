@@ -1,9 +1,11 @@
 use nalgebra::Vector2;
-use raylib::{ffi::KeyboardKey, RaylibHandle};
+use raylib::{
+    ffi::{KeyboardKey, MouseButton},
+    RaylibHandle,
+};
 
 use crate::{
-    cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE,
-    EVENT_QUEUE,
+    cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE, EVENT_QUEUE,
 };
 
 use super::{KeyPress, Mode, ModeId, MousePress};
@@ -89,8 +91,17 @@ impl Mode for SketchMode {
             KeyboardKey::KEY_ENTER => {
                 state.solving = true;
             }
-            KeyboardKey::KEY_P => {
-                eq.post_event(Event::PushMode(ModeId::Point));
+            // These keycodes are weird due to nordic layout. The intention is to increase zoom
+            // with (Ctrl +) and decrease it with (Ctrl -)
+            KeyboardKey::KEY_SLASH => {
+                if key.ctrl {
+                    eq.post_event(Event::DecreaseZoom);
+                }
+            }
+            KeyboardKey::KEY_MINUS => {
+                if key.ctrl {
+                    eq.post_event(Event::IncreaseZoom);
+                }
             }
             _ => {
                 out = false;

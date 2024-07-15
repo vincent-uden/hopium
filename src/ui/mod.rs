@@ -7,7 +7,7 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{modes::MousePress, registry::RegId};
+use crate::{event::Event, modes::MousePress, registry::RegId};
 
 pub mod constraint_selector;
 pub mod dropdown;
@@ -61,6 +61,8 @@ pub trait MouseEventHandler {
     }
 
     fn set_on_mouse_exit(&mut self, f: Box<dyn FnMut(UiId)>) {}
+
+    fn process_event(&mut self, event: Event, mouse_pos: Vector2<f64>) {}
 }
 
 pub trait Ui: Drawable + MouseEventHandler {}

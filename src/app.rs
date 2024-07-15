@@ -18,6 +18,7 @@ use crate::{
         boundary::BoundaryOrientation,
         renderer::{Renderer, AREA_MAP, BDRY_MAP},
     },
+    ui::MouseEventHandler,
     APP_STATE, EVENT_QUEUE, IMAGES, MODE_STACK,
 };
 
@@ -143,8 +144,9 @@ impl<'a> App<'a> {
             } => {
                 self.renderer.move_boundary(end_pos, bdry_id);
                 AREA_MAP.with_borrow_mut(|area_map| {
-                    for area in area_map.values_mut() {
-                        area.build(self.rl);
+                    for _area in area_map.values_mut() {
+                        // area.build(self.rl);
+                        // TODO: Implement an update_bounds method
                     }
                 });
             }
@@ -155,7 +157,7 @@ impl<'a> App<'a> {
                     area.build(self.rl);
                 });
             }
-            _ => {}
+            _ => self.renderer.process_event(event, Vector2::zeros()),
         }
     }
 }

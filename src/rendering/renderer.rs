@@ -100,7 +100,7 @@ impl Renderer {
         d.draw_text(
             &format!("{:?}", &ms.innermost_mode()),
             10,
-            900,
+            880,
             20,
             Color::WHITE,
         );
@@ -395,4 +395,12 @@ impl MouseEventHandler for Renderer {
     }
 
     fn set_on_mouse_enter(&mut self, f: Box<(dyn FnMut(UiId) + 'static)>) {}
+
+    fn process_event(&mut self, event: Event, mouse_pos: Vector2<f64>) {
+        AREA_MAP.with_borrow_mut(|area_map| {
+            for area in area_map.values_mut() {
+                area.process_event(event, self.mouse_pos);
+            }
+        });
+    }
 }

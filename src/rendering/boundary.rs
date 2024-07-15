@@ -173,7 +173,8 @@ impl Boundary {
                             remaining_area.screen_rect.width += deleted_dims.width;
                         }
                     }
-                    remaining_area.build(rl);
+                    // remaining_area.build(rl);
+                    // TODO: update_bounds
                 }
                 let to_delete = &area_map[self.side2[0]];
                 if let Some(bdry_id) = to_delete.further_down_bdry_tree(bdry_map).first() {
