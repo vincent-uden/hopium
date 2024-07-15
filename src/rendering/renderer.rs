@@ -9,7 +9,7 @@ use raylib::{
 };
 
 use crate::event::Event;
-use crate::modes::MousePress;
+use crate::modes::{KeyMods, MousePress};
 use crate::ui::MouseEventHandler;
 use crate::{registry::Registry, ui::UiId};
 use crate::{APP_STATE, EVENT_QUEUE, MODE_STACK};
@@ -146,7 +146,13 @@ impl Renderer {
                 self.receive_mouse_up(mouse_pos, &press);
             }
         }
-        self.receive_mouse_wheel(mouse_pos, rl.get_mouse_wheel_move().into());
+        let mods = KeyMods {
+            shift,
+            ctrl,
+            l_alt,
+            r_alt,
+        };
+        self.receive_mouse_wheel(mouse_pos, rl.get_mouse_wheel_move().into(), &mods);
 
         AREA_MAP.with_borrow_mut(|area_map| {
             for area in area_map.values_mut() {
@@ -382,10 +388,10 @@ impl MouseEventHandler for Renderer {
         }
     }
 
-    fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {
+    fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64, mods: &KeyMods) {
         AREA_MAP.with_borrow_mut(|area_map| {
             for area in area_map.values_mut() {
-                area.receive_mouse_wheel(mouse_pos, movement);
+                area.receive_mouse_wheel(mouse_pos, movement, mods);
             }
         });
     }

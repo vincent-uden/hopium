@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     event::Event,
     images::ImageId,
-    modes::MousePress,
+    modes::{KeyMods, MousePress},
     ui::{self, text::TextAlignment, Drawable, MouseEventHandler, Ui},
 };
 use crate::{registry::RegId, STYLES};
@@ -406,10 +406,10 @@ impl MouseEventHandler for Area {
         }
     }
 
-    fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {
+    fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64, mods: &KeyMods) {
         if self.contains_point(mouse_pos) {
             for ui in &mut self.ui {
-                ui.receive_mouse_wheel(mouse_pos - self.screen_pos, movement);
+                ui.receive_mouse_wheel(mouse_pos - self.screen_pos, movement, mods);
             }
         }
     }

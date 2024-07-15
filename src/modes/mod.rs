@@ -48,6 +48,14 @@ pub struct MousePress {
     pub r_alt: bool,
 }
 
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+pub struct KeyMods {
+    pub shift: bool,
+    pub ctrl: bool,
+    pub l_alt: bool,
+    pub r_alt: bool,
+}
+
 #[derive(Debug, PartialEq, Eq, EnumString, Serialize, Deserialize, Clone, Copy, Hash)]
 pub enum ModeId {
     Global,

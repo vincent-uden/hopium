@@ -10,7 +10,7 @@ use raylib::math::Vector2 as V2;
 use crate::cad::entity::FundamentalEntity;
 use crate::event::Event;
 use crate::modes::MousePress;
-use crate::rendering::renderer::to_raylib;
+use crate::rendering::renderer::{to_nalgebra, to_raylib};
 use crate::{APP_STATE, EVENT_QUEUE};
 
 use super::MouseEventHandler;
@@ -244,12 +244,32 @@ impl MouseEventHandler for SketchViewer {
         if self.contains_point(mouse_pos) {
             match event {
                 Event::IncreaseZoom => {
+                    let old_offset = self.to_sketch_space(self.pan_offset);
                     self.zoom *= 1.25;
+                    self.pan_offset = to_nalgebra(self.to_screen_space(old_offset));
                 }
                 Event::DecreaseZoom => {
+                    let old_offset = self.to_sketch_space(self.pan_offset);
                     self.zoom /= 1.25;
+                    self.pan_offset = to_nalgebra(self.to_screen_space(old_offset));
                 }
                 _ => {}
+            }
+        }
+    }
+
+    fn receive_mouse_wheel(
+        &mut self,
+        mouse_pos: Vector2<f64>,
+        movement: f64,
+        mods: &crate::modes::KeyMods,
+    ) {
+        let mut eq = EVENT_QUEUE.lock().unwrap();
+        if mods.ctrl {
+            if movement > 0.0 {
+                eq.post_event(Event::IncreaseZoom);
+            } else if movement < 0.0 {
+                eq.post_event(Event::DecreaseZoom);
             }
         }
     }

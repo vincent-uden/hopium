@@ -7,7 +7,11 @@ use raylib::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{event::Event, modes::MousePress, registry::RegId};
+use crate::{
+    event::Event,
+    modes::{KeyMods, MousePress},
+    registry::RegId,
+};
 
 pub mod constraint_selector;
 pub mod dropdown;
@@ -48,7 +52,7 @@ pub trait MouseEventHandler {
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress);
 
-    fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64) {}
+    fn receive_mouse_wheel(&mut self, mouse_pos: Vector2<f64>, movement: f64, mods: &KeyMods) {}
 
     fn get_on_mouse_enter(&mut self) -> Option<&mut Box<dyn FnMut(UiId)>> {
         None
