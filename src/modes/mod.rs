@@ -11,6 +11,7 @@ use strum_macros::EnumString;
 use crate::event::Event;
 
 pub mod circle;
+pub mod command;
 pub mod global;
 pub mod line;
 pub mod point;
@@ -63,6 +64,7 @@ pub enum ModeId {
     Point,
     Line,
     Circle,
+    Command,
 }
 
 pub trait Mode {

@@ -13,6 +13,7 @@ use crate::{
     registry::RegId,
 };
 
+pub mod command_palette;
 pub mod constraint_selector;
 pub mod dropdown;
 pub mod icon;

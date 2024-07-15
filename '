@@ -1,0 +1,53 @@
+use nalgebra::Vector2;
+use raylib::RaylibHandle;
+
+use crate::event::Event;
+
+use super::{rect::Rect, text::Text, MouseEventHandler};
+
+pub struct CommandPalette {
+    pos: Vector2<f64>,
+    size: Vector2<f64>,
+    bg: Rect,
+    input: String,
+    ui_input: Text,
+    suggestions: Vec<Text>,
+    suggestion_bgs: Vec<Rect>,
+    commands: Vec<String>,
+}
+
+impl CommandPalette {
+    pub fn new() -> Self {
+        Self {
+            pos: Vector2::zeros(),
+            size: Vector2::zeros(),
+            bg: Rect::new(),
+            input: String::new(),
+            ui_input: Text::new(),
+            suggestions: vec![],
+            suggestion_bgs: vec![],
+            commands: vec![],
+        }
+    }
+
+    pub fn set_commands(&mut self, commands: Vec<String>) {
+        self.commands = commands;
+    }
+
+    pub fn update(&mut self, input: String, rl: &mut RaylibHandle) {
+        self.input = input;
+        self.ui_input.set_text(self.input, rl);
+    }
+}
+
+impl MouseEventHandler for CommandPalette {
+    fn contains_point(&self, mouse_pos: Vector2<f64>) -> bool {
+        true
+    }
+
+    fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {}
+
+    fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {}
+
+    fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {}
+}
