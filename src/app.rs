@@ -158,6 +158,8 @@ impl<'a> App<'a> {
             Event::OpenCommandPalette => {
                 let mut state = APP_STATE.lock().unwrap();
                 state.command_palette_open = true;
+                state.command_palette_input.clear();
+                state.command_palette_pending_event = None;
                 let mut eq = EVENT_QUEUE.lock().unwrap();
                 eq.post_event(Event::PushMode(ModeId::Command));
             }
@@ -174,6 +176,8 @@ pub struct State {
     pub solving: bool,
     pub command_palette_open: bool,
     pub command_palette_input: String,
+    pub command_palette_pending_event: Option<Event>,
+    pub pending_clicks: Vec<Vector2<f64>>,
 }
 
 impl State {
@@ -185,6 +189,8 @@ impl State {
             solving: false,
             command_palette_open: false,
             command_palette_input: "".to_string(),
+            command_palette_pending_event: None,
+            pending_clicks: Vec::new(),
         }
     }
 }

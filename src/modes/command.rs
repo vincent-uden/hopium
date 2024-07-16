@@ -48,6 +48,13 @@ impl Mode for CommandMode {
                 }
                 state.command_palette_input.pop();
             }
+            KeyboardKey::KEY_ENTER => {
+                if let Some(event) = state.command_palette_pending_event.take() {
+                    state.command_palette_open = false;
+                    eq.post_event(Event::PopMode);
+                    eq.post_event(event);
+                }
+            }
             _ => {}
         }
         if let Some(ch) = key.char() {

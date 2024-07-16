@@ -103,6 +103,27 @@ impl Mode for SketchMode {
                     eq.post_event(Event::IncreaseZoom);
                 }
             }
+            KeyboardKey::KEY_P => {
+                if key.vanilla() {
+                    eq.post_event(Event::PushMode(ModeId::Point));
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_L => {
+                if key.vanilla() {
+                    eq.post_event(Event::PushMode(ModeId::Line));
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_C => {
+                if key.vanilla() {
+                    eq.post_event(Event::PushMode(ModeId::Circle));
+                } else {
+                    out = false;
+                }
+            }
             _ => {
                 out = false;
             }

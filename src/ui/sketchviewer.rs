@@ -7,12 +7,12 @@ use raylib::{color::Color, drawing::RaylibDraw};
 
 use raylib::math::Vector2 as V2;
 
-use crate::cad::entity::FundamentalEntity;
+use crate::cad::entity::{Circle, FundamentalEntity, Line};
 use crate::combined_draw_handle::CombinedDrawHandle;
 use crate::event::Event;
-use crate::modes::MousePress;
+use crate::modes::{ModeId, MousePress};
 use crate::rendering::renderer::{to_nalgebra, to_raylib};
-use crate::{APP_STATE, EVENT_QUEUE};
+use crate::{APP_STATE, EVENT_QUEUE, MODE_STACK};
 
 use super::MouseEventHandler;
 use super::{text::Text, Drawable};
@@ -127,6 +127,41 @@ impl SketchViewer {
         self.ui_error
             .set_text(format!("Error: {:?}", state.sketch.error()), rl);
     }
+
+    fn draw_line(
+        &self,
+        l: &Line,
+        rl: &mut CombinedDrawHandle<'_>,
+        t: &raylib::prelude::RaylibThread,
+        color: Color,
+    ) {
+        let start = self.to_sketch_space(Vector2::zeros());
+        let ts = -((l.offset - start).component_div(&l.direction));
+
+        let end = self.to_sketch_space(self.texture_size + self.pan_offset);
+        let ts_end = -((l.offset - end).component_div(&l.direction));
+        rl.draw_line_v(
+            self.to_screen_space(l.offset + l.direction * ts.min()),
+            self.to_screen_space(l.offset + l.direction * ts_end.max()),
+            color,
+        );
+    }
+
+    fn draw_circle(
+        &self,
+        c: &Circle,
+        rl: &mut CombinedDrawHandle<'_>,
+        t: &raylib::prelude::RaylibThread,
+        color: Color,
+    ) {
+        let pos = self.to_screen_space(c.pos);
+        rl.draw_circle_lines(
+            pos.x as i32,
+            pos.y as i32,
+            (c.radius * self.zoom * self.scale) as f32,
+            color,
+        );
+    }
 }
 
 impl Drawable for SketchViewer {
@@ -152,6 +187,35 @@ impl Drawable for SketchViewer {
         );
 
         let state = APP_STATE.lock().unwrap();
+
+        let mut color = self.style.selected_entity_color;
+        color.a = 128;
+        let ms = MODE_STACK.lock().unwrap();
+        if ms.is_innermost_mode(&ModeId::Point) {
+            let p = self.to_sketch_space(self.last_mouse_pos);
+            rl.draw_circle_v(self.to_screen_space(p), 4.0, color);
+        }
+        if state.pending_clicks.len() > 0 {
+            if ms.is_innermost_mode(&ModeId::Line) {
+                let p1 = state.pending_clicks[0];
+                let p2 = self.to_sketch_space(self.last_mouse_pos);
+                let l = Line {
+                    offset: p1,
+                    direction: p2 - p1,
+                };
+                self.draw_line(&l, rl, t, color);
+            }
+            if ms.is_innermost_mode(&ModeId::Circle) {
+                let p1 = state.pending_clicks[0];
+                let p2 = self.to_sketch_space(self.last_mouse_pos);
+                let c = Circle {
+                    pos: p1,
+                    radius: (p1 - p2).norm(),
+                };
+                self.draw_circle(&c, rl, t, color);
+            }
+        }
+
         for (id, e) in state.sketch.fundamental_entities.iter() {
             let color = if state.selected.contains(id) {
                 self.style.selected_entity_color
@@ -163,25 +227,10 @@ impl Drawable for SketchViewer {
                     rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, color);
                 }
                 FundamentalEntity::Line(l) => {
-                    let start = self.to_sketch_space(Vector2::zeros());
-                    let ts = -((l.offset - start).component_div(&l.direction));
-
-                    let end = self.to_sketch_space(self.texture_size + self.pan_offset);
-                    let ts_end = -((l.offset - end).component_div(&l.direction));
-                    rl.draw_line_v(
-                        self.to_screen_space(l.offset + l.direction * ts.min()),
-                        self.to_screen_space(l.offset + l.direction * ts_end.max()),
-                        color,
-                    );
+                    self.draw_line(l, rl, t, color);
                 }
                 FundamentalEntity::Circle(c) => {
-                    let pos = self.to_screen_space(c.pos);
-                    rl.draw_circle_lines(
-                        pos.x as i32,
-                        pos.y as i32,
-                        (c.radius * self.zoom * self.scale) as f32,
-                        color,
-                    );
+                    self.draw_circle(c, rl, t, color);
                 }
             }
         }

@@ -95,6 +95,10 @@ impl KeyPress {
             _ => None,
         }
     }
+
+    pub fn vanilla(&self) -> bool {
+        !(self.ctrl || self.l_alt || self.r_alt || self.shift)
+    }
 }
 
 #[allow(non_camel_case_types)]

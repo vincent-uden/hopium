@@ -7,8 +7,11 @@ use nucleo_matcher::{
     Config, Matcher,
 };
 use raylib::RaylibHandle;
+use serde::de;
 
-use crate::{combined_draw_handle::CombinedDrawHandle, event::Event, modes::ModeId};
+use crate::{
+    app::State, combined_draw_handle::CombinedDrawHandle, event::Event, modes::ModeId, APP_STATE,
+};
 
 use super::{
     rect::Rect,
@@ -91,13 +94,14 @@ impl CommandPalette {
         }
     }
 
-    pub fn update(&mut self, input: String, rl: &mut RaylibHandle) {
-        self.input = input;
+    pub fn update(&mut self, rl: &mut RaylibHandle) {
+        let mut state = APP_STATE.lock().unwrap();
+        self.input = state.command_palette_input.clone();
         self.ui_input.set_text(self.input.clone(), rl);
-        self.match_commands(rl);
+        self.match_commands(rl, &mut state);
     }
 
-    fn match_commands(&mut self, rl: &mut RaylibHandle) {
+    fn match_commands(&mut self, rl: &mut RaylibHandle, app_state: &mut State) {
         let matches = Pattern::parse(&self.input, CaseMatching::Ignore, Normalization::Smart)
             .match_list(self.commands.keys(), &mut self.matcher);
 
@@ -110,6 +114,12 @@ impl CommandPalette {
             text.style = StyleId(StyleType::CommandPalette);
             text.hovered_style = StyleId(StyleType::CommandPalette);
             self.suggestions.push(text);
+        }
+
+        if !matches.is_empty() {
+            app_state.command_palette_pending_event = Some(self.commands[matches[0].0]);
+        } else {
+            app_state.command_palette_pending_event = None;
         }
     }
 

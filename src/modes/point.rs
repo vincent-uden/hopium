@@ -3,8 +3,9 @@ use nalgebra::Vector2;
 use crate::{
     cad::entity::{FundamentalEntity, Point},
     event::Event,
-    APP_STATE,
+    APP_STATE, EVENT_QUEUE,
 };
+use raylib::ffi::KeyboardKey;
 
 use super::{Mode, ModeId, MousePress};
 
@@ -44,5 +45,19 @@ impl Mode for PointMode {
             }
             _ => false,
         }
+    }
+
+    fn key_press(&mut self, key: &super::KeyPress, rl: &mut raylib::RaylibHandle) -> bool {
+        let mut eq = EVENT_QUEUE.lock().unwrap();
+        let mut out = true;
+        match key.key {
+            KeyboardKey::KEY_ESCAPE => {
+                eq.post_event(Event::PopMode);
+            }
+            _ => {
+                out = false;
+            }
+        };
+        out
     }
 }
