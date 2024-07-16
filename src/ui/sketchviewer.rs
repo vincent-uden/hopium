@@ -270,6 +270,13 @@ impl MouseEventHandler for SketchViewer {
                     press: *press,
                 });
             }
+            MouseButton::MOUSE_BUTTON_RIGHT => {
+                eq.post_event(Event::SketchClick {
+                    pos: self.to_sketch_space(mouse_pos),
+                    sketch_space_select_radius: self.to_sketch_scale(self.select_radius),
+                    press: *press,
+                });
+            }
             MouseButton::MOUSE_BUTTON_MIDDLE => {
                 self.panning = true;
             }

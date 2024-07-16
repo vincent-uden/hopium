@@ -21,6 +21,8 @@ impl CircleMode {
         let mut state = APP_STATE.lock().unwrap();
         if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT {
             state.pending_clicks.push(click_pos);
+        } else if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_RIGHT {
+            state.pending_clicks.clear();
         }
 
         if state.pending_clicks.len() == 2 {

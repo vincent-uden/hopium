@@ -8,7 +8,7 @@ use raylib::{
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumString;
 
-use crate::event::Event;
+use crate::{event::Event, APP_STATE};
 
 pub mod circle;
 pub mod command;
@@ -307,10 +307,12 @@ impl ModeStack {
             let mode = &self.all_modes[id];
             consumed = consumed || mode.process_event(event);
         }
+        let mut state = APP_STATE.lock().unwrap();
         if !consumed {
             consumed = true;
             match event {
                 Event::PopMode => {
+                    state.pending_clicks.clear();
                     self.modes.pop();
                 }
                 Event::PushMode(mode_id) => {

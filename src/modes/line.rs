@@ -22,6 +22,9 @@ impl LineMode {
         if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT {
             state.pending_clicks.push(click_pos);
         }
+        if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_RIGHT {
+            state.pending_clicks.clear();
+        }
 
         if state.pending_clicks.len() == 2 {
             let p1 = state.pending_clicks[0];
