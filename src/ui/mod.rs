@@ -8,6 +8,7 @@ use raylib::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    combined_draw_handle::CombinedDrawHandle,
     event::Event,
     modes::{KeyMods, MousePress},
     registry::RegId,
@@ -39,7 +40,7 @@ impl RegId for UiId {
 pub trait Drawable {
     fn move_relative(&mut self, distance: Vector2<f64>);
     fn set_pos(&mut self, pos: Vector2<f64>);
-    fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &RaylibThread);
+    fn draw(&self, rl: &mut CombinedDrawHandle, t: &RaylibThread);
     fn get_size(&self) -> Vector2<f64>;
     fn update(&mut self, rl: &mut RaylibHandle) {}
 }

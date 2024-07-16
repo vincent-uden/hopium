@@ -56,6 +56,7 @@ pub enum Event {
     },
     IncreaseZoom,
     DecreaseZoom,
+    OpenCommandPalette,
 }
 
 fn should_serialize_as_layout(event: &Event) -> bool {

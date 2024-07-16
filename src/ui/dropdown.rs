@@ -5,7 +5,10 @@ use raylib::{
     RaylibHandle, RaylibThread,
 };
 
-use crate::{event::Event, modes::MousePress, rendering::renderer::to_nalgebra};
+use crate::{
+    combined_draw_handle::CombinedDrawHandle, event::Event, modes::MousePress,
+    rendering::renderer::to_nalgebra,
+};
 use crate::{ui::Drawable, EVENT_QUEUE};
 
 use super::{
@@ -121,7 +124,7 @@ impl Drawable for DropDown {
         self.move_relative(diff);
     }
 
-    fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &RaylibThread) {
+    fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &RaylibThread) {
         if self.hovered {
             for ui in &self.ui_bgs {
                 ui.draw(rl, t);

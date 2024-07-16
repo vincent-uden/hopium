@@ -1,7 +1,7 @@
 use nalgebra::Vector2;
 use raylib::drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode};
 
-use crate::{rendering::renderer::to_raylib, STYLES};
+use crate::{combined_draw_handle::CombinedDrawHandle, rendering::renderer::to_raylib, STYLES};
 
 use super::{
     style::{StyleId, StyleType},
@@ -39,7 +39,7 @@ impl Drawable for Rect {
         self.move_relative(diff);
     }
 
-    fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &raylib::RaylibThread) {
+    fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &raylib::RaylibThread) {
         let s = &STYLES.read().unwrap()[if self.hovered {
             self.hovered_style
         } else {

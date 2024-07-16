@@ -6,6 +6,7 @@ use raylib::{
 };
 
 use crate::{
+    combined_draw_handle::CombinedDrawHandle,
     rendering::renderer::{to_nalgebra, to_raylib},
     STYLES,
 };
@@ -81,7 +82,7 @@ impl Drawable for Text {
         self.move_relative(diff);
     }
 
-    fn draw(&self, rl: &mut RaylibTextureMode<RaylibDrawHandle>, t: &raylib::RaylibThread) {
+    fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &raylib::RaylibThread) {
         let mut draw_pos = self.pos;
         match self.align {
             TextAlignment::Left => {}

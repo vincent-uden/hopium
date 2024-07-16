@@ -6,6 +6,7 @@ use raylib::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    combined_draw_handle::CombinedDrawHandle,
     registry::{RegId, Registry},
     ui::style::{StyleId, StyleType},
     STYLES,
@@ -70,7 +71,7 @@ impl Boundary {
         }
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, t: &RaylibThread) {
+    pub fn draw(&self, d: &mut CombinedDrawHandle, t: &RaylibThread) {
         AREA_MAP.with_borrow(|area_map| {
             let start_pos = area_map[self.side2[0]].screen_pos;
             let mut end_pos = start_pos;

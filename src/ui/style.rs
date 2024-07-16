@@ -15,6 +15,7 @@ pub enum StyleType {
     DropDownHovered,
     Icon,
     IconHovered,
+    Overlay,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
@@ -82,6 +83,13 @@ pub fn populate_styles() {
             StyleId(StyleType::IconHovered),
             Style {
                 bg_color: Color::new(71, 71, 71, 255),
+                ..Default::default()
+            },
+        );
+        styles.insert_with_key(
+            StyleId(StyleType::Overlay),
+            Style {
+                bg_color: Color::new(0, 0, 0, 30),
                 ..Default::default()
             },
         );

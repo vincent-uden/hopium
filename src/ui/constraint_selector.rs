@@ -2,6 +2,7 @@ use nalgebra::Vector2;
 
 use crate::{
     cad::entity::{BiConstraint, ConstraintType},
+    combined_draw_handle::CombinedDrawHandle,
     event::Event,
     images::ImageId,
     APP_STATE, EVENT_QUEUE,
@@ -26,7 +27,8 @@ pub struct ConstraintSelector {
 impl ConstraintSelector {
     pub fn new() -> Self {
         let mut icons = vec![];
-        let icon_ids = [ImageId::IconAngle,
+        let icon_ids = [
+            ImageId::IconAngle,
             ImageId::IconCoincident,
             ImageId::IconColinear,
             ImageId::IconDistance,
@@ -34,7 +36,8 @@ impl ConstraintSelector {
             ImageId::IconParallel,
             ImageId::IconPerpendicular,
             ImageId::IconTangent,
-            ImageId::IconVertical];
+            ImageId::IconVertical,
+        ];
         let constraint_types = vec![
             ConstraintType::Angle { x: 0.0 },
             ConstraintType::Coincident,
@@ -86,11 +89,7 @@ impl Drawable for ConstraintSelector {
         self.move_relative(diff);
     }
 
-    fn draw(
-        &self,
-        rl: &mut raylib::prelude::RaylibTextureMode<raylib::prelude::RaylibDrawHandle>,
-        t: &raylib::RaylibThread,
-    ) {
+    fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &raylib::RaylibThread) {
         for (icon, constraint_type) in self.icons.iter().zip(&self.constraint_types) {
             icon.draw(rl, t);
         }

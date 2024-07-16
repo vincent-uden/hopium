@@ -5,10 +5,7 @@ use nalgebra::Vector2;
 use raylib::{RaylibHandle, RaylibThread};
 
 use crate::{
-    cad::{
-        entity::{Circle, EntityId, FundamentalEntity, Line, Point},
-        sketch::Sketch,
-    },
+    cad::{entity::EntityId, sketch::Sketch},
     event::Event,
     modes::{
         circle::CircleMode, global::GlobalMode, line::LineMode, point::PointMode,
@@ -22,7 +19,6 @@ use crate::{
     APP_STATE, EVENT_QUEUE, IMAGES, MODE_STACK,
 };
 
-#[derive(Debug)]
 pub struct App<'a> {
     renderer: Renderer,
     rl: &'a mut RaylibHandle,
@@ -157,6 +153,10 @@ impl<'a> App<'a> {
                     area.build(self.rl);
                 });
             }
+            Event::OpenCommandPalette => {
+                let mut state = APP_STATE.lock().unwrap();
+                state.command_palette_open = true;
+            }
             _ => self.renderer.process_event(event, Vector2::zeros()),
         }
     }
@@ -168,6 +168,7 @@ pub struct State {
     pub sketch: Sketch,
     pub selected: Vec<EntityId>,
     pub solving: bool,
+    pub command_palette_open: bool,
 }
 
 impl State {
@@ -177,6 +178,7 @@ impl State {
             sketch: Sketch::new("Untitled".to_string()),
             selected: Vec::new(),
             solving: false,
+            command_palette_open: false,
         }
     }
 }

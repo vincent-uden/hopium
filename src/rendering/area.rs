@@ -1,9 +1,10 @@
 use core::fmt;
+use std::ops::Deref;
 
 use nalgebra::Vector2;
 use raylib::{
     color::Color,
-    drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureModeExt},
+    drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode, RaylibTextureModeExt},
     math::Rectangle,
     texture::{RaylibTexture2D, RenderTexture2D},
     RaylibHandle, RaylibThread,
@@ -11,6 +12,7 @@ use raylib::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    combined_draw_handle::CombinedDrawHandle,
     event::Event,
     images::ImageId,
     modes::{KeyMods, MousePress},
@@ -127,7 +129,7 @@ impl Area {
         }
     }
 
-    pub fn draw(&mut self, d: &mut RaylibDrawHandle, t: &RaylibThread) {
+    pub fn draw(&mut self, d: &mut CombinedDrawHandle<'_>, t: &RaylibThread) {
         let offset = Vector2::<f64>::new(
             ((self.texture.width() as f32 - self.screen_rect.width) / 2.0) as f64,
             ((self.texture.height() as f32 - self.screen_rect.height) / 2.0) as f64,

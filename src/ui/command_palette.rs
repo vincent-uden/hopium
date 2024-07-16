@@ -1,14 +1,20 @@
 use nalgebra::Vector2;
 use raylib::RaylibHandle;
 
-use crate::event::Event;
+use crate::{combined_draw_handle::CombinedDrawHandle, event::Event};
 
-use super::{rect::Rect, text::Text, Drawable, MouseEventHandler};
+use super::{
+    rect::Rect,
+    style::{StyleId, StyleType},
+    text::Text,
+    Drawable, MouseEventHandler,
+};
 
 pub struct CommandPalette {
     pos: Vector2<f64>,
     size: Vector2<f64>,
     bg: Rect,
+    overlay: Rect,
     input: String,
     ui_input: Text,
     suggestions: Vec<Text>,
@@ -19,10 +25,14 @@ pub struct CommandPalette {
 impl CommandPalette {
     pub fn new(screen_size: Vector2<f64>) -> Self {
         let size = Vector2::new(800.0, 800.0);
+        let mut overlay = Rect::new();
+        overlay.size = screen_size;
+        overlay.style = StyleId(StyleType::Overlay);
         Self {
             pos: (screen_size - size) / 2.0,
             size,
             bg: Rect::new(),
+            overlay,
             input: String::new(),
             ui_input: Text::new(),
             suggestions: vec![],
@@ -58,6 +68,10 @@ impl CommandPalette {
             self.suggestions.push(text);
         }
     }
+
+    fn get_size(&self) -> Vector2<f64> {
+        self.size
+    }
 }
 
 impl Drawable for CommandPalette {
@@ -78,11 +92,7 @@ impl Drawable for CommandPalette {
         self.move_relative(diff);
     }
 
-    fn draw(
-        &self,
-        rl: &mut raylib::prelude::RaylibTextureMode<raylib::prelude::RaylibDrawHandle>,
-        t: &raylib::prelude::RaylibThread,
-    ) {
+    fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &raylib::prelude::RaylibThread) {
         self.bg.draw(rl, t);
         self.ui_input.draw(rl, t);
         for ui in &self.suggestions {
@@ -94,7 +104,7 @@ impl Drawable for CommandPalette {
     }
 
     fn get_size(&self) -> Vector2<f64> {
-        todo!()
+        self.size
     }
 }
 

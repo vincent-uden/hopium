@@ -1,7 +1,10 @@
 use nalgebra::Vector2;
 use raylib::{color::Color, drawing::RaylibDraw};
 
-use crate::{images::ImageId, rendering::renderer::to_raylib, IMAGES, STYLES};
+use crate::{
+    combined_draw_handle::CombinedDrawHandle, images::ImageId, rendering::renderer::to_raylib,
+    IMAGES, STYLES,
+};
 
 use super::{
     rect::Rect,
@@ -55,11 +58,7 @@ impl Drawable for Icon {
         self.move_relative(pos - self.pos);
     }
 
-    fn draw(
-        &self,
-        rl: &mut raylib::prelude::RaylibTextureMode<raylib::prelude::RaylibDrawHandle>,
-        t: &raylib::RaylibThread,
-    ) {
+    fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &raylib::RaylibThread) {
         let s = &STYLES.read().unwrap()[if self.hovered {
             self.hovered_style
         } else {

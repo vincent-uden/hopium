@@ -8,9 +8,11 @@ use raylib::{
     RaylibThread,
 };
 
+use crate::combined_draw_handle::CombinedDrawHandle;
 use crate::event::Event;
 use crate::modes::{KeyMods, MousePress};
-use crate::ui::MouseEventHandler;
+use crate::ui::command_palette::CommandPalette;
+use crate::ui::{Drawable, MouseEventHandler};
 use crate::{registry::Registry, ui::UiId};
 use crate::{APP_STATE, EVENT_QUEUE, MODE_STACK};
 
@@ -33,7 +35,6 @@ pub fn to_nalgebra(x: raylib::math::Vector2) -> Vector2<f64> {
 thread_local!(pub static AREA_MAP: RefCell<Registry<AreaId, Area>> = RefCell::new(Registry::new()));
 thread_local!(pub static BDRY_MAP: RefCell<Registry<BoundaryId, Boundary>> = RefCell::new(Registry::new()));
 
-#[derive(Debug)]
 pub struct Renderer {
     screen_w: i32,
     screen_h: i32,
@@ -43,6 +44,7 @@ pub struct Renderer {
     grabbed_at: Vector2<f64>,
     next_area_id: AreaId,
     next_bdry_id: BoundaryId,
+    command_palette: CommandPalette,
 }
 
 impl Renderer {
@@ -76,6 +78,7 @@ impl Renderer {
             grabbed_at: Vector2::default(),
             next_area_id: AreaId(1),
             next_bdry_id: BoundaryId(0),
+            command_palette: CommandPalette::new(Vector2::new(screen_w as f64, screen_h as f64)),
         }
     }
 
@@ -83,27 +86,36 @@ impl Renderer {
         let mut d = rl.begin_drawing(t);
         d.clear_background(Color::BLACK);
 
+        let mut combined_draw_handle = CombinedDrawHandle::RaylibDrawHandle(d);
+
         AREA_MAP.with_borrow_mut(|areas| {
             for area in areas.values_mut() {
-                area.draw(&mut d, t);
+                area.draw(&mut combined_draw_handle, t);
             }
         });
 
         BDRY_MAP.with_borrow(|bdrys| {
             for bdry in bdrys.values() {
-                bdry.draw(&mut d, t);
+                bdry.draw(&mut combined_draw_handle, t);
             }
         });
 
-        d.draw_fps(self.screen_w - 100, 900);
+        combined_draw_handle.draw_fps(self.screen_w - 100, 900);
         let ms = MODE_STACK.lock().unwrap();
-        d.draw_text(
+        combined_draw_handle.draw_text(
             &format!("{:?}", &ms.innermost_mode()),
             10,
             880,
             20,
             Color::WHITE,
         );
+
+        {
+            let state = APP_STATE.lock().unwrap();
+            if state.command_palette_open {
+                self.command_palette.draw(&mut combined_draw_handle, t);
+            }
+        }
     }
 
     pub fn update(&mut self, rl: &mut RaylibHandle) {

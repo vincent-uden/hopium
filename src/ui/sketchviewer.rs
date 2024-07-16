@@ -8,6 +8,7 @@ use raylib::{color::Color, drawing::RaylibDraw};
 use raylib::math::Vector2 as V2;
 
 use crate::cad::entity::FundamentalEntity;
+use crate::combined_draw_handle::CombinedDrawHandle;
 use crate::event::Event;
 use crate::modes::MousePress;
 use crate::rendering::renderer::{to_nalgebra, to_raylib};
@@ -138,11 +139,7 @@ impl Drawable for SketchViewer {
         self.move_relative(pos - self.pos)
     }
 
-    fn draw(
-        &self,
-        rl: &mut raylib::prelude::RaylibTextureMode<raylib::prelude::RaylibDrawHandle>,
-        t: &raylib::prelude::RaylibThread,
-    ) {
+    fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &raylib::prelude::RaylibThread) {
         rl.draw_line_v(
             V2::new(0.0, self.pan_offset.y as f32),
             V2::new(self.texture_size.x as f32, self.pan_offset.y as f32),
