@@ -8,8 +8,8 @@ use crate::{
     cad::{entity::EntityId, sketch::Sketch},
     event::Event,
     modes::{
-        circle::CircleMode, global::GlobalMode, line::LineMode, point::PointMode,
-        sketch::SketchMode, ModeId,
+        circle::CircleMode, command::CommandMode, global::GlobalMode, line::LineMode,
+        point::PointMode, sketch::SketchMode, ModeId,
     },
     rendering::{
         boundary::BoundaryOrientation,
@@ -81,6 +81,7 @@ impl<'a> App<'a> {
         let point_mode = Box::new(PointMode::new());
         let line_mode = Box::new(LineMode::new());
         let circle_mode = Box::new(CircleMode::new());
+        let command_mode = Box::new(CommandMode::new());
         {
             let mut ms = MODE_STACK.lock().unwrap();
             ms.all_modes.insert(ModeId::Global, global_mode);
@@ -88,6 +89,7 @@ impl<'a> App<'a> {
             ms.all_modes.insert(ModeId::Point, point_mode);
             ms.all_modes.insert(ModeId::Line, line_mode);
             ms.all_modes.insert(ModeId::Circle, circle_mode);
+            ms.all_modes.insert(ModeId::Command, command_mode);
             ms.push(ModeId::Global);
         }
 
@@ -156,6 +158,8 @@ impl<'a> App<'a> {
             Event::OpenCommandPalette => {
                 let mut state = APP_STATE.lock().unwrap();
                 state.command_palette_open = true;
+                let mut eq = EVENT_QUEUE.lock().unwrap();
+                eq.post_event(Event::PushMode(ModeId::Command));
             }
             _ => self.renderer.process_event(event, Vector2::zeros()),
         }
@@ -169,6 +173,7 @@ pub struct State {
     pub selected: Vec<EntityId>,
     pub solving: bool,
     pub command_palette_open: bool,
+    pub command_palette_input: String,
 }
 
 impl State {
@@ -179,6 +184,7 @@ impl State {
             selected: Vec::new(),
             solving: false,
             command_palette_open: false,
+            command_palette_input: "Point".to_string(),
         }
     }
 }

@@ -1,3 +1,4 @@
+use log::debug;
 use nalgebra::Vector2;
 use raylib::RaylibHandle;
 
@@ -15,6 +16,7 @@ pub struct CommandPalette {
     size: Vector2<f64>,
     bg: Rect,
     overlay: Rect,
+    divider: Rect,
     input: String,
     ui_input: Text,
     suggestions: Vec<Text>,
@@ -25,16 +27,38 @@ pub struct CommandPalette {
 impl CommandPalette {
     pub fn new(screen_size: Vector2<f64>) -> Self {
         let size = Vector2::new(800.0, 800.0);
+        let pos = (screen_size - size) / 2.0;
+
         let mut overlay = Rect::new();
         overlay.size = screen_size;
         overlay.style = StyleId(StyleType::Overlay);
+        overlay.hovered_style = StyleId(StyleType::Overlay);
+        overlay.set_pos(Vector2::new(0.0, 0.0));
+
+        let mut bg = Rect::new();
+        bg.size = size;
+        bg.style = StyleId(StyleType::CommandPalette);
+        bg.hovered_style = StyleId(StyleType::CommandPalette);
+        bg.set_pos(pos);
+
+        let mut ui_input = Text::new();
+        ui_input.set_pos(pos + Vector2::new(16.0, 10.0));
+        ui_input.style = StyleId(StyleType::CommandPalette);
+        ui_input.hovered_style = StyleId(StyleType::CommandPalette);
+
+        let mut divider = Rect::new();
+        divider.size = Vector2::new(size.y - 20.0, 2.0);
+        divider.set_pos(pos + Vector2::new(10.0, 36.0));
+        divider.style = StyleId(StyleType::CommandPaletteDivider);
+        divider.hovered_style = StyleId(StyleType::CommandPaletteDivider);
         Self {
-            pos: (screen_size - size) / 2.0,
+            pos,
             size,
-            bg: Rect::new(),
+            bg,
             overlay,
+            divider,
             input: String::new(),
-            ui_input: Text::new(),
+            ui_input,
             suggestions: vec![],
             suggestion_bgs: vec![],
             commands: vec![],
@@ -93,14 +117,16 @@ impl Drawable for CommandPalette {
     }
 
     fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &raylib::prelude::RaylibThread) {
+        self.overlay.draw(rl, t);
         self.bg.draw(rl, t);
-        self.ui_input.draw(rl, t);
         for ui in &self.suggestions {
             ui.draw(rl, t);
         }
         for ui in &self.suggestion_bgs {
             ui.draw(rl, t);
         }
+        self.ui_input.draw(rl, t);
+        self.divider.draw(rl, t);
     }
 
     fn get_size(&self) -> Vector2<f64> {

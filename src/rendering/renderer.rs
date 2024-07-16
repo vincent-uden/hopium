@@ -124,6 +124,9 @@ impl Renderer {
             if rl.is_key_pressed(KeyboardKey::KEY_Q) {
                 state.running = false;
             }
+
+            self.command_palette
+                .update(state.command_palette_input.clone(), rl);
         }
 
         let mouse_pos = to_nalgebra(rl.get_mouse_position());

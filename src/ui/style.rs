@@ -16,6 +16,8 @@ pub enum StyleType {
     Icon,
     IconHovered,
     Overlay,
+    CommandPalette,
+    CommandPaletteDivider,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
@@ -89,7 +91,21 @@ pub fn populate_styles() {
         styles.insert_with_key(
             StyleId(StyleType::Overlay),
             Style {
-                bg_color: Color::new(0, 0, 0, 30),
+                bg_color: Color::new(0, 0, 0, 55),
+                ..Default::default()
+            },
+        );
+        styles.insert_with_key(
+            StyleId(StyleType::CommandPalette),
+            Style {
+                color: Color::new(200, 200, 200, 255),
+                ..Default::default()
+            },
+        );
+        styles.insert_with_key(
+            StyleId(StyleType::CommandPaletteDivider),
+            Style {
+                bg_color: Color::new(200, 200, 200, 255),
                 ..Default::default()
             },
         );
