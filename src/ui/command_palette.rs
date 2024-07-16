@@ -1,8 +1,14 @@
+use std::collections::HashMap;
+
 use log::debug;
 use nalgebra::Vector2;
+use nucleo_matcher::{
+    pattern::{CaseMatching, Normalization, Pattern},
+    Config, Matcher,
+};
 use raylib::RaylibHandle;
 
-use crate::{combined_draw_handle::CombinedDrawHandle, event::Event};
+use crate::{combined_draw_handle::CombinedDrawHandle, event::Event, modes::ModeId};
 
 use super::{
     rect::Rect,
@@ -21,7 +27,8 @@ pub struct CommandPalette {
     ui_input: Text,
     suggestions: Vec<Text>,
     suggestion_bgs: Vec<Rect>,
-    commands: Vec<String>,
+    commands: HashMap<String, Event>,
+    matcher: Matcher,
 }
 
 impl CommandPalette {
@@ -51,6 +58,24 @@ impl CommandPalette {
         divider.set_pos(pos + Vector2::new(10.0, 36.0));
         divider.style = StyleId(StyleType::CommandPaletteDivider);
         divider.hovered_style = StyleId(StyleType::CommandPaletteDivider);
+
+        let mut commands = HashMap::new();
+        commands.insert(
+            "Enter point mode".to_string(),
+            Event::PushMode(ModeId::Point),
+        );
+        commands.insert("Enter line mode".to_string(), Event::PushMode(ModeId::Line));
+        commands.insert(
+            "Enter circle mode".to_string(),
+            Event::PushMode(ModeId::Circle),
+        );
+        commands.insert(
+            "Enter sketch mode".to_string(),
+            Event::PushMode(ModeId::Sketch),
+        );
+
+        let matcher = Matcher::new(Config::DEFAULT);
+
         Self {
             pos,
             size,
@@ -61,34 +86,29 @@ impl CommandPalette {
             ui_input,
             suggestions: vec![],
             suggestion_bgs: vec![],
-            commands: vec![],
+            commands,
+            matcher,
         }
-    }
-
-    pub fn set_commands(&mut self, commands: Vec<String>) {
-        self.commands = commands;
     }
 
     pub fn update(&mut self, input: String, rl: &mut RaylibHandle) {
         self.input = input;
         self.ui_input.set_text(self.input.clone(), rl);
+        self.match_commands(rl);
     }
 
     fn match_commands(&mut self, rl: &mut RaylibHandle) {
-        // TODO: Fuzzy find
-        let mut candidates = vec![];
-        for cmd in &self.commands {
-            if cmd.starts_with(&self.input) {
-                candidates.push(cmd.clone());
-            }
-        }
+        let matches = Pattern::parse(&self.input, CaseMatching::Ignore, Normalization::Smart)
+            .match_list(self.commands.keys(), &mut self.matcher);
 
         self.suggestions.clear();
         self.suggestion_bgs.clear();
-        for (i, candidate) in candidates[0..(10).min(candidates.len())].iter().enumerate() {
+        for (i, (candidate, score)) in matches[0..(10).min(matches.len())].iter().enumerate() {
             let mut text = Text::new();
-            text.set_text(candidate.clone(), rl);
-            text.set_pos(self.pos + Vector2::new(0.0, 30.0 * i as f64));
+            text.set_text(candidate.to_string().clone(), rl);
+            text.set_pos(self.pos + Vector2::new(16.0, 60.0 + 30.0 * i as f64));
+            text.style = StyleId(StyleType::CommandPalette);
+            text.hovered_style = StyleId(StyleType::CommandPalette);
             self.suggestions.push(text);
         }
     }

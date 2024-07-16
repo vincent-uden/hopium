@@ -184,7 +184,7 @@ impl State {
             selected: Vec::new(),
             solving: false,
             command_palette_open: false,
-            command_palette_input: "Point".to_string(),
+            command_palette_input: "".to_string(),
         }
     }
 }
