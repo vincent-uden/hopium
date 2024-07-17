@@ -1,10 +1,10 @@
 use core::fmt;
-use std::ops::Deref;
 
+use log::debug;
 use nalgebra::Vector2;
 use raylib::{
     color::Color,
-    drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode, RaylibTextureModeExt},
+    drawing::RaylibDraw,
     math::Rectangle,
     texture::{RaylibTexture2D, RenderTexture2D},
     RaylibHandle, RaylibThread,
@@ -115,7 +115,7 @@ impl Area {
                 self.build_viewport_3d();
             }
             AreaType::ToolSelection => {
-                self.build_tool_selection();
+                self.build_tool_selection(rl);
             }
             AreaType::ContraintSelection => {
                 self.build_constraint_selection(rl);
@@ -256,6 +256,7 @@ impl Area {
                 String::from("Empty"),
                 String::from("Constraint Selection"),
                 String::from("Sketch Viewer"),
+                String::from("Toolbar"),
             ],
             rl,
         );
@@ -272,6 +273,10 @@ impl Area {
                 id: self.id,
                 area_type: AreaType::SketchViewer,
             },
+            Event::ChangeAreaType {
+                id: self.id,
+                area_type: AreaType::ToolSelection,
+            },
         ];
         self.ui.push(picker);
     }
@@ -279,8 +284,13 @@ impl Area {
     fn build_viewport_3d(&mut self) {
         todo!()
     }
-    fn build_tool_selection(&mut self) {
-        todo!()
+    fn build_tool_selection(&mut self, rl: &mut RaylibHandle) {
+        self.ui.clear();
+        let mut toolbar = Box::new(ui::toolbar::Toolbar::new());
+        toolbar.update_contents(rl);
+        toolbar.set_pos(Vector2::new(250.0, 0.0));
+        self.ui.push(toolbar);
+        self.build_area_type_picker(rl);
     }
     fn build_constraint_selection(&mut self, rl: &mut RaylibHandle) {
         self.ui.clear();

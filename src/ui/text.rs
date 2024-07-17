@@ -24,7 +24,7 @@ pub enum TextAlignment {
 }
 
 pub struct Text {
-    pos: Vector2<f64>,
+    pub pos: Vector2<f64>,
     size: Vector2<f64>,
     pub align: TextAlignment,
     text: String,

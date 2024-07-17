@@ -1,10 +1,7 @@
 use std::hash::Hash;
 
 use nalgebra::Vector2;
-use raylib::{
-    drawing::{RaylibDrawHandle, RaylibTextureMode},
-    RaylibHandle, RaylibThread,
-};
+use raylib::{RaylibHandle, RaylibThread};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -22,6 +19,7 @@ pub mod rect;
 pub mod sketchviewer;
 pub mod style;
 pub mod text;
+pub mod toolbar;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Serialize, Deserialize)]
 pub struct UiId(pub i64);

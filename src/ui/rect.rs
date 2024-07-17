@@ -10,7 +10,7 @@ use super::{
 
 #[derive(Debug)]
 pub struct Rect {
-    pos: Vector2<f64>,
+    pub pos: Vector2<f64>,
     pub size: Vector2<f64>,
     pub style: StyleId,
     pub hovered_style: StyleId,

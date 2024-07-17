@@ -1,3 +1,4 @@
+use log::debug;
 use nalgebra::Vector2;
 use raylib::{
     drawing::{RaylibDrawHandle, RaylibTextureMode},
@@ -19,7 +20,7 @@ use super::{
 };
 
 pub struct DropDown {
-    pos: Vector2<f64>,
+    pub pos: Vector2<f64>,
     btn_size: Vector2<f64>,
     list_size: Vector2<f64>,
     label: String,
@@ -62,7 +63,7 @@ impl DropDown {
             1.0,
         ));
 
-        let mut biggest_size = Vector2::<f64>::zeros();
+        let mut biggest_size = self.btn_size;
         for opt in &self.options {
             let size = to_nalgebra(rl.get_font_default().measure_text(opt, self.font_size, 1.0));
             if size.x > biggest_size.x {
@@ -117,6 +118,11 @@ impl Drawable for DropDown {
         for ui in &mut self.ui_options {
             ui.move_relative(distance);
         }
+        for ui in &mut self.ui_bgs {
+            ui.move_relative(distance);
+        }
+        self.ui_label.move_relative(distance);
+        self.ui_label_bg.move_relative(distance);
     }
 
     fn set_pos(&mut self, pos: Vector2<f64>) {
@@ -163,11 +169,13 @@ impl MouseEventHandler for DropDown {
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
-        for (i, bg) in self.ui_bgs.iter().enumerate() {
-            if bg.contains_point(mouse_pos) {
-                let mut eq = EVENT_QUEUE.lock().unwrap();
-                eq.post_event(self.option_events[i]);
-                break;
+        if self.hovered {
+            for (i, bg) in self.ui_bgs.iter().enumerate() {
+                if bg.contains_point(mouse_pos) {
+                    let mut eq = EVENT_QUEUE.lock().unwrap();
+                    eq.post_event(self.option_events[i]);
+                    break;
+                }
             }
         }
     }
