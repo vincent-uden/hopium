@@ -1,13 +1,12 @@
 use colored::Colorize;
-use raylib::{
-    RaylibHandle, RaylibThread,
-};
+use raylib::{RaylibHandle, RaylibThread};
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 use crate::IMAGES;
 
+#[allow(clippy::enum_variant_names)]
 #[derive(
     Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Serialize, Deserialize, EnumIter,
 )]

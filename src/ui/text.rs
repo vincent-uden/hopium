@@ -1,6 +1,6 @@
 use nalgebra::Vector2;
 use raylib::{
-    drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode},
+    drawing::RaylibDraw,
     text::RaylibFont,
     RaylibHandle,
 };

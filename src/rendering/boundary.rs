@@ -1,6 +1,6 @@
 use nalgebra::Vector2;
 use raylib::{
-    drawing::{RaylibDraw, RaylibDrawHandle},
+    drawing::RaylibDraw,
     RaylibHandle, RaylibThread,
 };
 use serde::{Deserialize, Serialize};

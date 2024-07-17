@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 
-use log::debug;
 use nalgebra::Vector2;
 use nucleo_matcher::{
     pattern::{CaseMatching, Normalization, Pattern},
     Config, Matcher,
 };
 use raylib::RaylibHandle;
-use serde::de;
 
 use crate::{
     app::State, combined_draw_handle::CombinedDrawHandle, event::Event, modes::ModeId, APP_STATE,

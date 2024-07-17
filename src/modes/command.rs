@@ -1,9 +1,7 @@
-use log::debug;
 use nalgebra::Vector2;
 use raylib::ffi::KeyboardKey;
 
 use crate::{
-    cad::entity::{FundamentalEntity, Point},
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };

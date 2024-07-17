@@ -195,7 +195,7 @@ impl Drawable for SketchViewer {
             let p = self.to_sketch_space(self.last_mouse_pos);
             rl.draw_circle_v(self.to_screen_space(p), 4.0, color);
         }
-        if state.pending_clicks.len() > 0 {
+        if !state.pending_clicks.is_empty() {
             if ms.is_innermost_mode(&ModeId::Line) {
                 let p1 = state.pending_clicks[0];
                 let p2 = self.to_sketch_space(self.last_mouse_pos);
@@ -285,11 +285,8 @@ impl MouseEventHandler for SketchViewer {
     }
 
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
-        match press.button {
-            MouseButton::MOUSE_BUTTON_MIDDLE => {
-                self.panning = false;
-            }
-            _ => {}
+        if press.button == MouseButton::MOUSE_BUTTON_MIDDLE {
+            self.panning = false;
         }
     }
 

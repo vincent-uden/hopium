@@ -1,7 +1,5 @@
-use log::debug;
 use nalgebra::Vector2;
 use raylib::{
-    drawing::{RaylibDrawHandle, RaylibTextureMode},
     text::RaylibFont,
     RaylibHandle, RaylibThread,
 };

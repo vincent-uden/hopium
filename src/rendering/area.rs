@@ -1,6 +1,5 @@
 use core::fmt;
 
-use log::debug;
 use nalgebra::Vector2;
 use raylib::{
     color::Color,
@@ -349,11 +348,8 @@ impl Area {
     }
 
     pub fn update(&mut self, rl: &mut RaylibHandle) {
-        match self.area_type {
-            AreaType::SketchViewer => {
-                self.ui[0].update(rl);
-            }
-            _ => {}
+        if let AreaType::SketchViewer = self.area_type {
+            self.ui[0].update(rl);
         }
     }
 }

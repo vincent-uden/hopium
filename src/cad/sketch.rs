@@ -212,11 +212,11 @@ mod tests {
         );
     }
 
-    fn run_sketch_test<T>(test: T) -> ()
+    fn run_sketch_test<T>(test: T)
     where
-        T: FnOnce() -> () + std::panic::UnwindSafe,
+        T: FnOnce() + std::panic::UnwindSafe,
     {
-        let result = std::panic::catch_unwind(|| test());
+        let result = std::panic::catch_unwind(test);
 
         assert!(result.is_ok())
     }

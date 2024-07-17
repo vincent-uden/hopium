@@ -1,4 +1,3 @@
-use log::debug;
 use nalgebra::Vector2;
 use raylib::RaylibHandle;
 
@@ -88,7 +87,7 @@ impl Toolbar {
 
         for (name, opt) in &self.options {
             let names = opt.iter().map(|(n, _)| n.clone()).collect::<Vec<_>>();
-            let events = opt.iter().map(|(_, e)| e.clone()).collect::<Vec<_>>();
+            let events = opt.iter().map(|(_, e)| *e).collect::<Vec<_>>();
             let mut category = DropDown::new();
             category.set_contents(name.clone(), names, rl);
             category.option_events = events;
@@ -161,7 +160,7 @@ impl MouseEventHandler for Toolbar {
             Event::ToolbarConfirm { idx } => {
                 let mut eq = EVENT_QUEUE.lock().unwrap();
                 if let Some(open_category) = self.open_category {
-                    eq.post_event(self.options[open_category].1[idx].1.clone());
+                    eq.post_event(self.options[open_category].1[idx].1);
                     for category in &mut self.ui_categories {
                         category.open = false;
                     }

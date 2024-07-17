@@ -1,5 +1,5 @@
 use nalgebra::Vector2;
-use raylib::drawing::{RaylibDraw, RaylibDrawHandle, RaylibTextureMode};
+use raylib::drawing::RaylibDraw;
 
 use crate::{combined_draw_handle::CombinedDrawHandle, rendering::renderer::to_raylib, STYLES};
 
