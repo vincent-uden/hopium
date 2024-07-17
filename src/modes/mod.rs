@@ -318,6 +318,15 @@ impl ModeStack {
                 Event::PushMode(mode_id) => {
                     self.modes.push(mode_id);
                 }
+                Event::SwitchMode {
+                    switch_after,
+                    switch_to,
+                } => {
+                    while self.innermost_mode() != switch_after && self.len() > 1 {
+                        self.pop();
+                    }
+                    self.push(switch_to);
+                }
                 _ => {
                     consumed = false;
                 }

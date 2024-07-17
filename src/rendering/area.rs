@@ -427,7 +427,7 @@ impl MouseEventHandler for Area {
     }
 
     fn process_event(&mut self, event: Event, mouse_pos: Vector2<f64>) {
-        if self.contains_point(mouse_pos) {
+        if self.contains_point(mouse_pos) || event.ignore_mouse_pos() {
             for ui in &mut self.ui {
                 ui.process_event(event, mouse_pos);
             }

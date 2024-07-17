@@ -163,6 +163,10 @@ impl<'a> App<'a> {
                 let mut eq = EVENT_QUEUE.lock().unwrap();
                 eq.post_event(Event::PushMode(ModeId::Command));
             }
+            Event::ExitProgram => {
+                let mut state = APP_STATE.lock().unwrap();
+                state.running = false;
+            }
             _ => self.renderer.process_event(event, Vector2::zeros()),
         }
     }
@@ -172,12 +176,14 @@ impl<'a> App<'a> {
 pub struct State {
     pub running: bool,
     pub sketch: Sketch,
-    pub selected: Vec<EntityId>,
     pub solving: bool,
+    // Command palette
     pub command_palette_open: bool,
     pub command_palette_input: String,
     pub command_palette_pending_event: Option<Event>,
+    // Sketch viewer
     pub pending_clicks: Vec<Vector2<f64>>,
+    pub selected: Vec<EntityId>,
 }
 
 impl State {
@@ -185,12 +191,12 @@ impl State {
         Self {
             running: true,
             sketch: Sketch::new("Untitled".to_string()),
-            selected: Vec::new(),
             solving: false,
             command_palette_open: false,
             command_palette_input: "".to_string(),
             command_palette_pending_event: None,
             pending_clicks: Vec::new(),
+            selected: Vec::new(),
         }
     }
 }

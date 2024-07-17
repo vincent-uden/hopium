@@ -1,8 +1,5 @@
 use nalgebra::Vector2;
-use raylib::{
-    ffi::{KeyboardKey, MouseButton},
-    RaylibHandle,
-};
+use raylib::{ffi::KeyboardKey, RaylibHandle};
 
 use crate::{
     cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE, EVENT_QUEUE,
@@ -88,6 +85,9 @@ impl Mode for SketchMode {
         let mut eq = EVENT_QUEUE.lock().unwrap();
         let mut out = true;
         match key.key {
+            KeyboardKey::KEY_ESCAPE => {
+                eq.post_event(Event::PopMode);
+            }
             KeyboardKey::KEY_ENTER => {
                 state.solving = true;
             }
@@ -120,6 +120,83 @@ impl Mode for SketchMode {
             KeyboardKey::KEY_C => {
                 if key.vanilla() {
                     eq.post_event(Event::PushMode(ModeId::Circle));
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_Q => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarOpenCategory { idx: 0 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_W => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarOpenCategory { idx: 1 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_ONE => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 0 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_TWO => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 1 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_THREE => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 2 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_FOUR => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 3 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_FIVE => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 4 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_SIX => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 5 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_SEVEN => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 6 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_EIGHT => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 7 });
+                } else {
+                    out = false;
+                }
+            }
+            KeyboardKey::KEY_NINE => {
+                if key.vanilla() {
+                    eq.post_event(Event::ToolbarConfirm { idx: 8 });
                 } else {
                     out = false;
                 }

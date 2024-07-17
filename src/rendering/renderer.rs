@@ -119,12 +119,6 @@ impl Renderer {
     }
 
     pub fn update(&mut self, rl: &mut RaylibHandle) {
-        {
-            let mut state = APP_STATE.lock().unwrap();
-            if rl.is_key_pressed(KeyboardKey::KEY_Q) {
-                state.running = false;
-            }
-        }
         self.command_palette.update(rl);
 
         let mouse_pos = to_nalgebra(rl.get_mouse_position());

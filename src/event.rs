@@ -17,6 +17,10 @@ use crate::{
 pub enum Event {
     PopMode,
     PushMode(ModeId),
+    SwitchMode {
+        switch_after: ModeId,
+        switch_to: ModeId,
+    },
     StartRotate,
     StopRotate,
     SplitPaneHorizontally {
@@ -57,6 +61,21 @@ pub enum Event {
     IncreaseZoom,
     DecreaseZoom,
     OpenCommandPalette,
+    ToolbarOpenCategory {
+        idx: usize,
+    },
+    ToolbarConfirm {
+        idx: usize,
+    },
+}
+
+impl Event {
+    pub fn ignore_mouse_pos(&self) -> bool {
+        matches!(
+            self,
+            Event::ToolbarOpenCategory { .. } | Event::ToolbarConfirm { .. }
+        )
+    }
 }
 
 fn should_serialize_as_layout(event: &Event) -> bool {

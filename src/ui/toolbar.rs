@@ -2,7 +2,7 @@ use log::debug;
 use nalgebra::Vector2;
 use raylib::RaylibHandle;
 
-use crate::{combined_draw_handle::CombinedDrawHandle, event::Event, modes::ModeId};
+use crate::{combined_draw_handle::CombinedDrawHandle, event::Event, modes::ModeId, EVENT_QUEUE};
 
 use super::{
     dropdown::DropDown,
@@ -17,6 +17,7 @@ pub struct Toolbar {
     hovered_style: StyleId,
     ui_categories: Vec<DropDown>,
     options: Vec<(String, Vec<(String, Event)>)>,
+    open_category: Option<usize>,
     hovered: bool,
 }
 
@@ -26,9 +27,27 @@ impl Toolbar {
             (
                 String::from("(Q) Fundamentals"),
                 vec![
-                    (String::from("(1) Point"), Event::PushMode(ModeId::Point)),
-                    (String::from("(2) Line"), Event::PushMode(ModeId::Line)),
-                    (String::from("(3) Circle"), Event::PushMode(ModeId::Circle)),
+                    (
+                        String::from("(1) Point"),
+                        Event::SwitchMode {
+                            switch_after: ModeId::Sketch,
+                            switch_to: ModeId::Point,
+                        },
+                    ),
+                    (
+                        String::from("(2) Line"),
+                        Event::SwitchMode {
+                            switch_after: ModeId::Sketch,
+                            switch_to: ModeId::Line,
+                        },
+                    ),
+                    (
+                        String::from("(3) Circle"),
+                        Event::SwitchMode {
+                            switch_after: ModeId::Sketch,
+                            switch_to: ModeId::Circle,
+                        },
+                    ),
                 ],
             ),
             (
@@ -36,11 +55,17 @@ impl Toolbar {
                 vec![
                     (
                         String::from("(1) Two point rectangle"),
-                        Event::PushMode(ModeId::Point),
+                        Event::SwitchMode {
+                            switch_after: ModeId::Sketch,
+                            switch_to: ModeId::Point,
+                        },
                     ),
                     (
                         String::from("(2) Center point rectangle"),
-                        Event::PushMode(ModeId::Point),
+                        Event::SwitchMode {
+                            switch_after: ModeId::Sketch,
+                            switch_to: ModeId::Point,
+                        },
                     ),
                 ],
             ),
@@ -51,6 +76,7 @@ impl Toolbar {
             style: StyleId(StyleType::Default),
             hovered_style: StyleId(StyleType::Default),
             ui_categories: Vec::new(),
+            open_category: None,
             options,
             hovered: false,
         }
@@ -121,6 +147,28 @@ impl MouseEventHandler for Toolbar {
     fn receive_mouse_up(&mut self, mouse_pos: Vector2<f64>, press: &crate::modes::MousePress) {
         for category in &mut self.ui_categories {
             category.receive_mouse_up(mouse_pos, press);
+        }
+    }
+
+    fn process_event(&mut self, event: Event, mouse_pos: Vector2<f64>) {
+        match event {
+            Event::ToolbarOpenCategory { idx } => {
+                for (i, category) in self.ui_categories.iter_mut().enumerate() {
+                    category.open = i == idx;
+                }
+                self.open_category = Some(idx);
+            }
+            Event::ToolbarConfirm { idx } => {
+                let mut eq = EVENT_QUEUE.lock().unwrap();
+                if let Some(open_category) = self.open_category {
+                    eq.post_event(self.options[open_category].1[idx].1.clone());
+                    for category in &mut self.ui_categories {
+                        category.open = false;
+                    }
+                    self.open_category = None;
+                }
+            }
+            _ => {}
         }
     }
 }

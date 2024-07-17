@@ -27,6 +27,7 @@ pub struct DropDown {
     options: Vec<String>,
     pub option_events: Vec<Event>,
     hovered: bool,
+    pub open: bool,
     font_size: f32,
     padding: f64,
     ui_options: Vec<Text>,
@@ -45,6 +46,7 @@ impl DropDown {
             options: Vec::new(),
             option_events: Vec::new(),
             hovered: false,
+            open: false,
             font_size: 20.0,
             padding: 4.0,
             ui_options: Vec::new(),
@@ -131,7 +133,7 @@ impl Drawable for DropDown {
     }
 
     fn draw(&self, rl: &mut CombinedDrawHandle<'_>, t: &RaylibThread) {
-        if self.hovered {
+        if self.open {
             for ui in &self.ui_bgs {
                 ui.draw(rl, t);
             }
@@ -161,7 +163,14 @@ impl MouseEventHandler for DropDown {
     }
 
     fn receive_mouse_pos(&mut self, mouse_pos: Vector2<f64>) {
-        self.hovered = self.contains_point(mouse_pos);
+        let hovered = self.contains_point(mouse_pos);
+        if hovered && !self.hovered {
+            self.open = true;
+        }
+        if !hovered && self.hovered {
+            self.open = false;
+        }
+        self.hovered = hovered;
         for ui in &mut self.ui_bgs {
             ui.receive_mouse_pos(mouse_pos);
         }
@@ -169,7 +178,7 @@ impl MouseEventHandler for DropDown {
     }
 
     fn receive_mouse_down(&mut self, mouse_pos: Vector2<f64>, press: &MousePress) {
-        if self.hovered {
+        if self.open {
             for (i, bg) in self.ui_bgs.iter().enumerate() {
                 if bg.contains_point(mouse_pos) {
                     let mut eq = EVENT_QUEUE.lock().unwrap();
