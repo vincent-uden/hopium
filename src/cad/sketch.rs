@@ -19,7 +19,7 @@ impl Sketch {
             name,
             fundamental_entities: Registry::new(),
             bi_constraints: Vec::new(),
-            step_size: 1e-1,
+            step_size: 1e-2,
         }
     }
 
@@ -55,6 +55,17 @@ mod tests {
     use crate::cad::entity::{Circle, ConstraintType, Line, Point};
 
     use super::*;
+
+    impl Sketch {
+        fn dump(&self, name: &str) {
+            let mut file = std::fs::File::create(format!(
+                "./test_sketches/{}.json",
+                name.replace(" ", "_").to_lowercase()
+            ))
+            .unwrap();
+            serde_json::to_writer_pretty(&mut file, &self).expect("Failed to write sketch to file");
+        }
+    }
 
     #[cfg(test)]
     impl Drop for Sketch {
@@ -185,31 +196,50 @@ mod tests {
         let e1 = sketch
             .fundamental_entities
             .insert(FundamentalEntity::Circle(Circle {
-                pos: Vector2::new(0.0, 0.0),
+                pos: Vector2::new(0.0, -1.0),
                 radius: 1.0,
             }));
+        sketch.dump("Circle Line Tangent Intial");
         let e2 = sketch
             .fundamental_entities
             .insert(FundamentalEntity::Line(Line {
-                offset: Vector2::new(0.0, 0.0),
-                direction: Vector2::new(1.0, 1.0),
+                offset: Vector2::new(1.0, 1.0),
+                direction: Vector2::new(1.0, -1.0),
             }));
         sketch.bi_constraints.push(BiConstraint {
             e1,
             e2,
             c: ConstraintType::Tangent,
         });
+        sketch.dump("Circle Line Tangent Intial");
 
         assert!(sketch.error() > 0.0, "The error should be larger than 0");
         for _ in 0..20000 {
             sketch.sgd_step();
         }
-        println!("{:?}", sketch);
 
         assert!(
             sketch.error() < 1e-6,
             "The error should be smaller than 1e-6"
         );
+
+        match sketch.fundamental_entities[e1] {
+            FundamentalEntity::Point(_) => panic!("e1 should be a circle"),
+            FundamentalEntity::Line(_) => panic!("e1 should be a circle"),
+            FundamentalEntity::Circle(c) => {
+                println!("{:?}", c);
+                //assert!(c.radius > 1e-2, "The radius should be larger than 1e-2")
+            }
+        }
+
+        match sketch.fundamental_entities[e2] {
+            FundamentalEntity::Point(_) => panic!("e2 should be a line"),
+            FundamentalEntity::Line(l) => {
+                println!("{:?}", l);
+            }
+            FundamentalEntity::Circle(_) => panic!("e2 should be a line"),
+        }
+        panic!();
     }
 
     fn run_sketch_test<T>(test: T)

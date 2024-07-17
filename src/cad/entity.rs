@@ -1,3 +1,4 @@
+use log::debug;
 use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
@@ -176,7 +177,10 @@ impl BiConstraint {
 
     fn error_pl(p: &Point, l: &Line, c: ConstraintType) -> f64 {
         let ortho_a = p.pos - project(&p.pos, &l.direction);
-        let ortho_r = l.offset - project(&l.offset, &l.direction);
+        let mut ortho_r = l.offset - project(&l.offset, &l.direction);
+        if ortho_r.dot(&ortho_a) < 0.0 {
+            ortho_r = -ortho_r;
+        }
         match c {
             ConstraintType::Coincident => (ortho_r - ortho_a).norm_squared(),
             ConstraintType::Distance { x } => ((ortho_r - ortho_a).norm() - x).powi(2),
@@ -217,7 +221,10 @@ impl BiConstraint {
 
     fn error_lc(l: &Line, ci: &Circle, c: ConstraintType) -> f64 {
         let ortho_a = ci.pos - project(&ci.pos, &l.direction);
-        let ortho_r = l.offset - project(&l.offset, &l.direction);
+        let mut ortho_r = l.offset - project(&l.offset, &l.direction);
+        if ortho_r.dot(&ortho_a) < 0.0 {
+            ortho_r = -ortho_r;
+        }
         match c {
             // Doesnt seem to be working
             ConstraintType::Tangent => ((ortho_r + ortho_a).norm() - ci.radius).powi(2),

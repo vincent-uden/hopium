@@ -135,6 +135,22 @@ impl SketchViewer {
         t: &raylib::prelude::RaylibThread,
         color: Color,
     ) {
+        if l.direction.x == 0.0 {
+            let offset_screen = self.to_screen_space(l.offset);
+            rl.draw_line_v(
+                to_raylib(Vector2::new(offset_screen.x as f64, 0.0)),
+                to_raylib(Vector2::new(offset_screen.x as f64, self.texture_size.y)),
+                color,
+            );
+        }
+        if l.direction.y == 0.0 {
+            let offset_screen = self.to_screen_space(l.offset);
+            rl.draw_line_v(
+                to_raylib(Vector2::new(0.0, offset_screen.y as f64)),
+                to_raylib(Vector2::new(self.texture_size.x, offset_screen.y as f64)),
+                color,
+            );
+        }
         let start = self.to_sketch_space(Vector2::zeros());
         let ts = -((l.offset - start).component_div(&l.direction));
 
