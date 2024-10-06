@@ -1,4 +1,4 @@
-use log::debug;
+use log::{debug, info};
 use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
@@ -177,12 +177,12 @@ impl BiConstraint {
 
     fn error_pl(p: &Point, l: &Line, c: ConstraintType) -> f64 {
         let ortho_a = p.pos - project(&p.pos, &l.direction);
-        let mut ortho_r = l.offset - project(&l.offset, &l.direction);
+        let mut ortho_r = (p.pos - l.offset) - project(&(p.pos - l.offset), &l.direction);
         if ortho_r.dot(&ortho_a) < 0.0 {
             ortho_r = -ortho_r;
         }
         match c {
-            ConstraintType::Coincident => (ortho_r - ortho_a).norm_squared(),
+            ConstraintType::Coincident => (ortho_r + ortho_a).norm_squared(),
             ConstraintType::Distance { x } => ((ortho_r - ortho_a).norm() - x).powi(2),
             _ => 0.0,
         }
@@ -304,7 +304,7 @@ impl BiConstraint {
     }
 
     fn apply_grad_error_l(l: &mut Line, e: &FundamentalEntity, c: ConstraintType, step_size: f64) {
-        let h = 1e-6;
+        let h = 1e-4;
         let o_x_errors = [
             Self::error(
                 &FundamentalEntity::Line(Line {
@@ -384,6 +384,10 @@ impl BiConstraint {
         let d_x_derivative = (d_x_errors[1] - d_x_errors[0]) / h;
         let d_y_derivative = (d_y_errors[1] - d_y_errors[0]) / h;
         let direction_step = Vector2::new(d_x_derivative, d_y_derivative);
+        println!(
+            "offset_step: {:?} direction_step: {:?} step_size: {}",
+            offset_step, direction_step, step_size
+        );
         l.offset -= offset_step * step_size;
         l.direction -= direction_step * step_size;
     }

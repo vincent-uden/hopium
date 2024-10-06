@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use log::info;
 use nalgebra::Vector2;
 use raylib::ffi::MouseButton;
 use raylib::RaylibHandle;
@@ -7,7 +8,9 @@ use raylib::{color::Color, drawing::RaylibDraw};
 
 use raylib::math::Vector2 as V2;
 
-use crate::cad::entity::{Circle, FundamentalEntity, Line};
+use crate::cad::entity::{
+    project, BiConstraint, Circle, ConstraintType, FundamentalEntity, Line, Point,
+};
 use crate::combined_draw_handle::CombinedDrawHandle;
 use crate::event::Event;
 use crate::modes::{ModeId, MousePress};
@@ -44,6 +47,7 @@ pub struct SketchViewer {
     texture_size: Vector2<f64>,
     style: SketchViewerStyle,
     panning: bool,
+    draw_constraints: bool,
 }
 
 impl SketchViewer {
@@ -62,6 +66,7 @@ impl SketchViewer {
             texture_size: Vector2::new(1600.0, 900.0),
             style: SketchViewerStyle::default(),
             panning: false,
+            draw_constraints: true,
         }
     }
 
@@ -178,6 +183,40 @@ impl SketchViewer {
             color,
         );
     }
+
+    fn draw_coincident_point_line_constraint(
+        &self,
+        rl: &mut CombinedDrawHandle<'_>,
+        t: &raylib::prelude::RaylibThread,
+        p: &Point,
+        l: &Line,
+    ) {
+        let ortho_a = p.pos - project(&p.pos, &l.direction);
+        let mut ortho_r = (p.pos - l.offset) - project(&(p.pos - l.offset), &l.direction);
+        if ortho_r.dot(&ortho_a) < 0.0 {
+            ortho_r = -ortho_r;
+        }
+        let start_a = self.to_screen_space(p.pos);
+        let end_a = self.to_screen_space(p.pos + ortho_a);
+        let start_r = self.to_screen_space(p.pos);
+        let end_r = self.to_screen_space(p.pos + ortho_r);
+        rl.draw_line_v(start_a, end_a, Color::new(0, 255, 0, 255));
+        rl.draw_line_v(start_r, end_r, Color::new(255, 0, 0, 255));
+        rl.draw_text(
+            "Ortho A",
+            end_a.x as i32,
+            end_a.y as i32,
+            20,
+            Color::new(0, 255, 0, 255),
+        );
+        rl.draw_text(
+            "Ortho R",
+            end_r.x as i32,
+            end_r.y as i32,
+            20,
+            Color::new(255, 0, 0, 255),
+        );
+    }
 }
 
 impl Drawable for SketchViewer {
@@ -199,6 +238,18 @@ impl Drawable for SketchViewer {
         rl.draw_line_v(
             V2::new(self.pan_offset.x as f32, 0.0),
             V2::new(self.pan_offset.x as f32, self.texture_size.y as f32),
+            self.style.axis_color,
+        );
+
+        // draw ticks at 1 on each axis
+        rl.draw_line_v(
+            self.to_screen_space(Vector2::new(-0.1, 1.0)),
+            self.to_screen_space(Vector2::new(0.1, 1.0)),
+            self.style.axis_color,
+        );
+        rl.draw_line_v(
+            self.to_screen_space(Vector2::new(1.0, -0.1)),
+            self.to_screen_space(Vector2::new(1.0, 0.1)),
             self.style.axis_color,
         );
 
@@ -247,6 +298,27 @@ impl Drawable for SketchViewer {
                 }
                 FundamentalEntity::Circle(c) => {
                     self.draw_circle(c, rl, t, color);
+                }
+            }
+        }
+
+        if self.draw_constraints {
+            for BiConstraint { e1, e2, c } in &state.sketch.bi_constraints {
+                match c {
+                    ConstraintType::Coincident => {
+                        let fe1 = state.sketch.fundamental_entities[*e1];
+                        let fe2 = state.sketch.fundamental_entities[*e2];
+                        match (fe1, fe2) {
+                            (FundamentalEntity::Point(p), FundamentalEntity::Line(l)) => {
+                                self.draw_coincident_point_line_constraint(rl, t, &p, &l);
+                            }
+                            (FundamentalEntity::Line(l), FundamentalEntity::Point(p)) => {
+                                self.draw_coincident_point_line_constraint(rl, t, &p, &l);
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
                 }
             }
         }

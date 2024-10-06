@@ -191,6 +191,39 @@ mod tests {
     }
 
     #[test]
+    fn point_line_coincident() {
+        let mut sketch = Sketch::new("Point Line Coincident".to_string());
+        let e1 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Point(Point {
+                pos: Vector2::new(3.0, 1.0),
+            }));
+        let e2 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Line(Line {
+                offset: Vector2::new(1.0, 1.2),
+                direction: Vector2::new(-1.0, -1.0),
+            }));
+        sketch.bi_constraints.push(BiConstraint {
+            e1,
+            e2,
+            c: ConstraintType::Coincident,
+        });
+
+        sketch.dump("Point Line Coincident Intial");
+
+        assert!(sketch.error() > 0.0, "The error should be larger than 0");
+        for _ in 0..20000 {
+            sketch.sgd_step();
+        }
+
+        assert!(
+            sketch.error() < 1e-6,
+            "The error should be smaller than 1e-6"
+        );
+    }
+
+    #[test]
     fn circle_line_tangent() {
         let mut sketch = Sketch::new("Circle Line Tangent".to_string());
         let e1 = sketch
@@ -228,7 +261,7 @@ mod tests {
             FundamentalEntity::Line(_) => panic!("e1 should be a circle"),
             FundamentalEntity::Circle(c) => {
                 println!("{:?}", c);
-                //assert!(c.radius > 1e-2, "The radius should be larger than 1e-2")
+                assert!(c.radius > 1e-2, "The radius should be larger than 1e-2")
             }
         }
 
@@ -239,7 +272,91 @@ mod tests {
             }
             FundamentalEntity::Circle(_) => panic!("e2 should be a line"),
         }
-        panic!();
+    }
+
+    #[test]
+    fn rotating_line_test() {
+        // The line should rotate and be offset to align with the points called x and y
+        let mut sketch = Sketch::new("Rotating Line Sketch".to_string());
+        let origin = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Point(Point {
+                pos: Vector2::new(0.0, 0.0),
+            }));
+        let x = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Point(Point {
+                pos: Vector2::new(1.0, 0.0),
+            }));
+        let y = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Point(Point {
+                pos: Vector2::new(0.0, -1.0),
+            }));
+        let l1 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Line(Line {
+                offset: Vector2::new(0.0, 0.0),
+                direction: Vector2::new(1.0, 0.2),
+            }));
+        let l2 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Line(Line {
+                offset: Vector2::new(1.0, 1.0),
+                direction: Vector2::new(0.2, 1.0),
+            }));
+        sketch.bi_constraints.push(BiConstraint {
+            e1: origin,
+            e2: x,
+            c: ConstraintType::Horizontal,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: origin,
+            e2: x,
+            c: ConstraintType::Distance { x: 1.0 },
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: origin,
+            e2: y,
+            c: ConstraintType::Vertical,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: origin,
+            e2: y,
+            c: ConstraintType::Distance { x: 1.0 },
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: origin,
+            e2: l1,
+            c: ConstraintType::Coincident,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: x,
+            e2: l1,
+            c: ConstraintType::Coincident,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: x,
+            e2: l2,
+            c: ConstraintType::Coincident,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: y,
+            e2: l2,
+            c: ConstraintType::Coincident,
+        });
+        sketch.dump("Rotating Line Intial");
+
+        assert!(sketch.error() > 0.0, "The error should be larger than 0");
+        for _ in 0..20000 {
+            sketch.sgd_step();
+        }
+
+        assert!(
+            sketch.error() < 1e-6,
+            "The error should be smaller than 1e-6"
+        );
+        sketch.dump("Rotating Line After");
     }
 
     fn run_sketch_test<T>(test: T)

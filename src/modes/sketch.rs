@@ -89,7 +89,7 @@ impl Mode for SketchMode {
                 eq.post_event(Event::PopMode);
             }
             KeyboardKey::KEY_ENTER => {
-                state.solving = true;
+                state.solving = !state.solving;
             }
             // These keycodes are weird due to nordic layout. The intention is to increase zoom
             // with (Ctrl +) and decrease it with (Ctrl -)
@@ -212,9 +212,6 @@ impl Mode for SketchMode {
         let mut state = APP_STATE.lock().unwrap();
         let mut out = true;
         match key.key {
-            KeyboardKey::KEY_ENTER => {
-                state.solving = false;
-            }
             _ => {
                 out = false;
             }
