@@ -1,7 +1,9 @@
+use std::f32::consts::PI;
+use std::f64;
 use std::fmt::Debug;
 
 use log::info;
-use nalgebra::Vector2;
+use nalgebra::{Rotation2, Unit, Vector2};
 use raylib::ffi::MouseButton;
 use raylib::RaylibHandle;
 use raylib::{color::Color, drawing::RaylibDraw};
@@ -217,6 +219,50 @@ impl SketchViewer {
             Color::new(255, 0, 0, 255),
         );
     }
+
+    fn draw_distance_point_point_constraint(
+        &self,
+        rl: &mut CombinedDrawHandle,
+        t: &raylib::RaylibThread,
+        p1: &Point,
+        p2: &Point,
+        x: &f64,
+    ) {
+        let start = self.to_screen_space(p1.pos);
+        let end = self.to_screen_space(p2.pos);
+        let mut ortho = end - start;
+        ortho.rotate(PI / 2.0);
+        let offset = 10.0;
+        ortho.normalize();
+        let offset_v = ortho.scale_by(offset);
+        let ends_length = 5.0;
+        let ends_v = ortho.scale_by(ends_length);
+
+        rl.draw_line_v(start + offset_v, end + offset_v, self.style.entity_color);
+        rl.draw_line_v(
+            start + offset_v + ends_v,
+            start + offset_v - ends_v,
+            self.style.entity_color,
+        );
+        rl.draw_line_v(
+            end + offset_v + ends_v,
+            end + offset_v - ends_v,
+            self.style.entity_color,
+        );
+
+        println!("{:?}", x);
+        // Draw text with dimension in the middle
+        rl.draw_text_pro(
+            rl.get_font_default(),
+            &format!("{:.2} mm", x).to_string(),
+            (start + end) / 2.0 + offset_v,
+            V2::new(0.0, 0.0), // TODO: Center, requires a font
+            (start - end).angle_to(V2::new(1.0, 0.0)) * 180.0 / PI,
+            20.0,
+            1.0,
+            Color::new(255, 255, 255, 255),
+        );
+    }
 }
 
 impl Drawable for SketchViewer {
@@ -305,6 +351,16 @@ impl Drawable for SketchViewer {
         if self.draw_constraints {
             for BiConstraint { e1, e2, c } in &state.sketch.bi_constraints {
                 match c {
+                    ConstraintType::Distance { x } => {
+                        let fe1 = state.sketch.fundamental_entities[*e1];
+                        let fe2 = state.sketch.fundamental_entities[*e2];
+                        match (fe1, fe2) {
+                            (FundamentalEntity::Point(p1), FundamentalEntity::Point(p2)) => {
+                                self.draw_distance_point_point_constraint(rl, t, &p1, &p2, x);
+                            }
+                            _ => {}
+                        }
+                    }
                     ConstraintType::Coincident => {
                         let fe1 = state.sketch.fundamental_entities[*e1];
                         let fe2 = state.sketch.fundamental_entities[*e2];
