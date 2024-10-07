@@ -384,10 +384,6 @@ impl BiConstraint {
         let d_x_derivative = (d_x_errors[1] - d_x_errors[0]) / h;
         let d_y_derivative = (d_y_errors[1] - d_y_errors[0]) / h;
         let direction_step = Vector2::new(d_x_derivative, d_y_derivative);
-        println!(
-            "offset_step: {:?} direction_step: {:?} step_size: {}",
-            offset_step, direction_step, step_size
-        );
         l.offset -= offset_step * step_size;
         l.direction -= direction_step * step_size;
     }

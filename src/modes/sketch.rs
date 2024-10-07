@@ -1,5 +1,8 @@
 use nalgebra::Vector2;
-use raylib::{ffi::KeyboardKey, RaylibHandle};
+use raylib::{
+    ffi::{KeyboardKey, MouseButton},
+    RaylibHandle,
+};
 
 use crate::{
     cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE, EVENT_QUEUE,
@@ -212,6 +215,20 @@ impl Mode for SketchMode {
         let mut state = APP_STATE.lock().unwrap();
         let mut out = true;
         match key.key {
+            _ => {
+                out = false;
+            }
+        }
+        out
+    }
+
+    fn mouse_press(&mut self, key: &super::MousePress) -> bool {
+        let mut eq = EVENT_QUEUE.lock().unwrap();
+        let mut out = true;
+        match key.button {
+            MouseButton::MOUSE_BUTTON_RIGHT => {
+                eq.post_event(Event::PopMode);
+            }
             _ => {
                 out = false;
             }

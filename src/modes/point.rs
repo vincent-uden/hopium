@@ -5,7 +5,7 @@ use crate::{
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };
-use raylib::ffi::KeyboardKey;
+use raylib::ffi::{KeyboardKey, MouseButton};
 
 use super::{Mode, ModeId, MousePress};
 
@@ -58,6 +58,20 @@ impl Mode for PointMode {
                 out = false;
             }
         };
+        out
+    }
+
+    fn mouse_press(&mut self, key: &super::MousePress) -> bool {
+        let mut eq = EVENT_QUEUE.lock().unwrap();
+        let mut out = true;
+        match key.button {
+            MouseButton::MOUSE_BUTTON_RIGHT => {
+                eq.post_event(Event::PopMode);
+            }
+            _ => {
+                out = false;
+            }
+        }
         out
     }
 }

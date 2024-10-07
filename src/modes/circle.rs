@@ -1,5 +1,5 @@
 use nalgebra::Vector2;
-use raylib::ffi::KeyboardKey;
+use raylib::ffi::{KeyboardKey, MouseButton};
 
 use crate::{
     cad::entity::{Circle, FundamentalEntity},
@@ -7,7 +7,7 @@ use crate::{
     APP_STATE, EVENT_QUEUE,
 };
 
-use super::{Mode, ModeId, MousePress};
+use super::{Mode, ModeId, MouseButtonDef, MousePress};
 
 #[derive(Debug)]
 pub struct CircleMode {}
@@ -70,6 +70,20 @@ impl Mode for CircleMode {
                 out = false;
             }
         };
+        out
+    }
+
+    fn mouse_press(&mut self, key: &super::MousePress) -> bool {
+        let mut eq = EVENT_QUEUE.lock().unwrap();
+        let mut out = true;
+        match key.button {
+            MouseButton::MOUSE_BUTTON_RIGHT => {
+                eq.post_event(Event::PopMode);
+            }
+            _ => {
+                out = false;
+            }
+        }
         out
     }
 }
