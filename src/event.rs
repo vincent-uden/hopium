@@ -67,6 +67,8 @@ pub enum Event {
     ToolbarConfirm {
         idx: usize,
     },
+    SaveSketch,
+    LoadSketch,
 }
 
 impl Event {

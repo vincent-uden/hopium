@@ -167,6 +167,18 @@ impl<'a> App<'a> {
                 let mut state = APP_STATE.lock().unwrap();
                 state.running = false;
             }
+            Event::SaveSketch => {
+                let state = APP_STATE.lock().unwrap();
+                let json = serde_json::to_string(&state.sketch).unwrap();
+                println!("{}", json);
+                fs::write("sketch.json", json).unwrap();
+            }
+            Event::LoadSketch => {
+                let mut state = APP_STATE.lock().unwrap();
+                let json = fs::read_to_string("sketch.json").unwrap();
+                let sketch: Sketch = serde_json::from_str(&json).unwrap();
+                state.sketch = sketch;
+            }
             _ => self.renderer.process_event(event, Vector2::zeros()),
         }
     }
