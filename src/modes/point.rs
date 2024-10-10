@@ -1,7 +1,7 @@
 use nalgebra::Vector2;
 
 use crate::{
-    cad::entity::{FundamentalEntity, Point},
+    cad::entity::{FundamentalEntity, GuidedEntity, Point},
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };
@@ -20,10 +20,14 @@ impl PointMode {
     fn sketch_click(&self, click_pos: Vector2<f64>, press: MousePress) {
         let mut state = APP_STATE.lock().unwrap();
         if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT {
-            state
+            let id = state
                 .sketch
                 .fundamental_entities
                 .insert(FundamentalEntity::Point(Point { pos: click_pos }));
+            state
+                .sketch
+                .guided_entities
+                .insert(GuidedEntity::Point { id });
         }
     }
 }

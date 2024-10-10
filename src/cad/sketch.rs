@@ -3,12 +3,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::registry::Registry;
 
-use super::entity::{BiConstraint, EntityId, FundamentalEntity};
+use super::entity::{BiConstraint, EntityId, FundamentalEntity, GuidedEntity};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Sketch {
     name: String,
     pub fundamental_entities: Registry<EntityId, FundamentalEntity>,
+    pub guided_entities: Registry<EntityId, GuidedEntity>,
     pub bi_constraints: Vec<BiConstraint>,
     step_size: f64,
 }
@@ -18,6 +19,7 @@ impl Sketch {
         Self {
             name,
             fundamental_entities: Registry::new(),
+            guided_entities: Registry::new(),
             bi_constraints: Vec::new(),
             step_size: 1e-2,
         }

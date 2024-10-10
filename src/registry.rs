@@ -61,6 +61,11 @@ impl<K: RegId + Eq + Hash + Copy + fmt::Debug, V> Registry<K, V> {
     }
 
     #[inline(always)]
+    pub fn get(&self, k: &K) -> Option<&V> {
+        self.map.get(k)
+    }
+
+    #[inline(always)]
     pub fn get_mut(&mut self, k: &K) -> Option<&mut V> {
         self.map.get_mut(k)
     }

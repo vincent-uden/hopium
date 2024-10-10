@@ -10,6 +10,7 @@ use strum_macros::EnumString;
 
 use crate::{event::Event, APP_STATE};
 
+pub mod capped_line;
 pub mod circle;
 pub mod command;
 pub mod global;
@@ -140,6 +141,7 @@ pub enum ModeId {
     Line,
     Circle,
     Command,
+    CappedLine,
 }
 
 pub trait Mode {

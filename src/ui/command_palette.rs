@@ -74,6 +74,10 @@ impl CommandPalette {
             "Enter sketch mode".to_string(),
             Event::PushMode(ModeId::Sketch),
         );
+        commands.insert(
+            "Enter capped line mode".to_string(),
+            Event::PushMode(ModeId::CappedLine),
+        );
 
         let matcher = Matcher::new(Config::DEFAULT);
 

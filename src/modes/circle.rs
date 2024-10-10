@@ -2,7 +2,7 @@ use nalgebra::Vector2;
 use raylib::ffi::{KeyboardKey, MouseButton};
 
 use crate::{
-    cad::entity::{Circle, FundamentalEntity},
+    cad::entity::{Circle, FundamentalEntity, GuidedEntity},
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };
@@ -29,13 +29,17 @@ impl CircleMode {
             let p1 = state.pending_clicks[0];
             let p2 = state.pending_clicks[1];
             state.pending_clicks.clear();
-            state
+            let id = state
                 .sketch
                 .fundamental_entities
                 .insert(FundamentalEntity::Circle(Circle {
                     pos: p1,
                     radius: (p1 - p2).norm(),
                 }));
+            state
+                .sketch
+                .guided_entities
+                .insert(GuidedEntity::Circle { id });
         }
     }
 }

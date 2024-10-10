@@ -11,7 +11,7 @@ use raylib::{color::Color, drawing::RaylibDraw};
 use raylib::math::Vector2 as V2;
 
 use crate::cad::entity::{
-    project, BiConstraint, Circle, ConstraintType, FundamentalEntity, Line, Point,
+    project, BiConstraint, Circle, ConstraintType, FundamentalEntity, GuidedEntity, Line, Point,
 };
 use crate::combined_draw_handle::CombinedDrawHandle;
 use crate::event::Event;
@@ -186,6 +186,24 @@ impl SketchViewer {
         );
     }
 
+    fn draw_capped_line(
+        &self,
+        start: &Point,
+        end: &Point,
+        line: &Line,
+        rl: &mut CombinedDrawHandle,
+        t: &raylib::RaylibThread,
+        color: Color,
+    ) {
+        rl.draw_line_v(
+            self.to_screen_space(start.pos),
+            self.to_screen_space(end.pos),
+            color,
+        );
+        rl.draw_circle_v(self.to_screen_space(start.pos), 4.0, color);
+        rl.draw_circle_v(self.to_screen_space(end.pos), 4.0, color);
+    }
+
     fn draw_coincident_point_line_constraint(
         &self,
         rl: &mut CombinedDrawHandle<'_>,
@@ -329,12 +347,49 @@ impl Drawable for SketchViewer {
             }
         }
 
-        for (id, e) in state.sketch.fundamental_entities.iter() {
-            let color = if state.selected.contains(id) {
+        for (g_id, e) in state.sketch.guided_entities.iter() {
+            let color = if state.selected.contains(g_id) {
                 self.style.selected_entity_color
             } else {
                 self.style.entity_color
             };
+            match e {
+                GuidedEntity::Point { id } => {
+                    if let Some(FundamentalEntity::Point(p)) =
+                        state.sketch.fundamental_entities.get(id)
+                    {
+                        rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, color);
+                    }
+                }
+                GuidedEntity::Line { id } => {
+                    if let Some(FundamentalEntity::Line(l)) =
+                        state.sketch.fundamental_entities.get(id)
+                    {
+                        self.draw_line(&l, rl, t, color);
+                    }
+                }
+                GuidedEntity::Circle { id } => {
+                    if let Some(FundamentalEntity::Circle(c)) =
+                        state.sketch.fundamental_entities.get(id)
+                    {
+                        self.draw_circle(&c, rl, t, color);
+                    }
+                }
+                GuidedEntity::CappedLine { start, end, line } => {
+                    if let (
+                        Some(FundamentalEntity::Point(s)),
+                        Some(FundamentalEntity::Point(e)),
+                        Some(FundamentalEntity::Line(l)),
+                    ) = (
+                        state.sketch.fundamental_entities.get(start),
+                        state.sketch.fundamental_entities.get(end),
+                        state.sketch.fundamental_entities.get(line),
+                    ) {
+                        self.draw_capped_line(s, e, l, rl, t, color);
+                    }
+                }
+            }
+            /*
             match e {
                 FundamentalEntity::Point(p) => {
                     rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, color);
@@ -346,6 +401,7 @@ impl Drawable for SketchViewer {
                     self.draw_circle(c, rl, t, color);
                 }
             }
+            */
         }
 
         if self.draw_constraints {

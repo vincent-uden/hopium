@@ -459,6 +459,24 @@ impl BiConstraint {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
+pub enum GuidedEntity {
+    Point {
+        id: EntityId,
+    },
+    Line {
+        id: EntityId,
+    },
+    Circle {
+        id: EntityId,
+    },
+    CappedLine {
+        start: EntityId,
+        end: EntityId,
+        line: EntityId,
+    },
+}
+
 #[cfg(test)]
 mod tests {
     use nalgebra::Vector2;

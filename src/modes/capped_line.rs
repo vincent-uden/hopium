@@ -1,7 +1,5 @@
-use std::os::linux::raw::stat;
-
 use crate::{
-    cad::entity::{FundamentalEntity, GuidedEntity, Line},
+    cad::entity::{FundamentalEntity, GuidedEntity, Line, Point},
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };
@@ -12,9 +10,9 @@ use raylib::ffi::{KeyboardKey, MouseButton};
 use super::{Mode, ModeId, MousePress};
 
 #[derive(Debug)]
-pub struct LineMode {}
+pub struct CappedLine {}
 
-impl LineMode {
+impl CappedLine {
     pub fn new() -> Self {
         Self {}
     }
@@ -32,22 +30,25 @@ impl LineMode {
             let p1 = state.pending_clicks[0];
             let p2 = state.pending_clicks[1];
             state.pending_clicks.clear();
-            let id = state
-                .sketch
-                .fundamental_entities
-                .insert(FundamentalEntity::Line(Line {
-                    offset: p1,
-                    direction: p2 - p1,
-                }));
-            state
-                .sketch
-                .guided_entities
-                .insert(GuidedEntity::Line { id });
+            let entity_reg = &mut state.sketch.fundamental_entities;
+            // TODO: Query for existing points
+            let start_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p1 }));
+            let end_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p2 }));
+            let line_id = entity_reg.insert(FundamentalEntity::Line(Line {
+                offset: p1,
+                direction: p2 - p1,
+            }));
+            let guided_entity_reg = &mut state.sketch.guided_entities;
+            guided_entity_reg.insert(GuidedEntity::CappedLine {
+                start: start_id,
+                end: end_id,
+                line: line_id,
+            });
         }
     }
 }
 
-impl Mode for LineMode {
+impl Mode for CappedLine {
     fn id(&self) -> ModeId {
         ModeId::Line
     }
