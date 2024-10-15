@@ -17,7 +17,7 @@ impl ArcThreePoint {
         Self {}
     }
 
-    fn sketch_click(&self, click_pos: Vector2<f64>, press: MousePress) {
+    fn sketch_click(&self, click_pos: Vector2<f64>, select_radius: f64, press: MousePress) {
         let mut state = APP_STATE.lock().unwrap();
         if press.button == raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT {
             state.pending_clicks.push(click_pos);
@@ -27,16 +27,25 @@ impl ArcThreePoint {
         }
 
         if state.pending_clicks.len() == 3 {
-            let p1 = state.pending_clicks[0];
-            let p2 = state.pending_clicks[1];
-            let p3 = state.pending_clicks[2];
+            let mut p1 = state.pending_clicks[0];
+            let mut p2 = state.pending_clicks[1];
+            let mut p3 = state.pending_clicks[2];
             state.pending_clicks.clear();
-            let entity_reg = &mut state.sketch.fundamental_entities;
-            // TODO: Query for existing points
             // TODO: Constrain these together
-            let start_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p1 }));
-            let end_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p2 }));
-            let middle_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p3 }));
+            let start_id = state.sketch.query_or_insert_point(&p1, select_radius);
+            let end_id = state.sketch.query_or_insert_point(&p2, select_radius);
+            let middle_id = state.sketch.query_or_insert_point(&p3, select_radius);
+
+            let entity_reg = &mut state.sketch.fundamental_entities;
+            if let FundamentalEntity::Point(p) = entity_reg[start_id] {
+                p1 = p.pos;
+            }
+            if let FundamentalEntity::Point(p) = entity_reg[end_id] {
+                p2 = p.pos;
+            }
+            if let FundamentalEntity::Point(p) = entity_reg[middle_id] {
+                p3 = p.pos;
+            }
 
             let circle_id = entity_reg
                 .insert(FundamentalEntity::circle_from_three_coords(&p1, &p2, &p3).unwrap());
@@ -64,7 +73,7 @@ impl Mode for ArcThreePoint {
                 sketch_space_select_radius,
                 press,
             } => {
-                self.sketch_click(pos, press);
+                self.sketch_click(pos, sketch_space_select_radius, press);
                 true
             }
             _ => false,

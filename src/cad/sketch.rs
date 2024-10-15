@@ -1,9 +1,11 @@
+use log::debug;
+use nalgebra::Vector2;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 use crate::registry::Registry;
 
-use super::entity::{BiConstraint, EntityId, FundamentalEntity, GuidedEntity};
+use super::entity::{BiConstraint, EntityId, FundamentalEntity, GuidedEntity, Point};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Sketch {
@@ -46,6 +48,35 @@ impl Sketch {
             } else {
                 BiConstraint::apply_grad_error(fe2, fe1, c, self.step_size);
             }
+        }
+    }
+
+    fn query_point(&self, query_pos: &Vector2<f64>, radius: f64) -> Option<EntityId> {
+        let mut closest_id = None;
+        let mut closest_dist = f64::INFINITY;
+        for (id, e) in self.fundamental_entities.iter() {
+            match e {
+                FundamentalEntity::Point(p) => {
+                    let dist = e.distance_to_position(&query_pos);
+                    if dist <= radius && dist < closest_dist {
+                        closest_id = Some(*id);
+                        closest_dist = dist;
+                    }
+                }
+                _ => {}
+            }
+        }
+        closest_id
+    }
+
+    pub fn query_or_insert_point(&mut self, query_pos: &Vector2<f64>, radius: f64) -> EntityId {
+        if let Some(id) = self.query_point(query_pos, radius) {
+            id
+        } else {
+            let id = self
+                .fundamental_entities
+                .insert(FundamentalEntity::Point(Point { pos: *query_pos }));
+            id
         }
     }
 }

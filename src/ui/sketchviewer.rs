@@ -64,7 +64,7 @@ impl SketchViewer {
             last_mouse_pos: Vector2::zeros(),
             scale: 200.0,
             zoom: 1.0,
-            select_radius: 10.0,
+            select_radius: 40.0,
             texture_size: Vector2::new(1600.0, 900.0),
             style: SketchViewerStyle::default(),
             panning: false,
