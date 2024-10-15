@@ -1,18 +1,18 @@
 use crate::{
-    cad::entity::{FundamentalEntity, GuidedEntity, Line, Point},
+    cad::entity::{Circle, FundamentalEntity, GuidedEntity, Line, Point},
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };
 
-use nalgebra::Vector2;
+use nalgebra::{Normed, Vector2};
 use raylib::ffi::{KeyboardKey, MouseButton};
 
 use super::{Mode, ModeId, MousePress};
 
 #[derive(Debug)]
-pub struct CappedLine {}
+pub struct ArcThreePoint {}
 
-impl CappedLine {
+impl ArcThreePoint {
     pub fn new() -> Self {
         Self {}
     }
@@ -26,30 +26,33 @@ impl CappedLine {
             state.pending_clicks.clear();
         }
 
-        if state.pending_clicks.len() == 2 {
+        if state.pending_clicks.len() == 3 {
             let p1 = state.pending_clicks[0];
             let p2 = state.pending_clicks[1];
+            let p3 = state.pending_clicks[2];
             state.pending_clicks.clear();
             let entity_reg = &mut state.sketch.fundamental_entities;
             // TODO: Query for existing points
             // TODO: Constrain these together
             let start_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p1 }));
             let end_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p2 }));
-            let line_id = entity_reg.insert(FundamentalEntity::Line(Line {
-                offset: p1,
-                direction: p2 - p1,
-            }));
+            let middle_id = entity_reg.insert(FundamentalEntity::Point(Point { pos: p3 }));
+
+            let circle_id = entity_reg
+                .insert(FundamentalEntity::circle_from_three_coords(&p1, &p2, &p3).unwrap());
+
             let guided_entity_reg = &mut state.sketch.guided_entities;
-            guided_entity_reg.insert(GuidedEntity::CappedLine {
+            guided_entity_reg.insert(GuidedEntity::ArcThreePoint {
                 start: start_id,
+                middle: middle_id,
                 end: end_id,
-                line: line_id,
+                circle: circle_id,
             });
         }
     }
 }
 
-impl Mode for CappedLine {
+impl Mode for ArcThreePoint {
     fn id(&self) -> ModeId {
         ModeId::Line
     }

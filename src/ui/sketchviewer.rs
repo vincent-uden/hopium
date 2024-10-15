@@ -204,6 +204,45 @@ impl SketchViewer {
         rl.draw_circle_v(self.to_screen_space(end.pos), 4.0, color);
     }
 
+    fn draw_arc(
+        &self,
+        start: &Point,
+        middle: &Point,
+        end: &Point,
+        circle: &Circle,
+        rl: &mut CombinedDrawHandle,
+        t: &raylib::RaylibThread,
+        color: Color,
+    ) {
+        rl.draw_circle_v(self.to_screen_space(start.pos), 4.0, color);
+        rl.draw_circle_v(self.to_screen_space(middle.pos), 4.0, color);
+        rl.draw_circle_v(self.to_screen_space(end.pos), 4.0, color);
+
+        let start_offset = start.pos - circle.pos;
+        let end_offset = end.pos - circle.pos;
+        let middle_offset = middle.pos - circle.pos;
+
+        let start_angle = start_offset.y.atan2(start_offset.x) as f32;
+        let mut end_angle = end_offset.y.atan2(end_offset.x) as f32;
+        let middle_angle = middle_offset.y.atan2(middle_offset.x) as f32;
+        if middle_angle > 0.0 && end_angle < 0.0 {
+            end_angle += 2.0 * std::f32::consts::PI;
+        }
+        if middle_angle < 0.0 && end_angle > 0.0 {
+            end_angle -= 2.0 * std::f32::consts::PI;
+        }
+
+        rl.draw_ring_lines(
+            self.to_screen_space(circle.pos),
+            self.to_screen_scale(circle.radius) as f32,
+            self.to_screen_scale(circle.radius) as f32,
+            start_angle * 180.0 / std::f32::consts::PI,
+            end_angle * 180.0 / std::f32::consts::PI,
+            40,
+            color,
+        );
+    }
+
     fn draw_coincident_point_line_constraint(
         &self,
         rl: &mut CombinedDrawHandle<'_>,
@@ -345,6 +384,32 @@ impl Drawable for SketchViewer {
                 };
                 self.draw_circle(&c, rl, t, color);
             }
+            if ms.is_innermost_mode(&ModeId::CappedLine) {
+                let p1 = state.pending_clicks[0];
+                let p2 = self.to_sketch_space(self.last_mouse_pos);
+                let start = Point { pos: p1 };
+                let end = Point { pos: p2 };
+                let l = Line {
+                    offset: p1,
+                    direction: p2 - p1,
+                };
+                self.draw_capped_line(&start, &end, &l, rl, t, color);
+            }
+            if ms.is_innermost_mode(&ModeId::ArcThreePoint) {
+                if state.pending_clicks.len() == 2 {
+                    let p1 = state.pending_clicks[0];
+                    let p2 = state.pending_clicks[1];
+                    let p3 = self.to_sketch_space(self.last_mouse_pos);
+                    let start = Point { pos: p1 };
+                    let middle = Point { pos: p3 };
+                    let end = Point { pos: p2 };
+                    if let Some(FundamentalEntity::Circle(circle)) =
+                        FundamentalEntity::circle_from_three_coords(&p1, &p2, &p3)
+                    {
+                        self.draw_arc(&start, &middle, &end, &circle, rl, t, color);
+                    }
+                }
+            }
         }
 
         for (g_id, e) in state.sketch.guided_entities.iter() {
@@ -388,20 +453,27 @@ impl Drawable for SketchViewer {
                         self.draw_capped_line(s, e, l, rl, t, color);
                     }
                 }
+                GuidedEntity::ArcThreePoint {
+                    start,
+                    middle,
+                    end,
+                    circle,
+                } => {
+                    if let (
+                        Some(FundamentalEntity::Point(s)),
+                        Some(FundamentalEntity::Point(m)),
+                        Some(FundamentalEntity::Point(e)),
+                        Some(FundamentalEntity::Circle(c)),
+                    ) = (
+                        state.sketch.fundamental_entities.get(start),
+                        state.sketch.fundamental_entities.get(middle),
+                        state.sketch.fundamental_entities.get(end),
+                        state.sketch.fundamental_entities.get(circle),
+                    ) {
+                        self.draw_arc(s, m, e, c, rl, t, color);
+                    }
+                }
             }
-            /*
-            match e {
-                FundamentalEntity::Point(p) => {
-                    rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, color);
-                }
-                FundamentalEntity::Line(l) => {
-                    self.draw_line(l, rl, t, color);
-                }
-                FundamentalEntity::Circle(c) => {
-                    self.draw_circle(c, rl, t, color);
-                }
-            }
-            */
         }
 
         if self.draw_constraints {

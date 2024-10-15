@@ -43,6 +43,32 @@ impl FundamentalEntity {
             FundamentalEntity::Circle(c) => ((target - c.pos).norm() - c.radius).abs(),
         }
     }
+
+    pub fn circle_from_three_coords(
+        p1: &Vector2<f64>,
+        p2: &Vector2<f64>,
+        p3: &Vector2<f64>,
+    ) -> Option<Self> {
+        let temp = p2.norm_squared();
+        let bc = (p1.x.powi(2) + p1.y.powi(2) - temp) / 2.0;
+        let cd = (temp - p3.x.powi(2) - p3.y.powi(2)) / 2.0;
+        let det = (p1.x - p2.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p2.y);
+        if det.abs() < 1e-6 {
+            return None;
+        }
+
+        let center = Vector2::new(
+            (bc * (p2.y - p3.y) - cd * (p1.y - p2.y)) / det,
+            ((p1.x - p2.x) * cd - (p2.x - p3.x) * bc) / det,
+        );
+
+        let radius = ((center.x - p1.x).powi(2) + (center.y - p1.y).powi(2)).sqrt();
+
+        Some(FundamentalEntity::Circle(Circle {
+            pos: center,
+            radius,
+        }))
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Copy)]
@@ -474,6 +500,12 @@ pub enum GuidedEntity {
         start: EntityId,
         end: EntityId,
         line: EntityId,
+    },
+    ArcThreePoint {
+        start: EntityId,
+        middle: EntityId,
+        end: EntityId,
+        circle: EntityId,
     },
 }
 

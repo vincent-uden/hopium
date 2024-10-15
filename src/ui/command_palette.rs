@@ -78,6 +78,10 @@ impl CommandPalette {
             "Enter capped line mode".to_string(),
             Event::PushMode(ModeId::CappedLine),
         );
+        commands.insert(
+            "Enter three point arc mode".to_string(),
+            Event::PushMode(ModeId::ArcThreePoint),
+        );
 
         let matcher = Matcher::new(Config::DEFAULT);
 

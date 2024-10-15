@@ -8,8 +8,9 @@ use crate::{
     cad::{entity::EntityId, sketch::Sketch},
     event::Event,
     modes::{
-        capped_line::CappedLine, circle::CircleMode, command::CommandMode, global::GlobalMode,
-        line::LineMode, point::PointMode, sketch::SketchMode, ModeId,
+        arc_three_point::ArcThreePoint, capped_line::CappedLine, circle::CircleMode,
+        command::CommandMode, global::GlobalMode, line::LineMode, point::PointMode,
+        sketch::SketchMode, ModeId,
     },
     rendering::{
         boundary::BoundaryOrientation,
@@ -83,6 +84,7 @@ impl<'a> App<'a> {
         let circle_mode = Box::new(CircleMode::new());
         let command_mode = Box::new(CommandMode::new());
         let capped_line_mode = Box::new(CappedLine::new());
+        let arc_three_point_mode = Box::new(ArcThreePoint::new());
         {
             let mut ms = MODE_STACK.lock().unwrap();
             ms.all_modes.insert(ModeId::Global, global_mode);
@@ -92,6 +94,8 @@ impl<'a> App<'a> {
             ms.all_modes.insert(ModeId::Circle, circle_mode);
             ms.all_modes.insert(ModeId::Command, command_mode);
             ms.all_modes.insert(ModeId::CappedLine, capped_line_mode);
+            ms.all_modes
+                .insert(ModeId::ArcThreePoint, arc_three_point_mode);
             ms.push(ModeId::Global);
         }
 

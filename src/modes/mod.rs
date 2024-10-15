@@ -10,6 +10,7 @@ use strum_macros::EnumString;
 
 use crate::{event::Event, APP_STATE};
 
+pub mod arc_three_point;
 pub mod capped_line;
 pub mod circle;
 pub mod command;
@@ -142,6 +143,7 @@ pub enum ModeId {
     Circle,
     Command,
     CappedLine,
+    ArcThreePoint,
 }
 
 pub trait Mode {
