@@ -202,6 +202,7 @@ pub struct State {
     // Sketch viewer
     pub pending_clicks: Vec<Vector2<f64>>,
     pub selected: Vec<EntityId>,
+    pub draw_fundamental_entities: bool,
 }
 
 impl State {
@@ -215,6 +216,7 @@ impl State {
             command_palette_pending_event: None,
             pending_clicks: Vec::new(),
             selected: Vec::new(),
+            draw_fundamental_entities: true,
         }
     }
 }

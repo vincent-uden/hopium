@@ -392,6 +392,51 @@ mod tests {
         sketch.dump("Rotating Line After");
     }
 
+    #[test]
+    fn circle_tangent_with_two_lines() {
+        let mut sketch = Sketch::new("Circle Tangent With Two Lines Sketch".to_string());
+        let c = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Circle(Circle {
+                pos: Vector2::new(-0.01453125, -0.3746484375),
+                radius: 1.1365623545023815,
+            }));
+        let l1 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Line(Line {
+                offset: Vector2::new(1.56115234375, 0.7165625),
+                direction: Vector2::new(-2.3505859375, 0.7005468749999999),
+            }));
+        let l2 = sketch
+            .fundamental_entities
+            .insert(FundamentalEntity::Line(Line {
+                offset: Vector2::new(-1.03939453125, -2.0318359375),
+                direction: Vector2::new(2.04685546875, 0.4622460937499999),
+            }));
+
+        sketch.bi_constraints.push(BiConstraint {
+            e1: c,
+            e2: l1,
+            c: ConstraintType::Tangent,
+        });
+        sketch.bi_constraints.push(BiConstraint {
+            e1: c,
+            e2: l2,
+            c: ConstraintType::Tangent,
+        });
+        sketch.dump("Circle Tangent With Two Lines Sketch Initial");
+
+        assert!(sketch.error() > 0.0, "The error should be larger than 0");
+        for _ in 0..20000 {
+            sketch.sgd_step();
+        }
+
+        assert!(
+            sketch.error() < 1e-6,
+            "The error should be smaller than 1e-6"
+        );
+    }
+
     fn run_sketch_test<T>(test: T)
     where
         T: FnOnce() + std::panic::UnwindSafe,

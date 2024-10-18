@@ -320,6 +320,41 @@ impl SketchViewer {
             Color::new(255, 255, 255, 255),
         );
     }
+
+    fn draw_tangent_circle_line_constraint(
+        &self,
+        rl: &mut CombinedDrawHandle,
+        t: &raylib::RaylibThread,
+        c: &Circle,
+        l: &Line,
+    ) {
+        let ortho_a = c.pos - project(&c.pos, &l.direction);
+        let mut ortho_r = l.offset - project(&l.offset, &l.direction);
+        if ortho_r.dot(&ortho_a) < 0.0 {
+            ortho_r = -ortho_r;
+        }
+
+        let start_a = self.to_screen_space(c.pos);
+        let end_a = self.to_screen_space(c.pos + ortho_a);
+        let start_r = self.to_screen_space(c.pos);
+        let end_r = self.to_screen_space(c.pos + ortho_r);
+        rl.draw_line_v(start_a, end_a, Color::new(0, 255, 0, 255));
+        rl.draw_line_v(start_r, end_r, Color::new(255, 0, 0, 255));
+        rl.draw_text(
+            "Ortho A",
+            end_a.x as i32,
+            end_a.y as i32,
+            20,
+            Color::new(0, 255, 0, 255),
+        );
+        rl.draw_text(
+            "Ortho R",
+            end_r.x as i32,
+            end_r.y as i32,
+            20,
+            Color::new(255, 0, 0, 255),
+        );
+    }
 }
 
 impl Drawable for SketchViewer {
@@ -476,6 +511,23 @@ impl Drawable for SketchViewer {
             }
         }
 
+        if state.draw_fundamental_entities {
+            for (g_id, e) in state.sketch.fundamental_entities.iter() {
+                let color = self.style.entity_color;
+                match e {
+                    FundamentalEntity::Point(p) => {
+                        rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, color);
+                    }
+                    FundamentalEntity::Line(l) => {
+                        self.draw_line(&l, rl, t, color);
+                    }
+                    FundamentalEntity::Circle(c) => {
+                        self.draw_circle(&c, rl, t, color);
+                    }
+                }
+            }
+        }
+
         if self.draw_constraints {
             for BiConstraint { e1, e2, c } in &state.sketch.bi_constraints {
                 match c {
@@ -498,6 +550,19 @@ impl Drawable for SketchViewer {
                             }
                             (FundamentalEntity::Line(l), FundamentalEntity::Point(p)) => {
                                 self.draw_coincident_point_line_constraint(rl, t, &p, &l);
+                            }
+                            _ => {}
+                        }
+                    }
+                    ConstraintType::Tangent => {
+                        let fe1 = state.sketch.fundamental_entities[*e1];
+                        let fe2 = state.sketch.fundamental_entities[*e2];
+                        match (fe1, fe2) {
+                            (FundamentalEntity::Circle(c), FundamentalEntity::Line(l)) => {
+                                self.draw_tangent_circle_line_constraint(rl, t, &c, &l);
+                            }
+                            (FundamentalEntity::Line(l), FundamentalEntity::Circle(c)) => {
+                                self.draw_tangent_circle_line_constraint(rl, t, &c, &l);
                             }
                             _ => {}
                         }
