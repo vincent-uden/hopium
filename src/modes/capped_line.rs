@@ -1,5 +1,5 @@
 use crate::{
-    cad::entity::{FundamentalEntity, GuidedEntity, Line, Point},
+    cad::entity::{BiConstraint, ConstraintType, FundamentalEntity, GuidedEntity, Line, Point},
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };
@@ -30,7 +30,6 @@ impl CappedLine {
             let mut p1 = state.pending_clicks[0];
             let mut p2 = state.pending_clicks[1];
             state.pending_clicks.clear();
-            // TODO: Constrain these together
             let start_id = state.sketch.query_or_insert_point(&p1, select_radius);
             let end_id = state.sketch.query_or_insert_point(&p2, select_radius);
             let entity_reg = &mut state.sketch.fundamental_entities;
@@ -50,6 +49,17 @@ impl CappedLine {
                 end: end_id,
                 line: line_id,
             });
+
+            state.sketch.bi_constraints.push(BiConstraint::new(
+                start_id,
+                line_id,
+                ConstraintType::Coincident,
+            ));
+            state.sketch.bi_constraints.push(BiConstraint::new(
+                end_id,
+                line_id,
+                ConstraintType::Coincident,
+            ));
         }
     }
 }

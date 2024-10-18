@@ -1,5 +1,7 @@
 use crate::{
-    cad::entity::{Circle, FundamentalEntity, GuidedEntity, Line, Point},
+    cad::entity::{
+        BiConstraint, Circle, ConstraintType, FundamentalEntity, GuidedEntity, Line, Point,
+    },
     event::Event,
     APP_STATE, EVENT_QUEUE,
 };
@@ -57,6 +59,22 @@ impl ArcThreePoint {
                 end: end_id,
                 circle: circle_id,
             });
+
+            state.sketch.bi_constraints.push(BiConstraint::new(
+                start_id,
+                circle_id,
+                ConstraintType::Coincident,
+            ));
+            state.sketch.bi_constraints.push(BiConstraint::new(
+                middle_id,
+                circle_id,
+                ConstraintType::Coincident,
+            ));
+            state.sketch.bi_constraints.push(BiConstraint::new(
+                end_id,
+                circle_id,
+                ConstraintType::Coincident,
+            ));
         }
     }
 }
