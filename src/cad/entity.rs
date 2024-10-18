@@ -246,15 +246,12 @@ impl BiConstraint {
     }
 
     fn error_lc(l: &Line, ci: &Circle, c: ConstraintType) -> f64 {
-        let ortho_a = ci.pos - project(&ci.pos, &l.direction);
-        let mut ortho_r = l.offset - project(&l.offset, &l.direction);
-        if ortho_r.dot(&ortho_a) < 0.0 {
-            ortho_r = -ortho_r;
-        }
+        let diff = ci.pos - l.offset;
+        let ortho = diff - project(&diff, &l.direction);
         match c {
             // Doesnt seem to be working
-            ConstraintType::Tangent => ((ortho_r + ortho_a).norm() - ci.radius).powi(2),
-            ConstraintType::Distance { x } => ((ortho_r + ortho_a).norm() - x).powi(2),
+            ConstraintType::Tangent => ((ortho).norm() - ci.radius).powi(2),
+            ConstraintType::Distance { x } => ((ortho).norm() - x).powi(2),
             _ => 0.0,
         }
     }

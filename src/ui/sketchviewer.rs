@@ -68,7 +68,7 @@ impl SketchViewer {
             texture_size: Vector2::new(1600.0, 900.0),
             style: SketchViewerStyle::default(),
             panning: false,
-            draw_constraints: true,
+            draw_constraints: false,
         }
     }
 
@@ -328,32 +328,11 @@ impl SketchViewer {
         c: &Circle,
         l: &Line,
     ) {
-        let ortho_a = c.pos - project(&c.pos, &l.direction);
-        let mut ortho_r = l.offset - project(&l.offset, &l.direction);
-        if ortho_r.dot(&ortho_a) < 0.0 {
-            ortho_r = -ortho_r;
-        }
-
-        let start_a = self.to_screen_space(c.pos);
-        let end_a = self.to_screen_space(c.pos + ortho_a);
-        let start_r = self.to_screen_space(c.pos);
-        let end_r = self.to_screen_space(c.pos + ortho_r);
+        let diff = c.pos - l.offset;
+        let ortho = diff - project(&diff, &l.direction);
+        let start_a = self.to_screen_space(c.pos + ortho);
+        let end_a = self.to_screen_space(c.pos);
         rl.draw_line_v(start_a, end_a, Color::new(0, 255, 0, 255));
-        rl.draw_line_v(start_r, end_r, Color::new(255, 0, 0, 255));
-        rl.draw_text(
-            "Ortho A",
-            end_a.x as i32,
-            end_a.y as i32,
-            20,
-            Color::new(0, 255, 0, 255),
-        );
-        rl.draw_text(
-            "Ortho R",
-            end_r.x as i32,
-            end_r.y as i32,
-            20,
-            Color::new(255, 0, 0, 255),
-        );
     }
 }
 
