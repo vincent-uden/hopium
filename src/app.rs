@@ -128,6 +128,10 @@ impl<'a> App<'a> {
                 let state = APP_STATE.lock().unwrap();
                 println!("{:#?}", state.sketch);
             }
+            Event::DumpState => {
+                let state = APP_STATE.lock().unwrap();
+                println!("{:#?}", state);
+            }
             Event::SplitPaneHorizontally { mouse_pos } => {
                 self.renderer
                     .split_area(mouse_pos, BoundaryOrientation::Vertical, self.rl, self.t)
@@ -216,7 +220,7 @@ impl State {
             command_palette_pending_event: None,
             pending_clicks: Vec::new(),
             selected: Vec::new(),
-            draw_fundamental_entities: true,
+            draw_fundamental_entities: false,
         }
     }
 }

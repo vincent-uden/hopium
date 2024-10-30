@@ -10,8 +10,10 @@ use raylib::{color::Color, drawing::RaylibDraw};
 
 use raylib::math::Vector2 as V2;
 
+use crate::app::State;
 use crate::cad::entity::{
-    project, BiConstraint, Circle, ConstraintType, FundamentalEntity, GuidedEntity, Line, Point,
+    project, BiConstraint, Circle, ConstraintType, EntityId, FundamentalEntity, GuidedEntity, Line,
+    Point,
 };
 use crate::combined_draw_handle::CombinedDrawHandle;
 use crate::event::Event;
@@ -135,6 +137,14 @@ impl SketchViewer {
             .set_text(format!("Error: {:?}", state.sketch.error()), rl);
     }
 
+    fn entity_color(&self, state: &State, fundamental_id: &EntityId) -> Color {
+        if state.selected.contains(fundamental_id) {
+            self.style.selected_entity_color
+        } else {
+            self.style.entity_color
+        }
+    }
+
     fn draw_line(
         &self,
         l: &Line,
@@ -193,15 +203,17 @@ impl SketchViewer {
         line: &Line,
         rl: &mut CombinedDrawHandle,
         t: &raylib::RaylibThread,
-        color: Color,
+        s_color: Color,
+        e_color: Color,
+        l_color: Color,
     ) {
         rl.draw_line_v(
             self.to_screen_space(start.pos),
             self.to_screen_space(end.pos),
-            color,
+            l_color,
         );
-        rl.draw_circle_v(self.to_screen_space(start.pos), 4.0, color);
-        rl.draw_circle_v(self.to_screen_space(end.pos), 4.0, color);
+        rl.draw_circle_v(self.to_screen_space(start.pos), 4.0, s_color);
+        rl.draw_circle_v(self.to_screen_space(end.pos), 4.0, e_color);
     }
 
     fn draw_arc(
@@ -212,11 +224,14 @@ impl SketchViewer {
         circle: &Circle,
         rl: &mut CombinedDrawHandle,
         t: &raylib::RaylibThread,
-        color: Color,
+        s_color: Color,
+        m_color: Color,
+        e_color: Color,
+        c_color: Color,
     ) {
-        rl.draw_circle_v(self.to_screen_space(start.pos), 4.0, color);
-        rl.draw_circle_v(self.to_screen_space(middle.pos), 4.0, color);
-        rl.draw_circle_v(self.to_screen_space(end.pos), 4.0, color);
+        rl.draw_circle_v(self.to_screen_space(start.pos), 4.0, s_color);
+        rl.draw_circle_v(self.to_screen_space(middle.pos), 4.0, m_color);
+        rl.draw_circle_v(self.to_screen_space(end.pos), 4.0, e_color);
 
         let start_offset = start.pos - circle.pos;
         let end_offset = end.pos - circle.pos;
@@ -239,7 +254,7 @@ impl SketchViewer {
             start_angle * 180.0 / std::f32::consts::PI,
             end_angle * 180.0 / std::f32::consts::PI,
             40,
-            color,
+            c_color,
         );
     }
 
@@ -407,7 +422,7 @@ impl Drawable for SketchViewer {
                     offset: p1,
                     direction: p2 - p1,
                 };
-                self.draw_capped_line(&start, &end, &l, rl, t, color);
+                self.draw_capped_line(&start, &end, &l, rl, t, color, color, color);
             }
             if ms.is_innermost_mode(&ModeId::ArcThreePoint) {
                 if state.pending_clicks.len() == 2 {
@@ -420,7 +435,9 @@ impl Drawable for SketchViewer {
                     if let Some(FundamentalEntity::Circle(circle)) =
                         FundamentalEntity::circle_from_three_coords(&p1, &p2, &p3)
                     {
-                        self.draw_arc(&start, &middle, &end, &circle, rl, t, color);
+                        self.draw_arc(
+                            &start, &middle, &end, &circle, rl, t, color, color, color, color,
+                        );
                     }
                 }
             }
@@ -464,7 +481,16 @@ impl Drawable for SketchViewer {
                         state.sketch.fundamental_entities.get(end),
                         state.sketch.fundamental_entities.get(line),
                     ) {
-                        self.draw_capped_line(s, e, l, rl, t, color);
+                        self.draw_capped_line(
+                            s,
+                            e,
+                            l,
+                            rl,
+                            t,
+                            self.entity_color(&state, start),
+                            self.entity_color(&state, end),
+                            self.entity_color(&state, line),
+                        );
                     }
                 }
                 GuidedEntity::ArcThreePoint {
@@ -484,7 +510,18 @@ impl Drawable for SketchViewer {
                         state.sketch.fundamental_entities.get(end),
                         state.sketch.fundamental_entities.get(circle),
                     ) {
-                        self.draw_arc(s, m, e, c, rl, t, color);
+                        self.draw_arc(
+                            s,
+                            m,
+                            e,
+                            c,
+                            rl,
+                            t,
+                            self.entity_color(&state, start),
+                            self.entity_color(&state, middle),
+                            self.entity_color(&state, end),
+                            self.entity_color(&state, circle),
+                        );
                     }
                 }
             }
@@ -492,7 +529,11 @@ impl Drawable for SketchViewer {
 
         if state.draw_fundamental_entities {
             for (g_id, e) in state.sketch.fundamental_entities.iter() {
-                let color = self.style.entity_color;
+                let color = if state.selected.contains(g_id) {
+                    self.style.selected_entity_color
+                } else {
+                    self.style.entity_color
+                };
                 match e {
                     FundamentalEntity::Point(p) => {
                         rl.draw_circle_v(self.to_screen_space(p.pos), 4.0, color);

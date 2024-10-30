@@ -1,3 +1,4 @@
+use log::debug;
 use nalgebra::Vector2;
 use raylib::{
     ffi::{KeyboardKey, MouseButton},
@@ -26,9 +27,18 @@ impl SketchMode {
 
         for (id, e) in state.sketch.fundamental_entities.iter() {
             let dist = e.distance_to_position(&click_pos);
+            let mut inside = true;
+            for (guided_id, guided) in state.sketch.guided_entities.iter() {
+                if guided.refers_to(*id) {
+                    inside = guided.filter_selection_attempt(&state, click_pos);
+                    break;
+                }
+            }
+
             if dist <= select_radius
                 && ((dist < closest_dist && SketchViewer::can_ovveride_selection(e, &closest))
                     || SketchViewer::should_ovveride_selection(e, &closest))
+                && inside
             {
                 closest = Some(*e);
                 closest_id = Some(*id);

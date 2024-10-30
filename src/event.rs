@@ -38,6 +38,7 @@ pub enum Event {
         bdry_id: BoundaryId,
     },
     DumpShapes,
+    DumpState,
     ExitProgram,
     DumpLayout,
     UiEntered {

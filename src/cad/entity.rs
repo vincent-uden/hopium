@@ -2,7 +2,7 @@ use log::{debug, info};
 use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
-use crate::registry::RegId;
+use crate::{app::State, registry::RegId, APP_STATE};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Deserialize, Serialize)]
 pub struct EntityId(pub i64);
@@ -504,6 +504,72 @@ pub enum GuidedEntity {
         end: EntityId,
         circle: EntityId,
     },
+}
+
+fn inside_aabb(corner1: Vector2<f64>, corner2: Vector2<f64>, pos: Vector2<f64>) -> bool {
+    pos.x >= corner1.x && pos.x <= corner2.x && pos.y >= corner1.y && pos.y <= corner2.y
+        || pos.x <= corner1.x && pos.x >= corner2.x && pos.y <= corner1.y && pos.y >= corner2.y
+}
+
+impl GuidedEntity {
+    /// `mouse_pos` is in sketch space
+    pub fn filter_selection_attempt(&self, state: &State, mouse_pos: Vector2<f64>) -> bool {
+        let entity_reg = &state.sketch.fundamental_entities;
+
+        match self {
+            GuidedEntity::Point { id } => true,
+            GuidedEntity::Line { id } => true,
+            GuidedEntity::Circle { id } => true,
+            GuidedEntity::CappedLine { start, end, line } => {
+                if let (
+                    Some(FundamentalEntity::Point(start)),
+                    Some(FundamentalEntity::Point(end)),
+                ) = (entity_reg.get(start), entity_reg.get(end))
+                {
+                    let start_pos = start.pos;
+                    let end_pos = end.pos;
+                    inside_aabb(start_pos, end_pos, mouse_pos)
+                } else {
+                    false
+                }
+            }
+            GuidedEntity::ArcThreePoint {
+                start,
+                middle,
+                end,
+                circle,
+            } => {
+                if let (
+                    Some(FundamentalEntity::Point(start)),
+                    Some(FundamentalEntity::Point(end)),
+                ) = (entity_reg.get(start), entity_reg.get(end))
+                {
+                    let start_pos = start.pos;
+                    let end_pos = end.pos;
+                    inside_aabb(start_pos, end_pos, mouse_pos)
+                } else {
+                    false
+                }
+            }
+        }
+    }
+
+    pub fn refers_to(&self, other: EntityId) -> bool {
+        match self {
+            GuidedEntity::Point { id } => *id == other,
+            GuidedEntity::Line { id } => *id == other,
+            GuidedEntity::Circle { id } => *id == other,
+            GuidedEntity::CappedLine { start, end, line } => {
+                *start == other || *end == other || *line == other
+            }
+            GuidedEntity::ArcThreePoint {
+                start,
+                middle,
+                end,
+                circle,
+            } => *start == other || *middle == other || *end == other || *circle == other,
+        }
+    }
 }
 
 #[cfg(test)]

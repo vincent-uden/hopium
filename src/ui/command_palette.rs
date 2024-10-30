@@ -82,6 +82,7 @@ impl CommandPalette {
             "Enter three point arc mode".to_string(),
             Event::PushMode(ModeId::ArcThreePoint),
         );
+        commands.insert("Dump state".to_string(), Event::DumpState);
 
         let matcher = Matcher::new(Config::DEFAULT);
 
