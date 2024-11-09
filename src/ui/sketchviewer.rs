@@ -240,11 +240,18 @@ impl SketchViewer {
         let start_angle = start_offset.y.atan2(start_offset.x) as f32;
         let mut end_angle = end_offset.y.atan2(end_offset.x) as f32;
         let middle_angle = middle_offset.y.atan2(middle_offset.x) as f32;
-        if middle_angle > 0.0 && end_angle < 0.0 {
-            end_angle += 2.0 * std::f32::consts::PI;
+
+        if middle_angle < start_angle && end_angle > start_angle {
+            end_angle -= 2.0 * PI;
         }
-        if middle_angle < 0.0 && end_angle > 0.0 {
-            end_angle -= 2.0 * std::f32::consts::PI;
+        if middle_angle > start_angle && end_angle < start_angle {
+            end_angle += 2.0 * PI;
+        }
+        if middle_angle < end_angle && start_angle > end_angle {
+            end_angle += 2.0 * PI;
+        }
+        if middle_angle > end_angle && start_angle < end_angle {
+            end_angle -= 2.0 * PI;
         }
 
         rl.draw_ring_lines(

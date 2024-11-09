@@ -1,5 +1,7 @@
+use std::f64::consts::PI;
+
 use log::{debug, info};
-use nalgebra::Vector2;
+use nalgebra::{Rotation2, Vector2};
 use serde::{Deserialize, Serialize};
 
 use crate::{app::State, registry::RegId, APP_STATE};
@@ -31,6 +33,15 @@ pub enum FundamentalEntity {
     Circle(Circle),
 }
 
+fn vector_angle(a: Vector2<f64>) -> f64 {
+    let angle = f64::atan2(a.y, a.x);
+    if angle < 0.0 {
+        angle + 2.0 * std::f64::consts::PI
+    } else {
+        angle
+    }
+}
+
 impl FundamentalEntity {
     pub fn distance_to_position(&self, target: &Vector2<f64>) -> f64 {
         match self {
@@ -53,7 +64,7 @@ impl FundamentalEntity {
         let bc = (p1.x.powi(2) + p1.y.powi(2) - temp) / 2.0;
         let cd = (temp - p3.x.powi(2) - p3.y.powi(2)) / 2.0;
         let det = (p1.x - p2.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p2.y);
-        if det.abs() < 1e-6 {
+        if det.abs() < 1e-12 {
             return None;
         }
 
@@ -506,11 +517,6 @@ pub enum GuidedEntity {
     },
 }
 
-fn inside_aabb(corner1: Vector2<f64>, corner2: Vector2<f64>, pos: Vector2<f64>) -> bool {
-    pos.x >= corner1.x && pos.x <= corner2.x && pos.y >= corner1.y && pos.y <= corner2.y
-        || pos.x <= corner1.x && pos.x >= corner2.x && pos.y <= corner1.y && pos.y >= corner2.y
-}
-
 impl GuidedEntity {
     /// `mouse_pos` is in sketch space
     pub fn filter_selection_attempt(&self, state: &State, mouse_pos: Vector2<f64>) -> bool {
@@ -524,11 +530,20 @@ impl GuidedEntity {
                 if let (
                     Some(FundamentalEntity::Point(start)),
                     Some(FundamentalEntity::Point(end)),
-                ) = (entity_reg.get(start), entity_reg.get(end))
-                {
-                    let start_pos = start.pos;
-                    let end_pos = end.pos;
-                    inside_aabb(start_pos, end_pos, mouse_pos)
+                    Some(FundamentalEntity::Line(line)),
+                ) = (
+                    entity_reg.get(start),
+                    entity_reg.get(end),
+                    entity_reg.get(line),
+                ) {
+                    let angle = (end.pos - start.pos).angle(&Vector2::x());
+                    let rot = Rotation2::new(-angle);
+                    let start_pos = rot * start.pos;
+                    let end_pos = rot * end.pos;
+                    let mouse_pos = rot * mouse_pos;
+
+                    mouse_pos.x >= start_pos.x && mouse_pos.x <= end_pos.x
+                        || mouse_pos.x <= start_pos.x && mouse_pos.x >= end_pos.x
                 } else {
                     false
                 }
@@ -541,12 +556,41 @@ impl GuidedEntity {
             } => {
                 if let (
                     Some(FundamentalEntity::Point(start)),
+                    Some(FundamentalEntity::Point(middle)),
                     Some(FundamentalEntity::Point(end)),
-                ) = (entity_reg.get(start), entity_reg.get(end))
-                {
-                    let start_pos = start.pos;
-                    let end_pos = end.pos;
-                    inside_aabb(start_pos, end_pos, mouse_pos)
+                    Some(FundamentalEntity::Circle(circle)),
+                ) = (
+                    entity_reg.get(start),
+                    entity_reg.get(middle),
+                    entity_reg.get(end),
+                    entity_reg.get(circle),
+                ) {
+                    let tolerance = 5.0 * PI / 180.0;
+                    let start_angle = vector_angle(start.pos - circle.pos);
+                    let mut end_angle = vector_angle(end.pos - circle.pos);
+                    let middle_angle = vector_angle(middle.pos - circle.pos);
+                    let mouse_angle = vector_angle(mouse_pos - circle.pos);
+
+                    if middle_angle < start_angle && end_angle > start_angle {
+                        end_angle -= 2.0 * PI;
+                    }
+                    if middle_angle > start_angle && end_angle < start_angle {
+                        end_angle += 2.0 * PI;
+                    }
+                    if middle_angle < end_angle && start_angle > end_angle {
+                        end_angle += 2.0 * PI;
+                    }
+                    if middle_angle > end_angle && start_angle < end_angle {
+                        end_angle -= 2.0 * PI;
+                    }
+
+                    let min_angle = start_angle.min(end_angle) - tolerance;
+                    let max_angle = start_angle.max(end_angle) + tolerance;
+                    mouse_angle >= min_angle && mouse_angle <= max_angle
+                        || (mouse_angle + 2.0 * PI >= min_angle
+                            && mouse_angle + 2.0 * PI <= max_angle)
+                        || (mouse_angle - 2.0 * PI >= min_angle
+                            && mouse_angle - 2.0 * PI <= max_angle)
                 } else {
                     false
                 }

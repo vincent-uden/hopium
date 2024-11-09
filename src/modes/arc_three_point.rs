@@ -33,7 +33,6 @@ impl ArcThreePoint {
             let mut p2 = state.pending_clicks[1];
             let mut p3 = state.pending_clicks[2];
             state.pending_clicks.clear();
-            // TODO: Constrain these together
             let start_id = state.sketch.query_or_insert_point(&p1, select_radius);
             let end_id = state.sketch.query_or_insert_point(&p2, select_radius);
             let middle_id = state.sketch.query_or_insert_point(&p3, select_radius);
