@@ -4,7 +4,6 @@
 - raylib
 
 ## Roadmap
-- Selecting guided objects
 - Fillets
 - 3D View of sketch
 - Extrusion
