@@ -287,7 +287,6 @@ impl ModeStack {
                 KeyboardKey::KEY_KP_ENTER,
                 KeyboardKey::KEY_KP_EQUAL,
                 KeyboardKey::KEY_BACK,
-                KeyboardKey::KEY_MENU,
                 KeyboardKey::KEY_VOLUME_UP,
                 KeyboardKey::KEY_VOLUME_DOWN,
             ],
@@ -359,6 +358,7 @@ impl ModeStack {
         let r_alt = rl.is_key_down(KeyboardKey::KEY_RIGHT_ALT);
 
         for key in &self.all_keys {
+            debug!("Key: {:?}", key);
             if rl.is_key_pressed(*key) {
                 let press = KeyPress {
                     key: *key,
