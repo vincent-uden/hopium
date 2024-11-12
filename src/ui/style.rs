@@ -17,7 +17,9 @@ pub enum StyleType {
     IconHovered,
     Overlay,
     CommandPalette,
-    CommandPaletteDivider,
+    Divider,
+    DividerFocused,
+    DataEntry,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
@@ -103,9 +105,24 @@ pub fn populate_styles() {
             },
         );
         styles.insert_with_key(
-            StyleId(StyleType::CommandPaletteDivider),
+            StyleId(StyleType::Divider),
             Style {
                 bg_color: Color::new(200, 200, 200, 255),
+                ..Default::default()
+            },
+        );
+        styles.insert_with_key(
+            StyleId(StyleType::DividerFocused),
+            Style {
+                bg_color: Color::new(52, 183, 235, 255),
+                ..Default::default()
+            },
+        );
+        styles.insert_with_key(
+            StyleId(StyleType::DataEntry),
+            Style {
+                color: Color::new(200, 200, 200, 255),
+                bg_color: Color::new(31, 31, 31, 255),
                 ..Default::default()
             },
         );

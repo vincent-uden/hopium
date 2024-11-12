@@ -13,6 +13,7 @@ use crate::{
 
 pub mod command_palette;
 pub mod constraint_selector;
+pub mod data_entry;
 pub mod dropdown;
 pub mod icon;
 pub mod rect;

@@ -14,6 +14,7 @@ pub mod arc_three_point;
 pub mod capped_line;
 pub mod circle;
 pub mod command;
+pub mod data_entry;
 pub mod global;
 pub mod line;
 pub mod point;
@@ -144,6 +145,7 @@ pub enum ModeId {
     Command,
     CappedLine,
     ArcThreePoint,
+    DataEntry,
 }
 
 pub trait Mode {
@@ -358,7 +360,6 @@ impl ModeStack {
         let r_alt = rl.is_key_down(KeyboardKey::KEY_RIGHT_ALT);
 
         for key in &self.all_keys {
-            debug!("Key: {:?}", key);
             if rl.is_key_pressed(*key) {
                 let press = KeyPress {
                     key: *key,
@@ -369,7 +370,6 @@ impl ModeStack {
                 };
                 for id in self.modes.iter_mut().rev() {
                     let mode = self.all_modes.get_mut(id).unwrap();
-                    debug!("Pressing {:?}", press);
                     if mode.key_press(&press, rl) {
                         break;
                     }

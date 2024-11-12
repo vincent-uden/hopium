@@ -2,21 +2,31 @@ use std::fs;
 
 use log::debug;
 use nalgebra::Vector2;
-use raylib::{RaylibHandle, RaylibThread};
+use raylib::{data, RaylibHandle, RaylibThread};
 
 use crate::{
-    cad::{entity::EntityId, sketch::Sketch},
+    cad::{
+        entity::{BiConstraint, EntityId},
+        sketch::Sketch,
+    },
     event::Event,
     modes::{
-        arc_three_point::ArcThreePoint, capped_line::CappedLine, circle::CircleMode,
-        command::CommandMode, global::GlobalMode, line::LineMode, point::PointMode,
-        sketch::SketchMode, ModeId,
+        arc_three_point::ArcThreePoint,
+        capped_line::CappedLine,
+        circle::CircleMode,
+        command::CommandMode,
+        data_entry::{DataEntryMode, Form},
+        global::GlobalMode,
+        line::LineMode,
+        point::PointMode,
+        sketch::SketchMode,
+        ModeId,
     },
     rendering::{
         boundary::BoundaryOrientation,
         renderer::{Renderer, AREA_MAP, BDRY_MAP},
     },
-    ui::MouseEventHandler,
+    ui::{data_entry::DataEntry, MouseEventHandler},
     APP_STATE, EVENT_QUEUE, IMAGES, MODE_STACK,
 };
 
@@ -85,6 +95,7 @@ impl<'a> App<'a> {
         let command_mode = Box::new(CommandMode::new());
         let capped_line_mode = Box::new(CappedLine::new());
         let arc_three_point_mode = Box::new(ArcThreePoint::new());
+        let data_entry_mode = Box::new(DataEntryMode::new());
         {
             let mut ms = MODE_STACK.lock().unwrap();
             ms.all_modes.insert(ModeId::Global, global_mode);
@@ -96,6 +107,7 @@ impl<'a> App<'a> {
             ms.all_modes.insert(ModeId::CappedLine, capped_line_mode);
             ms.all_modes
                 .insert(ModeId::ArcThreePoint, arc_three_point_mode);
+            ms.all_modes.insert(ModeId::DataEntry, data_entry_mode);
             ms.push(ModeId::Global);
         }
 
@@ -203,10 +215,14 @@ pub struct State {
     pub command_palette_open: bool,
     pub command_palette_input: String,
     pub command_palette_pending_event: Option<Event>,
+    // Data entry
+    pub form: Option<Form>,
+    pub form_focused: usize,
     // Sketch viewer
     pub pending_clicks: Vec<Vector2<f64>>,
     pub selected: Vec<EntityId>,
     pub draw_fundamental_entities: bool,
+    pub pending_constraint: Option<BiConstraint>,
 }
 
 impl State {
@@ -218,9 +234,12 @@ impl State {
             command_palette_open: false,
             command_palette_input: "".to_string(),
             command_palette_pending_event: None,
+            form: None,
+            form_focused: 0,
             pending_clicks: Vec::new(),
             selected: Vec::new(),
             draw_fundamental_entities: false,
+            pending_constraint: None,
         }
     }
 }

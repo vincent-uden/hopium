@@ -70,6 +70,7 @@ pub enum Event {
     },
     SaveSketch,
     LoadSketch,
+    ConfirmDataEntry,
 }
 
 impl Event {

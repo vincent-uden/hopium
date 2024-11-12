@@ -57,8 +57,8 @@ impl CommandPalette {
         let mut divider = Rect::new();
         divider.size = Vector2::new(size.y - 20.0, 2.0);
         divider.set_pos(pos + Vector2::new(10.0, 36.0));
-        divider.style = StyleId(StyleType::CommandPaletteDivider);
-        divider.hovered_style = StyleId(StyleType::CommandPaletteDivider);
+        divider.style = StyleId(StyleType::Divider);
+        divider.hovered_style = StyleId(StyleType::Divider);
 
         let mut commands = HashMap::new();
         commands.insert(

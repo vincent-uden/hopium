@@ -6,17 +6,24 @@ use raylib::{
 };
 
 use crate::{
-    cad::entity::BiConstraint, event::Event, ui::sketchviewer::SketchViewer, APP_STATE, EVENT_QUEUE,
+    cad::entity::{BiConstraint, ConstraintType},
+    event::Event,
+    ui::sketchviewer::SketchViewer,
+    APP_STATE, EVENT_QUEUE,
 };
 
-use super::{KeyPress, Mode, ModeId, MousePress};
+use super::{data_entry::Form, KeyPress, Mode, ModeId, MousePress};
 
 #[derive(Debug)]
-pub struct SketchMode {}
+pub struct SketchMode {
+    pending_constraint: Option<BiConstraint>,
+}
 
 impl SketchMode {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            pending_constraint: None,
+        }
     }
 
     fn sketch_click(&self, click_pos: Vector2<f64>, select_radius: f64, press: MousePress) {
@@ -57,6 +64,7 @@ impl SketchMode {
 
     fn constrain(&self, constraint_type: crate::cad::entity::ConstraintType) {
         let mut state = APP_STATE.lock().unwrap();
+        let mut eq = EVENT_QUEUE.lock().unwrap();
         if state.selected.len() == 2 {
             let id1 = state.selected[0];
             let id2 = state.selected[1];
@@ -64,8 +72,24 @@ impl SketchMode {
             let e2 = &state.sketch.fundamental_entities[id2];
             if BiConstraint::possible(e1, e2, &constraint_type) {
                 let bi_constraint = BiConstraint::new(id1, id2, constraint_type);
-                state.sketch.bi_constraints.push(bi_constraint);
-                state.selected.clear();
+                match &constraint_type {
+                    ConstraintType::Angle { x } => {
+                        state.form = Some(Form::angle());
+                        state.form_focused = 0;
+                        eq.post_event(Event::PushMode(ModeId::DataEntry));
+                        state.pending_constraint = Some(bi_constraint);
+                    }
+                    ConstraintType::Distance { x } => {
+                        state.form = Some(Form::distance());
+                        state.form_focused = 0;
+                        eq.post_event(Event::PushMode(ModeId::DataEntry));
+                        state.pending_constraint = Some(bi_constraint);
+                    }
+                    _ => {
+                        state.sketch.bi_constraints.push(bi_constraint);
+                        state.selected.clear();
+                    }
+                }
             }
         }
     }
@@ -88,6 +112,34 @@ impl Mode for SketchMode {
             }
             Event::Constrain { constraint_type } => {
                 self.constrain(constraint_type);
+                true
+            }
+            Event::ConfirmDataEntry => {
+                let mut state = APP_STATE.lock().unwrap();
+                if let Some(mut constraint) = state.pending_constraint.take() {
+                    match constraint.c {
+                        ConstraintType::Angle { x } => {
+                            let angle = state.form.as_ref().unwrap().entries[0]
+                                .buffer
+                                .parse()
+                                .unwrap();
+                            constraint.c = ConstraintType::Angle { x: angle };
+                        }
+                        ConstraintType::Distance { x } => {
+                            let distance = state.form.as_ref().unwrap().entries[0]
+                                .buffer
+                                .parse()
+                                .unwrap();
+                            constraint.c = ConstraintType::Distance { x: distance };
+                        }
+                        _ => {}
+                    }
+                    state.sketch.bi_constraints.push(constraint);
+                    state.selected.clear();
+                    state.form = None;
+                    let mut eq = EVENT_QUEUE.lock().unwrap();
+                    eq.post_event(Event::PopMode);
+                }
                 true
             }
             _ => false,

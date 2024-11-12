@@ -12,6 +12,7 @@ use crate::combined_draw_handle::CombinedDrawHandle;
 use crate::event::Event;
 use crate::modes::{KeyMods, MousePress};
 use crate::ui::command_palette::CommandPalette;
+use crate::ui::data_entry::DataEntry;
 use crate::ui::{Drawable, MouseEventHandler};
 use crate::{registry::Registry, ui::UiId};
 use crate::{APP_STATE, EVENT_QUEUE, MODE_STACK};
@@ -45,6 +46,7 @@ pub struct Renderer {
     next_area_id: AreaId,
     next_bdry_id: BoundaryId,
     command_palette: CommandPalette,
+    data_entry: DataEntry,
 }
 
 impl Renderer {
@@ -79,6 +81,7 @@ impl Renderer {
             next_area_id: AreaId(1),
             next_bdry_id: BoundaryId(0),
             command_palette: CommandPalette::new(Vector2::new(screen_w as f64, screen_h as f64)),
+            data_entry: DataEntry::new(Vector2::new(screen_w as f64, screen_h as f64)),
         }
     }
 
@@ -115,11 +118,15 @@ impl Renderer {
             if state.command_palette_open {
                 self.command_palette.draw(&mut combined_draw_handle, t);
             }
+            if let Some(form) = &state.form {
+                self.data_entry.draw(&mut combined_draw_handle, t);
+            }
         }
     }
 
     pub fn update(&mut self, rl: &mut RaylibHandle) {
         self.command_palette.update(rl);
+        self.data_entry.update(rl);
 
         let mouse_pos = to_nalgebra(rl.get_mouse_position());
         self.receive_mouse_pos(mouse_pos);
